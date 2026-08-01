@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第3章 ミクロデータ ― リスク評価 | SDCハンドブック和訳</title>
+<link rel="stylesheet" href="assets/style.css">
+<script>
+  window.MathJax = { tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] } };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
+</head>
+<body>
+<div class="page">
+  <div class="masthead">
+    <nav class="crumbs"><a href="index.html">目次</a> / 第3章 (2/7)</nav>
+    <div class="kicker">Handbook on Statistical Disclosure Control (2nd Edition) 和訳</div>
+    <h1>第3章 ミクロデータ ― リスク評価</h1>
+    <div class="note-origtitle">原題: Risk assessment</div>
+  </div>
+
+  <h2 id="sec-risk-assessment">リスク評価</h2>
+
+<h3 id="sec-risk-overview">概要</h3>
+
+<p>ミクロデータは集計データに比べて多くの分析上の利点を持つが、1つのファイルに多数の変数が頒布されるため、より深刻な開示問題を抱える。ミクロデータにおける開示は、侵入者(intruder)がファイルに含まれる情報を用いて個人を再識別できる可能性があり、それに基づいて機密情報が取得される場合に発生する。ミクロデータは、氏名、住所、識別番号といった直接識別変数を取り除いた上でのみ公開される。しかし、ミクロデータ中の他の変数も間接識別変数として利用され得る。個人ミクロデータの場合、これは性別、年齢、職業、居住地、出生国、家族構成などの変数であり、事業所ミクロデータの場合は経済活動、従業員数などの変数である。これらの(間接)識別変数は、主に公開されている変数、または名簿(レジスター)のような公開データベースに存在する変数である。</p>
+
+<p>識別変数がカテゴリカルである場合、これらの変数の組み合わせ(交差分類)がキー(key)を定義する。開示リスクは、標本のみにおける、あるいは標本と母集団の両方におけるこうした識別変数/キーの関数である。</p>
+
+<p>開示リスクを評価するためには、まず侵入者が回答者について何を知り得るか、また回答者とミクロデータを照合し、識別・開示に至る可能性のある情報として侵入者が何を利用できるかについて、現実的な仮定を置く必要がある。これらの仮定は開示リスクシナリオと呼ばれ、詳細と例は本ハンドブックの次節で示す。この開示リスクシナリオに基づいて識別変数が決定される。ファイル中の他の変数は機密変数または特定情報を含む変数であり、開示してはならないデータを表す。NSI(国家統計機関)は通常、公開されていないすべての変数をその具体的な内容にかかわらず機密/特定情報を含む変数とみなすが、性的指向、健康状態、所得などのように、特に機微な変数も存在し得る。</p>
+
+<p>ミクロデータのリスク評価を行うにあたり、NSIはアドホックな手法、経験、および識別変数の詳細さと入手可能性を評価するチェックリストに頼ることがある。ミクロデータにおける再識別リスクについて、定量的で客観的な開示リスク尺度を得る必要性は明らかである。センサス(悉皆調査)や登録データを含むミクロデータについては、母集団全体について識別変数がすべて入手可能であるため、開示リスクは既知である。しかし、標本を含むミクロデータについては、母集団の全体像は未知であるか、周辺分布を通じて部分的にしか分からない。したがって、標本中で入手可能な情報に基づいて母集団レベルの開示リスク尺度を推定するために、確率モデルやヒューリスティックが用いられる。本節では、定量的な開示リスク尺度を推定するために利用可能な手法とツールの概要を示す。</p>
+
+<p>直感的には、あるユニットが他から際立って一意に特定できる場合、そのユニットはリスクにさらされている。リスクの定義の根底にある発想は、標本または母集団におけるユニットの希少性を測る方法である。</p>
+
+<p>識別変数がカテゴリカルである場合(社会調査で通常見られるように)、リスクは識別変数を交差集計して得られる分割表のセル、すなわちキーの観点から捉えられる。したがって、同一セルに属するすべてのレコードは同じリスク値を持つことになる。</p>
+
+<p><strong>リスク尺度の分類</strong><br>
+文献上ではリスクのさまざまな定義が提案されてきたが、ここでは主に、それらを容易に計算・推定するためのツールが利用可能なものに焦点を当てる。開示リスク尺度は大きく3つのタイプに分類できる。すなわち、標本中のキーに基づくリスク尺度、母集団中のキーに基づき統計モデルやヒューリスティックを用いて関心のある量を推定するリスク尺度、そしてレコード連結の理論に基づくリスク尺度である。最初の2つのクラスはカテゴリカルな識別変数のリスク評価に特化しているのに対し、3つ目のクラスはカテゴリカル変数と連続変数の両方に用いることができる。</p>
+
+<p><strong>標本中のキーに基づくリスク</strong><br>
+第1のクラスのリスク尺度では、識別変数のスコアの組み合わせが所与の閾値を下回る場合、そのユニットはリスクにさらされているとみなされる。ソフトウェアパッケージ μ-ARGUS で用いられる閾値ルールがこのクラスのリスク尺度の一例である。</p>
+
+<p><strong>母集団中のキーに基づくリスク</strong><br>
+第2のアプローチでは、識別変数のスコアの組み合わせによって母集団内で決まるユニットのリスク、あるいはその再識別確率に関心を持つ。この場合、そうした量が所与の閾値を上回るとき、そのユニットはリスクにさらされているとみなす。母集団における頻度は一般に未知であるため、モデリングの過程を通じて推定される場合が多い。この考え方の例としては、Benedetti and Franconi (1998) および Franconi and Polettini (2004) によって開発された負の二項分布に基づく個別開示リスク(@sec-argus-individual-risk で概説)、また Skinner and Holmes (1998) および Elamir and Skinner (2004) によって開発されたポアソン分布と対数線形モデルに基づく手法(@sec-poisson-log-linear で、他の確率的手法に関する最新の研究とともに説明)が挙げられる。母集団中のキーに基づく別のアプローチとしては、Elliot et al. (2002) によって開発された Special Uniques Detection(SUDA)アルゴリズムがあり、これはヒューリスティックな方法を用いてリスクを推定するもので、@sec-SUDA で概説する。</p>
+
+<p><strong>レコード連結に基づくリスク</strong><br>
+識別変数が連続変数である場合、キーの希少性という概念を利用することはできないため、この概念をレコードの近傍における希少性という考え方に置き換える。近傍における希少性を測る方法の1つがレコード連結技術である。この第3の開示リスクのクラスについては @sec-record-linkage で扱う。</p>
+
+<p>@sec-disclosure-risk-scenarios では開示リスクシナリオについて紹介し、@sec-concepts では本章全体を通じて用いる概念と表記法を紹介する。それ以降の節では、上述のミクロデータのリスク評価に関するさまざまなアプローチを説明する。しかしながら、ミクロデータのリスク評価は統計学研究において比較的新しい分野であるため、どの手法が最良か、あるいは少なくとも所与の状況下で最良かについて、まだ合意が得られているわけではない。以下の節では、さまざまなリスク尺度に対するアプローチについて論じ、それらが適用できる、あるいはできない状況について助言を試みる。いずれにせよ、こうしたミクロデータのリスク評価に対する種々のアプローチを評価するための研究が行われるべきであることは認識されている。例えば Shlomo and Barton (2006) を参照のこと。</p>
+
+<p>これらの手法および本節の焦点は、社会調査から得られるミクロデータの標本にある。センサスや登録データから得られるミクロデータの標本については開示リスクは既知である。事業所調査のミクロデータは、その開示性の高さ(偏った分布や非常に高い抽出率)のため、通常は公開されない。</p>
+
+<p>@sec-intro-example では実務上の実装に関するいくつかの提案を行い、@sec-further-example では実際のデータセットの例とリスク評価の実施方法を示す。</p>
+
+<h3 id="sec-disclosure-risk-scenarios">開示リスクシナリオ</h3>
+
+<p>開示シナリオの定義は、「安全な」ミクロデータファイル(MF)を作成するための戦略を策定する第一歩である。シナリオは、(i)侵入者が入手し得る情報は何か、(ii)侵入者がその情報をどのように用いて個人を識別しようとするか、すなわち侵入者の攻撃手段と戦略、を簡潔に記述するものである。異なる情報源が代替的あるいは同時に侵入者にとって入手可能であり得るため、複数のシナリオを定義することが有用な場合が多い。さらに、再識別リスクは複数のシナリオを同時に考慮に入れて評価することができる。</p>
+
+<p>侵入者が入手可能な情報を外部アーカイブ(External Archive, EA)と呼ぶことにする。ここでは情報は個人レベルで、氏名、姓などの直接識別データと共に提供される。開示シナリオは、侵入者が入手可能な EA が個人ミクロデータのアーカイブであるという仮定に基づく。すなわち、各個人について直接識別変数と、いくつかの他の変数が入手可能である。これらの変数のうち一部は、保護対象である MF にも存在すると仮定される。侵入者の攻撃戦略は、この重複する情報を用いて直接識別子を MF 中のレコードに照合することである。この照合に用いられる変数が識別変数である。</p>
+
+<p>ここでは、侵入者が入手可能と想定される情報に応じて、2種類の異なる再識別、すなわち自発的認識(spontaneous recognition)とレコード照合(またはリンケージ)による再識別を考える。第1のケースでは、侵入者が1人ないし数人の対象個人について個人的な知識を持ち、調査対象個人を自発的に認識する場合を想定する(お節介な隣人シナリオ、Nosy Neighbour scenario)。この場合、外部アーカイブには詳細な個人情報に関する1件(または数件)のレコードが含まれる。第2のケースでは、侵入者(MFの利用者であり得る)が公的な名簿(public register)にアクセスでき、この EA が提供する情報を MF が提供する情報と照合することで調査対象ユニットを識別しようとすると仮定する。この場合、あるユニットを侵入者が識別できる確率は、EA の完全性、正確性、データの分類方法といった主要な特性に依存する。大まかに言えば、EA が提供する情報が最新でない、不完全である、不正確である、あるいは統計調査で用いられているものと異なる基準で分類されている場合、侵入者が個人を正しく識別できる可能性は低くなると仮定される。</p>
+
+<p>さらに、統計的開示制御に関して、専門家は社会統計ミクロデータと経済統計ミクロデータ(一般性を失うことなく、それぞれ個人と事業所とみなせる)を区別することが多い。実際、開示リスクの概念は主に、識別変数の集合に対する希少性という考え方に基づいている。社会調査のミクロデータについては、調査対象となる母集団の特性と収集されるデータの性質上、識別変数は主に(あるいは専ら)カテゴリカルである。しかし、事業所について収集される情報の多くについては、識別変数はしばしば非対称な分布を持つ量的変数の形をとる(Willenborg and de Waal, 2001)。開示シナリオはこの点を踏まえて記述される。</p>
+
+<p>本ハンドブックの事例研究の部分には、社会調査データについてのお節介な隣人シナリオおよび EA シナリオの例が含まれている。階層データおよび縦断データに関わる問題についても扱う。最後に、事業所調査データのシナリオについても論じる。</p>
+
+<p>いずれにせよ、シナリオの定義は、リスク推定とその後のデータ保護の基礎となる仮定を定めるものであり、極めて重要である。</p>
+
+<h3 id="sec-concepts">概念と表記法</h3>
+
+<p>ミクロデータについて、開示リスク尺度は再識別のリスクを定量化する。レコードごとの個別開示リスク尺度は、高リスクのレコードを特定し、SDC手法を的確に適用する上で有用である。これらの個別リスク尺度を集約することで、ファイル全体レベルの大域的な開示リスク尺度を得ることができる。この大域的リスク尺度は、ミクロデータを公開してよいかどうかの意思決定プロセスや、異なるファイル間の比較にとって、NSIにとって特に有用である。</p>
+
+<p><strong>ミクロデータの開示</strong><br>
+ミクロデータの文脈における開示とは、標本中の対象個人と、氏名や住所といった個人識別子と一連の識別変数を含む入手可能な名簿(外部ファイル)とを侵入者が比較する際に達成される、正しいレコードの再識別操作を意味する。再識別は、公開ファイル中のユニットと外部ファイル中のユニットが母集団において同一個人に属する場合に発生する。基礎となる仮定は、侵入者が公開対象となる標本 $s$ 中のユニットと外部ファイル中のユニットとを、識別変数のみを用いて常に照合しようとする、というものである。さらに、侵入者は識別変数について一意(ユニーク)な標本ユニットを識別することに関心を持つと考えられる。再識別は、識別変数のスコアの比較に基づいて、外部ファイル中のユニット $i^*$ が標本中のユニット $i$ に一致するものとして選択され、かつこのリンクが正しく、それによって直接識別子を用いて個人に関する機密情報が開示される場合に発生する。</p>
+
+<p>開示シナリオを定義するため、以下の仮定を置く。そのほとんどは保守的なものであり、最悪ケースシナリオの定義に寄与する。</p>
+
+<ol>
+<li>母集団 $\mathcal{P}$ から抽出された標本 $s$ が公開されるものとし、抽出設計に基づくウェイトが入手可能である。</li>
+<li>侵入者が入手可能な外部ファイルは母集団 $\mathcal{P}$ 全体をカバーする。したがって、各 $i \in s$ について、対応するユニット $i^*$ は必ず $\mathcal{P}$ 中に存在する。</li>
+<li>侵入者が入手可能な外部ファイルには、個人の直接識別子と、標本中にも存在する一連のカテゴリカルな識別変数が含まれる。</li>
+<li>侵入者は、両ファイル中の識別変数の値を比較することにより、標本中のユニット $i$ を母集団名簿中のユニット $i^*$ に照合しようとする。</li>
+<li>侵入者は外部ファイルに含まれる情報以外の追加情報を持たない。</li>
+<li>標本中のユニット $i$ と母集団中のユニット $i^*$ の間にリンクが確立され、かつ $i^*$ が標本ユニット $i$ の元となった母集団中の当該個人である場合に、再識別が発生する。すなわち、識別が成立する前に、その照合は正しい照合でなければならない。</li>
+</ol>
+
+<p>さらに、以下の仮定を追加する。</p>
+
+<ol start="7">
+<li>侵入者は標本中のすべてのレコードを外部ファイル中のレコードと照合しようとする。</li>
+<li>識別変数は、正しい照合において一致する。すなわち、両方のミクロデータファイルにおける識別変数の記録には、誤り・欠測・経時的な変化が生じない。</li>
+</ol>
+
+<p><strong>表記法</strong><br>
+以下の表記は本章を通じて、ミクロデータの開示リスクを推定するさまざまな手法を説明する際に用いる。</p>
+
+<p>キーが $K$ 個のセルを持ち、各セル $k = 1, \ldots, K$ は識別変数のカテゴリの直積であるとする。一般に、ここでは単一のベクトルではなく、ミクロデータ中の識別変数によって張られる分割表を扱う。この分割表は標本の度数を含み、典型的には非常に大きく、非常にスパースである。キーのセル $k$ における母集団サイズを $F_k$、標本サイズを $f_k$ とする。また、次が成り立つ。</p>
+
+$$
+\sum_{k = 1}^{K}F_{k} = N,\quad \sum_{k = 1}^{K}f_{k} = n.
+$$
+
+<p>形式的には、@sec-argus-individual-risk および @sec-poisson-log-linear で導入されるモデルにおいて、標本サイズおよび母集団サイズは確率変数であり、その期待値をそれぞれ $n$、$N$ と表す。実務上は、標本サイズと母集団サイズは、既知であると仮定される実際の標本サイズと母集団サイズという自然な推定量に置き換えられるのが通常である。</p>
+
+<p>標本中の個人 $i \in s$ についてキーの値を観測することにより、その個人は1つのセルに分類される。キーの値に基づいて個人 $i \in s$ が分類されるセルの添字を $k(i)$ と表す。</p>
+
+<p>上記で与えた再識別の開示概念に従い、標本中のユニット $i$ の(基礎)個別開示リスクを、最悪ケースシナリオのもとでのその再識別確率として定義する。したがって、得られるリスク $r_i$ は実際のリスクを下回ることは決してなく、個別リスクは実際のリスクに対する保守的な推定値である。</p>
+
+$$
+r_{i}=\mathbb{P}\left( i \text{ correctly linked with } i^* \mid s , \mathcal{P} \text{, worst case scenario }\right)
+$$
+
+<p>本章で説明する母集団中のキーに基づく手法はすべて、$1/F_k$ として定式化できるこの個別レコードごとの開示リスク尺度を推定することを目的としている。母集団頻度 $F_k$ は未知のパラメータであるため、標本から推定する必要がある。標本にわたって個別開示リスク尺度を集約することにより、ファイル全体レベルの大域的な開示リスク尺度を計算できる。</p>
+
+$$
+\tau_{1} = \sum\limits_{k}^{}\frac{1}{F_{k}}
+$$
+
+<p>代替的な大域リスク尺度として、交差分類された識別変数の標本ユニークについて個別開示リスク尺度を集約する方法がある。母集団中のユニーク($F_k = 1$)が開示リスク尺度の支配的な要因であることから、ここでは標本ユニーク($f_k = 1$)に注目する。</p>
+
+$$
+\tau_{2} = \sum\limits_{k}^{}{I(f_{k} = 1)\frac{1}{F_{k}}}
+$$
+
+<p>ここで $I$ は指示関数であり、$f_k = 1$ ならば値1を、そうでなければ0をとる。</p>
+
+<p>これら2つの大域リスク尺度はいずれも、標本サイズあるいはユニーク数である $n$ で割ることにより、比率として表すこともできる。</p>
+
+<p>ここでは、$f_k$ は観測されるが、$F_k$ は観測されないものと仮定する。</p>
+
+<h3 id="argus-threshold-rule">ARGUS閾値ルール</h3>
+
+<p>ARGUS閾値ルールは、オランダ統計局(Statistics Netherlands)で用いられている、容易に適用可能なルールと安全性/非安全性に関する考え方に基づいている。これらのルールの実装が、ソフトウェアパッケージ μ-ARGUS の開発を開始した主な理由であった。</p>
+
+<p>開示シナリオにおいて、識別変数の組み合わせであるキーは、侵入者が回答者を再識別するために用いると想定される。回答者の再識別は、その回答者が識別変数の値の組み合わせであるキー値に関して母集団中で希少である場合に発生し得る。したがって、あるキー値に関して母集団中で回答者が希少であることは避けるべきである。回答者がキー値に関して母集団中で希少であると判明した場合には、この回答者を再識別から保護するための開示制御措置を講じるべきである。</p>
+
+<p>お節介な隣人シナリオに従うと、μ-ARGUS 閾値ルールの目的は、母集団中で希少なスコアの組み合わせの発生を回避することであり、単に母集団ユニークを回避するだけではない。何をもって希少とみなすかを定義するために、データ保護担当者は各キーについて閾値を選択しなければならない。あるキーがこの閾値よりも多く出現する場合、そのキーは安全とみなされ、そうでない場合には再識別のリスクがあるため保護されなければならない。</p>
+
+<p>閾値の水準、および検査対象とするキーの数と大きさは、当然ながら達成したい保護の水準に依存する。公開利用ファイルは、契約に基づき研究者のみが利用可能なミクロデータファイルよりもはるかに高い保護を必要とする。この規則が実務でどのように用いられるかについては @sec-intro-example の例で示す。</p>
+
+<p>このルールに従ってあるキーが安全でないとみなされた場合、保護が必要となる。そのため、しばしば全体再コード化と局所抑制が適用される。これらの技法については後述の各節で説明する。</p>
+
+<h3 id="sec-argus-individual-risk">ARGUS個別リスク方法論</h3>
+
+<p>標本中で希少なユニットと母集団中で希少なユニットとを区別したい場合には、推測統計的な手順を踏むことができる。Benedetti and Franconi (1998) による当初の提案は、Franconi and Polettini (2004) によってさらに発展し、μ-ARGUS に実装された。この方法では、標本頻度が与えられたときの母集団頻度の分布を導入することにより、$F_k$ の不確実性をベイズ流に扱う。個別開示リスクは、$F_k|f_k$ の分布に関する $\frac{1}{F_k}$ の(事後)平均として測られる。</p>
+
+$$
+r_{i} = \mathbb{E} \left( \frac{1}{F_{k}} \mid f_{k} \right) = \sum\limits_{h\geq f_{k}} \frac{1}{h} \mathbb{P} \left(F_{k} = h \mid f_{k} \right).
+$$
+
+<p>ここで、$F_k|f_k$ の事後分布は、成功確率 $p_k$、成功回数 $f_k$ の負の二項分布である。リスクは $f_k$ と $p_k$ の関数であるため、その推定値は $p_k$ を推定することによって得られる。Benedetti and Franconi (1998) は次の推定量を用いることを提案している。</p>
+
+$$
+{\hat{p}}_{k} = \frac{f_{k}}{\sum\limits_{i:k(i)=k}^{}w_{i}}
+$$
+
+<p>ここで $\sum\limits_{i:k(i)=k}^{}w_{i}$ は、(場合によってはキャリブレーションされた)抽出設計ウェイト $w_i$ に基づく $F_k$ の推定値である(Deville and Särndal, 1992)。</p>
+
+<p><strong>個別リスク推定を適用できる場合</strong><br>
+この手順は、入手可能なデータがより大きな母集団からの標本であるという仮定に依拠している。<em>抽出ウェイトが入手できない場合、あるいはデータが母集団全体を表す場合には、個別リスクを推定するこの戦略には意味がない。</em></p>
+
+<p>この手法の完全に詳細な説明は μ-ARGUS マニュアル(例えば Hundepool et al., 2014 を参照)に記載されている。この簡単な注記は Polettini (2004) に基づく。</p>
+
+<p><strong>ファイル全体のリスク評価</strong><br>
+個別リスクは<em>個人レベル</em>でのリスクの尺度を与える。ファイル全体の開示リスクの<em>大域的な</em>尺度は、ファイル中で期待される再識別件数として表すことができる。<em>期待再識別件数</em>はレコード数に依存する開示の尺度である。このため、μ-ARGUS は $n$ に依存しない<em>再識別率</em>も評価する。</p>
+
+$$
+\xi = \frac{1}{n}\sum\limits_{k=1}^{K}{f_{k}r_{k}} \quad .
+$$
+
+<p>$\xi$ は<em>大域的リスク</em>、すなわちファイル全体の開示リスクの尺度を与え、標本サイズに依存せず、ファイルのリスクを評価したり、異なる種類の公開方法を比較したりするのに用いることができる。数学的な詳細については Polettini (2004) を参照のこと。</p>
+
+<p><em>期待再識別率(percentage of expected re-identifications)</em>、すなわち値 $\psi=100\cdot\xi\%$ は、大域リスクの同等な尺度を与える。</p>
+
+<p><strong>個別リスク方法論における局所抑制の適用</strong><br>
+リスクが推定された後、保護が行われる。保護における1つの選択肢は<em>局所抑制</em>の適用である(局所抑制については後述の節を参照)。</p>
+
+<p>μ-ARGUS では、個別リスクと組み合わせた局所抑制の技法は、安全でないセルまたは組み合わせにのみ適用される。したがって、利用者はリスク(例えば再識別確率)に関する<em>閾値</em>を入力し、これらを安全または安全でないと分類する必要がある。局所抑制は安全でない個人に適用され、その再識別確率を所与の閾値未満に下げる。</p>
+
+<p>受容可能なリスクの水準、すなわちそれ未満であれば個人が安全とみなされるリスク値を表すリスク閾値を選択するために、<em>再識別率</em>を用いることができる。正しい再識別が期待される率が NSI にとって受容可能とみなされる水準を下回る場合、公開データは<em>安全</em>とみなされる。再識別率は個別リスクを用いて表されるため、再識別率に関する閾値は(以下に示すように)個別リスクに関する閾値に変換することができる。このアプローチのもとでは、個人がリスクにさらされているとされるのは、その再識別確率がファイル中の期待再識別件数に占める割合が大きいためである。</p>
+
+<p>局所抑制の件数を減らすため、安全なファイルを公開する手順では、まず<em>全体再コード化</em>(後述の節を参照)のような技法を用いた予備的な保護のステップを検討する。選択された変数の再コード化は、実際に個別リスクを下げ、したがってファイルの再識別率を下げることになる。</p>
+
+<div class="expert-level">
+<span class="badge">上級者向け</span>
+
+<p><strong>再識別率を用いた閾値設定</strong><br>
+再識別率 $\xi$ を考える。キー $k$ は $\xi$ に対して $r_kf_k$ という量の期待再識別件数を寄与する。同一キー $k$ に属するユニットは同一の個別リスクを持つため、キーはリスク $r_k$ の昇順に並べることができる。添字 $(k)$ をこの並べ替えにおける $k$ 番目の要素を表すものとする。個別リスクに関する閾値 $r^*$ を設定できる。その結果、安全でないセルは $r_{k} \geq r^*$ を満たすものであり、$(k) = k^{*} + 1,\ldots,K$ で添字付けできる。キー $k^{*}$ は $r^{*}$ と一対一に対応する。これにより、(データ保護後の)公開ファイルの再識別率について、各 $(k)$ について $r_kf_k$ を $r^{*}f_{(k)}$ に置き換えることで上限 $\xi^{*}$ を設定することができる。数学的な詳細については Polettini (2004) および Argus マニュアル(例えば Hundepool et al., 2014)を参照のこと。</p>
+
+<p>ここまでのアプローチは逆向きにたどることもできる。すなわち、再識別率 $\xi$ に関する<em>閾値</em> $\tau$ を選択すると、これに対応するキー添字 $k^{*}$ が定まり、それが $r^{*}$ の値に対応する。$r^{*}$ を個別リスクの閾値として用いることにより、公開ファイルの再識別率 $\xi$ を $\tau$ 未満に保つことができる。このような $k^{*}$ の探索は、単純な反復アルゴリズムによって行われる。</p>
+
+<p><strong>階層ファイルの公開</strong><br>
+社会統計ミクロデータの重要な特徴は、その本質的な階層構造であり、これによりファイル中の個人のグループ、典型的には<em>世帯</em>を認識することができる。再識別リスクを定義する際には、ユニット間のこうした依存関係を考慮に入れることが重要である。実際、グループ内の1個人の再識別は、その全メンバーの開示確率に影響を及ぼし得る。これまでのところ、階層リスクの実装は世帯についてのみ、すなわち<em>世帯リスク</em>としてのみ行われている。</p>
+
+<p>リスクの推定において依存関係を考慮することにより、独立性のみを仮定する場合よりも高い水準の安全性を達成することができる。</p>
+
+<p><strong>世帯リスク</strong><br>
+世帯リスクは、個別リスクについて定義したものと同じ枠組みを用いる。特に、再識別の概念は、<em>侵入者が世帯内の個人の再識別によって機密性の侵害を試みる</em>という追加の仮定のもとで成り立つ。</p>
+
+<p><em>世帯リスク</em>は、世帯内の<em>少なくとも</em>1人の個人が再識別される確率として定義される。サイズ $|g|$ の所与の世帯 $g$ について、そのメンバーを $i_1, \ldots, i_{|g|}$ とすると、世帯リスクは次のように表される。</p>
+
+$$
+r^{h}(g) = \mathbb{P} \left(i_{1} \cup i_{2} \cup \ldots \cup i_{|g|} \text { re-identified } \right)
+$$
+
+<p>これは世帯 $g$ に属するすべての個人について同一であり、$r_{g}^{h}$ に等しい。</p>
+
+<p><strong>世帯リスクに対する閾値設定</strong><br>
+所与の世帯に属するすべての個人が同一の世帯リスクを持つため、世帯 $g$ において再識別されると期待されるレコード数は $|g|r_{g}^{h}$ に等しい。階層ファイルにおける再識別率は $\xi^{h} = \frac{1}{n}\sum\limits_{g=1}^{G}{|g|r_{g}^{h}}$ として定義でき、ここで $G$ はファイル中の世帯の総数である。再識別率は、個別リスクの場合とほぼ同様に、世帯リスク $r^{h}$ に関する閾値 $r^{h^{\ast}}$ を定義するために用いることができる。数学的な詳細については Polettini (2004) および Argus マニュアル(例えば Hundepool et al., 2014)を参照のこと。</p>
+
+<p>世帯 $g$ の世帯リスク $r_{g}^{h}$ は、その世帯メンバーの個別リスクによって計算される点に注意されたい。所与の世帯について、そのメンバーのうちの1人 $i$ が高い個別リスク値 $r_{i}$ を持つという理由だけで、その世帯が(閾値を超える $r_{g}^{h}$ を持つ)安全でないものとなることがあり得る。したがって、世帯を保護するために取られるアプローチは、世帯内の個人を保護すること、まず世帯リスクへの寄与が最も大きい個人から保護することである。このため、<em>安全でない世帯</em>の中で<em>安全でない個人</em>を検出する必要がある。言い換えると、世帯リスク $r^{h}$ に関する閾値を、個別リスク $r_{i}$ に関する閾値に変換する必要がある。このために、世帯リスクが世帯メンバーの個別リスクの和によって上から抑えられることに注意する。すなわち $r_{g}^{h} \leq \sum\limits_{j=1}^{|g|}r_{i_{j}}$ である。</p>
+
+<p>世帯リスクに関する閾値 $r^{h^{\ast}}$ を適用することを考える。世帯 $g$ が安全と分類される(すなわち $r_{g}^{h} < r^{h^{\ast}}$)ためには、その構成員全員が $\delta_{g} = r^{h ^{\ast}}/|g|$ より小さい個別リスクを持つことが<em>十分条件</em>である。</p>
+
+<p>これは、世帯リスクの<em>上界</em>が所与の閾値を下回るかどうかを検査しているに過ぎないため、過剰な保護につながり得るアプローチであることは明らかである。</p>
+
+<p>ここで定義した閾値 $\delta_g$ は、個人 $i$ が属する世帯のサイズに依存することに留意すべきである。これは、同一キー $k$ に分類される(したがって同一の個別リスク $r_{k}$ を持つ)2人の個人が、サイズの異なる別々の世帯に属している場合、(世帯サイズが識別変数の集合に含まれていない限り)一方は安全、他方は安全でないと分類されることがあり得ることを意味する。</p>
+
+<p>実務上、レコード $i$ が属する世帯を $g(i)$ と表すと、ここまで述べたアプローチは、世帯リスクに関する閾値 $r^{h^{\ast}}$ を、個別リスク $r_{i} = 1,\ldots,n$ に関する<em>閾値のベクトル</em>に変換することに帰着する。</p>
+
+$$
+\delta_{g} = \delta_{g(i)} = \frac{r^{h^{\ast}}}{|g(i)|} \quad .
+$$
+
+<p><em>個人</em>は、$r_{i} \geq \delta_{g(i)}$ である場合に最終的に安全でないと設定され、要求があればこれらのレコードに局所抑制が適用される。これらのレコードを抑制することにより、保護後に世帯リスクが閾値 $\delta_{g}$ を下回ることが保証される。</p>
+
+<p><strong>階層ファイルにおける識別変数の選択</strong><br>
+世帯データについては、世帯リスクを推定するために用いる識別変数の中に、構成員数や世帯タイプといった世帯に関する入手可能な情報も含めることが重要である。</p>
+
+<p>世帯データファイルにおいて世帯サイズのみを識別変数としてリスクを計算し、そのファイルに所定の閾値を上回るリスクを持つ世帯が含まれるとする。世帯構造を持つファイルからは構成員数に関する情報を除去できないため、これらのレコードを安全に公開することはできず、いかなる抑制を行ってもそれらを安全にすることはできない。これにより、(通常は非常に大きな)非常に特異な世帯の存在を検査することができる。そうした世帯は、母集団中でそのサイズだけで容易に認識され得るものであり、その主要な特徴であるサイズは、ファイルから直ちに計算できる。この問題については Polettini (2004) の議論を参照のこと。</p>
+</div>
+
+<h3 id="sec-poisson-log-linear">ポアソンモデルと対数線形モデリング</h3>
+
+<p>Skinner and Elamir (2004) の定義に従い、$F_{k}$ が平均 $\left\{\lambda_{k} \right\}$ を持つ独立なポアソン分布に従い、かつ選択確率 $\pi$ が等しいベルヌーイ抽出方式を仮定すると、$f_{k}$ と $F_{k} - f_{k}$ は独立に $f_{k} \mid \lambda_{k} \sim \operatorname{Pois} \left(\pi\lambda_{k} \right)$ および $F_{k} - f_{k} \mid \lambda_{k} \sim \operatorname{Pois} \left( ( 1 - \pi ) \lambda_{k} \right)$ というポアソン分布に従う。標本ユニークについての個別リスク尺度は $r_{k} = \mathbb{E}_{\lambda_{k}} \left( \frac{1}{F_{k}} \mid f_{k} = 1 \right)$ として定義され、これは次に等しい。</p>
+
+$$
+r_{k} = \frac{1}{\lambda_{k} (1 - \pi) } \left[ 1 - e^{ - \lambda_{k} (1 - \pi) } \right]
+$$
+
+<p>このアプローチでは、パラメータ $\left\{ \lambda_{k} \right\}$ は、対数線形モデリングを通じてデータの構造や依存関係を考慮に入れることによって推定される。標本頻度 $f_{k}$ が平均 $u_{k} = \pi\lambda_{k}$ を持つ独立なポアソン分布に従うと仮定すると、$u_{k}$ についての対数線形モデルは $\text{log}(u_{k}) = x_{k}^{'}\beta$ と表すことができる。ここで $x_{k}$ は、キー変数についてのモデルの主効果と交互作用を表す計画ベクトルである。反復比例フィッティングなどの標準的な手続きを用いることにより、ベクトル $\beta$ のポアソン最尤推定値が得られ、フィット値 ${\hat{u}}_{k} = \text{exp}(x_{k}^{'}\hat{\beta})$ を計算できる。${\hat{\lambda}}_{k}$ の推定値は $\frac{{\hat{u}}_{k}}{\pi}$ に等しく、これを上記の $r_{k}$ の式における $\lambda_{k}$ に代入する。個別開示リスク尺度を集約することにより、大域的(ファイルレベル)な尺度を得ることができる。</p>
+
+$$
+{\hat{\tau}}_{2} = \sum\limits_{k \in \text{SU}}^{}{\hat{r_k} =}\sum\limits_{k \in \text{SU}}^{}{\frac{1}{{\hat{\lambda}}_{k}(1 - \pi)}\lbrack 1 - e^{- {\hat{\lambda}}_{k}(1 - \pi)}\rbrack}
+$$
+
+<p>ここで $\text{SU}$ はすべての標本ユニークの集合である。</p>
+
+<p>この手法の詳細については Skinner and Shlomo (2005, 2006) および Shlomo and Barton (2006) を参照のこと。</p>
+
+<div class="expert-level">
+<span class="badge">上級者向け</span>
+
+<p>Skinner and Shlomo (2005, 2006) は、上記の大域的開示リスク尺度について正確な推定値を与える、最も頑健な対数線形モデルを選択するための適合度基準を開発した。この手法は、あるモデルから出発し、高い検定統計量が過小適合(すなわち開示リスク尺度が過大推定されること)を示すというところから始まる。次に、対数線形モデルの適合が受容される水準(正規分布による近似に基づく)に検定統計量が近づくまで、モデルに高次の交互作用項を段階的に追加していく前向き探索アルゴリズムが用いられる。</p>
+
+<p>この手法は現在も開発中である。現時点では、この手法を実装するための明確で使いやすいソフトウェアを開発する必要がある。しかし、英国国家統計局(Office for National Statistics)は、ミクロデータの公開に関する意思決定にこの手法を活用してきた。この手法は、理論的に明確に定義された開示リスク尺度と、対数線形モデルの適合および開示リスク尺度の精度を保証する適合度基準に基づいている。ある程度の計算時間を要し、人手による介入を必要とするモデル探索アルゴリズムが必要となる。</p>
+
+<p>標本開示リスク推定のための一般化負の二項平滑化モデルに基づく、確率的リスク評価の新しい手法が開発中であり、これは μ-ARGUS で用いられるモデルと上記のポアソン対数線形モデルの両方を包含するものである。この手法は、セル $k$ についての推測のために局所的な近傍を定義できる順序尺度のキー変数に対して有用である。上記のポアソンモデルに、$\lambda_{k} \sim \text{Gamma}(\alpha_{k},\beta_{k})$ というベイズ的な仮定を独立に追加すると、周辺分布は一般化負の二項分布に変換される。</p>
+$$
+f_{k} \sim \text{NB}(\alpha_{k},p_{k} = \frac{1}{1 + \text{N}\pi_{k}\beta_{k}})
+$$
+<p>および</p>
+
+$$
+F_{k}|f_{k} \sim \text{NB}(\alpha_{k} + f_{k},\rho_{k} = \frac{1 + \text{N}\pi_{k}\beta_{k}}{1 + \text{N}\beta_{k}})
+$$
+
+<p>ここで $\pi_{k}$ は抽出率である。セル $k$ の各局所近傍において、$\alpha_{k}$ と $\beta_{k}$ を推定するための平滑化多項式回帰モデルが実行され、負の二項分布に基づいて開示リスク尺度が推定される。${\hat{\tau}}_{2} = \sum_{k \in \text{SU}}^{}{\hat{r_k} =}\sum_{k \in \text{SU}}^{}\frac{{\hat{\rho}}_{k}(1 - {\hat{\rho}}_{k})^{{\hat{\alpha}}_{k}}}{{\hat{\alpha}}_{k}(1 - {\hat{\rho}}_{k})}$ 。詳細は Rinott and Shlomo (2005, 2006) を参照のこと。</p>
+</div>
+
+<h3 id="sec-SUDA">SUDA</h3>
+
+<p>Special Uniques Detection Algorithm(SUDA、Elliot et al., 2005)は、制限付きライセンスのもとでフリーウェアとして提供されている Windows アプリケーションのソフトウェアシステムであり、レコード、変数、変数の値、およびこれらの相互作用ごとに分解した開示リスクを提供する。これは「特殊ユニーク(special unique)」という概念に基づく。特殊ユニークとは、ある変数集合において標本ユニークであり、かつその部分集合においてもユニークであるレコードのことである。実証研究により、特殊ユニークはランダムなユニークよりも母集団ユニークである可能性が高いことが示されている。特殊ユニークは、そのレコードをユニークと定義するキー変数の最小の部分集合のサイズと数に応じて分類することができ、これは最小標本ユニーク(minimal sample unique, MSU)として知られる。このアルゴリズムでは、利用者が指定する最大サイズ $m$ までの、キー変数のあらゆる可能な部分集合について、各レコードのすべての MSU が見つけ出される。</p>
+
+<div class="expert-level">
+<span class="badge">上級者向け</span>
+
+<p>SUDA は、リスクの水準に応じてミクロデータファイル内のレコードを格付けし、順位付けする。この手法は、最小ユニークの数とサイズに基づいて、標本ユニークにレコードごとの照合確率を割り当てる。DIS尺度(Skinner and Elliot, 2000)は、ユニークな照合が与えられたときの正しい照合の条件付き確率である。</p>
+
+$$
+p(cm \mid um) = \frac{\sum\limits_{k = 1}^{K} I\left(f_{k} = 1 \right)}{\sum\limits_{k = 1}^{K} F_{k} I \left(f_{k} = 1 \right) }
+$$
+
+<p>これは、モデリングの仮定を伴わずにほぼ不偏な単純な標本ベースの尺度によって推定される。Elliot (2005) は、DIS 尺度とアルゴリズムから得られるスコア(すなわち SUDA スコア)を組み合わせたヒューリスティックを記述している。この DIS-SUDA として知られる手法は、あるレコードに対する照合が正しいことについての侵入者の確信度の推定値を生成する。これは照合が正しい確率と密接に関連しており、ヒューリスティックに次の推定値と結び付けられる。</p>
+
+$$
+\tau_2 = \sum\limits_k{I(f_k=1)\frac{1}{F_k}}
+$$
+
+<p>この手法の利点は、データ侵入の実践的なモデルに関連付けられており、異なる値を直接比較することが可能な点である。欠点は、最大 MSU パラメータの水準に敏感であり、ヒューリスティックな方法で計算されることである。加えて、異なるファイル間で開示リスクを比較することは難しい。しかしながら、この手法は広範に検証されており、2001年のセンサス(国勢調査)から抽出された英国の匿名化サンプル記録(Sample of Anonymized Records, SAR)における高リスクレコードの検出に成功裏に用いられた(Merrett, 2004)。この評価により、DIS-SUDA 尺度がアルゴリズムから計算されると、特にキー変数の数が $m = 6$ の場合に、個別開示リスク尺度に対して良好な推定を与えることが示された。このアルゴリズムはまた、レコードの開示リスクに最も寄与している変数とその値も特定する。</p>
+
+<p>Elliot et al. (2005) によって、いくつかの方法で SUDA を改良した新しいアルゴリズム SUDA2 が開発された。この開発により、より大規模なデータセットを扱うことのできる、はるかに高速なツールが提供されている。</p>
+</div>
+
+<h3 id="sec-record-linkage">レコード連結</h3>
+
+<p>大まかに言えば、レコード連結とは、ファイル $A$(保護済みファイル)中の各レコード $a$ をファイル $B$(原ファイル)中のレコード $b$ に連結することである。$b$ が $a$ に対応する原レコードであることが判明した場合、ペア $(a,b)$ はマッチ(一致)である。</p>
+
+<p>この手法を身元開示のリスクを測定するために適用するにあたっては、侵入者が、公開される保護済みデータセットといくつかの(キー変数または結果変数を)共有し、さらにパスポート番号や氏名などのいくつかの識別子変数を含む外部データセットを入手していると仮定する。侵入者は、共有変数を用いて保護済みデータセットと外部データセットを連結しようとすると仮定される。マッチの数によって、侵入者によって回答者が再識別され得る保護済みレコードの数を推定することができる。したがって、開示リスクは、$A$ 中の総レコード数に対するマッチの割合として定義される。</p>
+
+<p>SDC において身元開示を測定するために用いられる主なレコード連結の種類について、以下で論じる。事例研究の1つとして、本ハンドブックに関連する CASC のウェブサイト(<a href="https://research.cbs.nl/casc/Handbook.htm#casestudies">https://research.cbs.nl/casc/Handbook.htm#casestudies</a>)に説明的な例が掲載されている。</p>
+
+<h4 id="distance-based-record-linkage">距離に基づくレコード連結</h4>
+
+<div class="expert-level">
+<span class="badge">上級者向け</span>
+
+<p>距離に基づくレコード連結とは、ファイル $A$ 中の各レコード $a$ を、ファイル $B$ 中で最も近いレコード $b$ に連結することである。したがって、この方法では、レコード間の「近さ」を表す距離関数を定義する必要がある。このレコードレベルの距離は、変数レベルで定義された距離関数から構成することができる。レコードレベルの距離を構成するには、尺度の問題を避けるために変数を標準化し、レコードレベルの距離において各変数に重みを割り当てる必要がある。</p>
+
+<p>距離に基づくレコード連結は、マイクロアグリゲーション後の開示リスクを評価するために Pagliuca and Seri (1999) によって初めて提案された(マイクロアグリゲーションについては該当節を参照)。これらの著者はユークリッド距離を用い、すべての変数に等しい重みを与えた。その後、(Domingo-Ferrer and Torra, 2001) は、他のマスキング手法を評価するためにも距離に基づくレコード連結を用いた。彼らの実証研究では、距離に基づくレコード連結は(後述する)確率的レコード連結よりも優れた性能を示した。近年では、(Torra and Miyamoto, 2004) が、特定の SDC 手法に対してマッチの割合を高めるために、手法固有の距離関数を定義できることを示している。</p>
+
+<p>(Bacher, Brand and Bender, 2002) で導入されたレコード連結アルゴリズムは、距離に基づくレコード連結と精神的に類似している。これは、クラスター分析に基づいており、したがって互いに近いレコードを連結するためである。</p>
+
+<p>距離を用いたレコード連結の主な利点は、実装者にとっての単純さと、利用者にとっての直感的な分かりやすさである。もう1つの強みは、距離を適切に修正することにより、(個人や変数についての)主観的な情報を再識別のプロセスに組み込むことができる点である。実際、μ-ARGUS ミクロデータ保護パッケージの次バージョン(例えば Hundepool et al., 2014)には、開示リスク評価手法として距離に基づくレコード連結が組み込まれる予定である。</p>
+
+<p>距離に基づくレコード連結の主な難点は、対象となる変数について適切な距離を考案することにある。まず、各変数の重みを決定する必要があるが、この決定はしばしば自明ではない。適切な距離を選ぶことは、カテゴリカル変数の場合や、マスキングされたファイルが原データセットに対して新たなラベルを含むことになる局所再コード化のようなマスキング手法の場合にも、特に厄介である。</p>
+</div>
+
+<h4 id="probabilistic-record-linkage">確率的レコード連結</h4>
+
+<div class="expert-level">
+<span class="badge">上級者向け</span>
+
+<p>距離に基づくレコード連結と同様に、確率的レコード連結は、それぞれデータセット $A$ と $B$ 中のレコードのペア $(a,b)$ を連結することを目的とする。各ペアについて指標(インデックス)が計算される。次に、指標の範囲における2つの閾値 $LT$ と $NLT$ を用いて、そのペアを連結、要確認(clerical)、非連結のいずれかに分類する。指標が $LT$ を上回れば連結、$NLT$ を下回れば非連結とされ、自動的に連結・非連結のいずれとも分類できず人手による検査を要するものが要確認ペアである。変数間の独立性を仮定すると、指標は各変数についての以下の条件付き確率から計算できる。すなわち、2つのレコード $a$ と $b$ が実際にマッチであるという条件のもとで、両者における当該変数の値が一致する確率 $\mathbb{P}\left( 1\mid M \right)$、および $a$ と $b$ が実際にアンマッチであるという条件のもとで、値が一致しない確率 $\mathbb{P}\left( 0\mid U \right)$ である。</p>
+
+<p>前節と同様に、開示リスクは、ファイル $A$ 中のレコード数に対する、マッチの数(正しく連結された連結ペア)の割合として定義される。</p>
+
+<p>確率的レコード連結を効果的に用いるためには、閾値 $LT$ と $NLT$ を設定し、指標の計算に用いる条件付き確率 $\mathbb{P}\left( 1 \mid M \right)$ と $\mathbb{P}\left( 0 \mid U \right)$ を推定する必要がある。平たく言えば、閾値は、(i)アンマッチのペアを連結してしまう確率 $\mathbb{P}\left( \text{LP} \mid U \right)$(偽陽性、すなわち誤った連結)、および (ii)マッチであるペアを連結しない確率 $\mathbb{P}\left( \text{NP} \mid M \right)$(偽陰性、すなわち誤った非連結)から計算される。条件付き確率 $\mathbb{P}\left( 1 \mid M \right)$ と $\mathbb{P}\left( 0 \mid U \right)$ は、通常 EM アルゴリズム(Dempster, Laird and Rubin 1977)を用いて推定される。</p>
+
+<p>この種のレコード連結についての原典的な記述は Fellegi and Sunter (1969) および Jaro (1989) に見られる。Torra and Domingo-Ferrer (2003) はこの手法を(例とともに)詳細に説明しており、Winkler (1993) は確率的レコード連結に関する最新研究の概観を示している。特に、後者の論文には非独立変数に関する議論が含まれている。これまでの手法よりも優れた性能を示す(階層的)グラフィカルモデルが近年提案されている(Ravikumar and Cohen, 2004)。</p>
+
+<p>確率的レコード連結の手法は、距離に基づく手法ほど単純ではない。しかし、変数の再スケーリングや重み付けを必要としない。利用者は、偽陽性の最大受容可能確率 $\mathbb{P}\left( \text{LP} \mid U \right)$ と偽陰性の最大受容可能確率 $\mathbb{P}\left( \text{NP} \mid M \right)$ という2つの確率を入力として与えるだけでよい。</p>
+</div>
+
+<h4 id="other-record-linkage-methods">その他のレコード連結手法</h4>
+
+<div class="expert-level">
+<span class="badge">上級者向け</span>
+
+<p>近年、開示リスク評価のために他のレコード連結手法の使用も検討されるようになっている。これまでのレコード連結手法では、連結対象の2つのファイルが変数の集合を共有していることが仮定されていたが、この制約を緩和した手法も開発されている。適切な条件のもとでは、(Torra, 2004) は、ファイルが変数を全く共有していない場合でも再識別が依然として可能であることを示している。Domingo-Ferrer and Torra (2003) は、開示リスク評価にこうした手法を用いることを提案している。</p>
+</div>
+
+<h3 id="references">参考文献</h3>
+
+<p>Bacher J., Brand R., and Bender S. (2002), <em>Re-identifying register data by survey data using cluster analysis: an empirical study</em>. International Journal of Uncertainty, Fuzziness and Knowledge Based Systems, 10(5):589–607, 2002.</p>
+
+<p>Benedetti, R. and Franconi, L. (1998). <em>Statistical and technological solutions for controlled data dissemination</em>, Pre-proceedings of New Techniques and Technologies for Statistics, 1, 225-232.</p>
+
+<p>Coppola, L. and Seri, G. (2005). <em>Confidentiality aspects of household panel survey: the case study of Italian sample from EU-SILC.</em> Monographs of official statistics -- Proceedings of the Work session on statistical data confidentiality -- Geneve 9-11 November 2005, 175-180.</p>
+
+<p>Cox, L.H. (1995). <em>Protecting confidentiality in business surveys</em>. Business Survey Methods, Cox, B.G., Binder, D.A., Chinnappa, B.N., Christianson, A., Colledge, M.J. e Kott, P.S. (Eds.), New-York: Wiley, 443‑476.</p>
+
+<p>Dempster A. P., Laird N. M., and Rubin D. B. (1977), <em>Maximum likelihood from incomplete data via the em algorithm.</em> Journal of the Royal Statistical Society, 39:1–38, 1977.</p>
+
+<p>Deville, J.C. and Särndal, C.E. (1992). <em>Calibration estimators in survey sampling</em>, Journal of the American Statistical Association 87, 367–382.</p>
+
+<p>Domingo-Ferrer J., and Torra, V. (2001), <em>A quantitative comparison of disclosure control methods for microdata.</em> In P. Doyle, J. I. Lane, J. J. M. Theeuwes, and L. Zayatz, editors, Confidentiality, Disclosure and Data Access: Theory and Practical Applications for Statistical Agencies, pages 111–134, Amsterdam, 2001. North-Holland. <a href="https://crises-deim.urv.cat/webCrises/publications/bcpi/cliatpasa01Aquantitative.pdf">https://crises-deim.urv.cat/webCrises/publications/bcpi/cliatpasa01Aquantitative.pdf</a>.</p>
+
+<p>Domingo-Ferrer, J., and Torra, V. (2003), <em>Disclosure risk assessment in statistical microdata protection via advanced record linkage.</em> Statistics and Computing, 13:343–354.</p>
+
+<p>Elamir, E., Skinner, C. (2004) <em>Record-level Measures of Disclosure Risk for Survey Microdata</em>, Journal of Official Statistics, Vol. 22, No. 3, 2006, pp. 525–539. See also: Southampton Statistical Sciences Research Institute, University of Southampton, methodology working paper: <a href="https://eprints.soton.ac.uk/8175/">https://eprints.soton.ac.uk/8175/</a></p>
+
+<p>Elliot, M. J., (2000). <em>DIS: A new approach to the Measurement of Statistical Disclosure Risk.</em> International Journal of Risk Management 2(4), pp 39-48.</p>
+
+<p>Elliot, M. J., Manning, A. M.& Ford, R. W. (2002). 'A Computational Algorithm for Handling the Special Uniques Problem'. International Journal of Uncertainty, Fuzziness and Knowledge Based Systems 5(10), pp 493-509.</p>
+
+<p>Elliot, M. J., Manning, A., Mayes, K., Gurd, J. & Bane, M. (2005). 'SUDA: A Program for Detecting Special Uniques'. Proceedings of the UNECE/Eurostat work session on statistical data confidentiality, Geneva, November 2005</p>
+
+<p>Elliot, M. J., Skinner, C. J., and Dale, A. (1998). 'Special Uniques, Random Uniques, and Sticky Populations: Some Counterintuitive Effects of Geographical Detail on Disclosure Risk'. Research in Official Statistics 1(2), pp 53-67.</p>
+
+<p>Fellegi, I. P., and Sunter, A.B. (1969), <em>A theory for record linkage</em>. Journal of the American Statistical Association, 64(328):1183–1210.</p>
+
+<p>Franconi, L. and Polettini, S. (2004). <em>Individual risk estimation in $\mu$-ARGUS: a review.</em> In: Domingo-Ferrer, J. (Ed.), Privacy in Statistical Databases. Lecture Notes in Computer Science. Springer, 262‑272</p>
+
+<p>Franconi, L. and Seri, G. (2000). <em>Microdata Protection at the Italian National Statistical Insititute (Istat): A User Perspective.</em> Of Significance Journal of the Association of Public Data Users -- Volume 2 Number 1 2000, page. 57-64.</p>
+
+<p>Hundepool, A., Van de Wetering, A., Ramaswamy, R., Franconi, L., Capobianchi, A., de Wolf, P.P., Domingo-Ferrer, J., Torra, V., Brand, R., and Giessing, S. (2014), <em>$\mu$-ARGUS version 5.1 Software and User's Manual</em>. Statistics Netherlands, Voorburg NL, 2014. <a href="https://research.cbs.nl/casc/Software/MUmanual5.1.3.pdf">https://research.cbs.nl/casc/Software/MUmanual5.1.3.pdf</a>.</p>
+
+<p>Jackson, P., Longhurst, J. (2005), <em>Providing access to data and making microdata safe, experiences of the ONS</em>, proceedings of the UNECE/Eurostat work session on statistical data confidentiality, Geneva, November 2005</p>
+
+<p>Jaro, M.A. (1989), <em>Advances in record-linkage methodology as applied to matching the 1985 census of tampa, florida.</em> Journal of the American Statistical Association, 84(406):414–420.</p>
+
+<p>Pagliuca, D. and Seri, G. (1999), <em>Some results of individual ranking method on the system of enterprise accounts annual survey</em>, Esprit SDC Project, Deliverable MI-3/D2.</p>
+
+<p>Polettini, S. and Seri, G (2004). <em>Revision of "Guidelines for the protection of social microdata using the individual risk methodology"</em>. Deliverable 1.2-D3, available at CASC web site.</p>
+
+<p>Ravikumar, P., and Cohen, W.W. (2004), <em>A hierarchical graphical model for record linkage.</em> In UAI 2004, USA, 2004. Association for Uncertainty in Artificial Intelligence.</p>
+
+<p>Rinott, Y., Shlomo, N (2006) <em>A Generalized Negative Binomial Smoothing Model for Sample Disclosure Risk Estimation</em>, PSD'2006 Privacy in Statistical Databases, Springer LNCS proceedings, to appear.</p>
+
+<p>Rinott, Y., Shlomo, N. (forthcoming) <em>A Smoothing Model for Sample Disclosure Risk Estimation</em>, Volume in memory of Yehuda Vardi in the IMS Lecture Notes Monograph Series.</p>
+
+<p>Shlomo, N. (2006), <em>Review of statistical disclosure control methods for census frequency tables</em>, ONS Survey Methodology Bulletin.</p>
+
+<p>Shlomo, N., Barton, J. (2006) <em>Comparison of Methods for Estimating Disclosure Risk Measures for Microdata at the UK Office for National Statistics</em>, PSD'2006 Privacy in Statistical Databases Conference, CD Proceedings, to appear</p>
+
+<p>Skinner, C., Shlomo, N. (2005), <em>Assessing disclosure risk in microdata using record-level measures</em>, proceedings of the UNECE/Eurostat work session on statistical data confidentiality, Geneva, November 2005</p>
+
+<p>Skinner, C.J., Shlomo, N. (2006) <em>Assessing Identification Risk in Survey Microdata Using Log-linear Models</em>, Journal of the American Statistical Association, 103 (483). pp. 989-1001. See also: <a href="http://eprints.lse.ac.uk/39112/1/Assessing_Identification_Risk_in_Survey_Microdata%28lsero%29.pdf">http://eprints.lse.ac.uk/39112/1/Assessing_Identification_Risk_in_Survey_Microdata%28lsero%29.pdf</a>.</p>
+
+<p>Skinner, C., Holmes, D. (1998), <em>Estimating the re-identification risk per record in microdata</em>, JOS, Vol.14.</p>
+
+<p>Torra, V. (2004), <em>Owa operators in data modeling and re-identification.</em> IEEE Trans. on Fuzzy Systems, vol. 12, no. 5, pp. 652-660.</p>
+
+<p>Torra V., and Domingo-Ferrer J. (2003). <em>Record linkage methods for multidatabase data mining</em>. In V. Torra, editor, Information Fusion in Data Mining, pages 101–132, Germany, Springer.</p>
+
+<p>Torra, V., and Miyamoto, S. (2004), <em>Evaluating fuzzy clustering algorithms for microdata protection.</em> In J. Domingo-Ferrer and V. Torra, editors, Privacy in Statistical Databases, volume 3050 of LNCS, pages 175–186, Berlin Heidelberg. Springer.</p>
+
+<p>Willenborg, L. and De Waal, T. (1996). <em>Statistical Disclosure Control in Practice.</em> Lecture Notes in Statistics, 111, New-York: Springer Verlag.</p>
+
+<p>Willenborg, L. and De Waal, T. (2001). <em>Elements of statistical disclosure control.</em> Lecture Notes in Statistics, 115, New York: Springer-Verlag.</p>
+
+<p>Winkler, W. E. (1993), <em>Matching and record linkage.</em> Technical Report RR93/08, Statistical Research Division, U. S. Bureau of the Census (USA), 1993.</p>
+
+  <div class="pagenav">
+    <a class="prev" href="03-1-intro-roadmap.html">← 第3章 序論とロードマップ</a>
+    <a class="next" href="03-3a-protection-methods-1.html">第3章 保護手法 (3/7) →</a>
+  </div>
+</div>
+</body>
+</html>

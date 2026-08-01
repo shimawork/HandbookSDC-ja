@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>序文(書籍について) | SDCハンドブック和訳</title>
+<link rel="stylesheet" href="assets/style.css">
+<script>
+  window.MathJax = { tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] } };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
+</head>
+<body>
+<div class="page">
+  <div class="masthead">
+    <nav class="crumbs"><a href="index.html">目次</a> / 序文</nav>
+    <div class="kicker">Handbook on Statistical Disclosure Control (2nd Edition) 和訳</div>
+    <h1>序文(書籍について)</h1>
+    <div class="note-origtitle">原題: Preface to the second edition</div>
+  </div>
+
+  <div class="callout">
+    <div class="callout-title">ヒント</div>
+    <p><a href="https://raw.githubusercontent.com/sdcTools/HandbookSDC/gh-pages/Handbook-on-Statistical-Disclosure-Control.pdf" download target="_blank" rel="noopener">PDF版をダウンロード</a></p>
+  </div>
+
+  <h2>第2版の序文</h2>
+
+  <p>2006年、Eurostat(欧州連合統計局)は卓越センター(Centre of Excellence)を設立するという構想を打ち出した。この仕組みの狙いは、特定のテーマについてヨーロッパの主要な国家統計機関(NSI)の強みを結集することにある。複数のNSIにおいて、特定のテーマに取り組む小規模で孤立したグループが存在することが多く、また方法論上の特定の課題に十分な注意を払うためのリソースを欠いているNSIも存在する。こうした状況が、卓越センターというEurostatの構想につながった。卓越センターは、主導的な国々における研究を支援し、その成果を他のNSIへ広めることによって、特定のテーマに関する知見をより高いレベルで結集することができる。統計的開示制御(SDC)は、そのパイロットテーマとして選定された。SDCが選定された理由の一つは、EUの枠組みプロジェクトであるSDC(<a href="https://cordis.europa.eu/project/id/20462" target="_blank" rel="noopener">https://cordis.europa.eu/project/id/20462</a>)やCASC(<a href="https://research.cbs.nl/casc/CASCindex.htm" target="_blank" rel="noopener">https://research.cbs.nl/casc/CASCindex.htm</a>)などにみられるように、ヨーロッパにおける協力に関してSDC分野がより長い伝統を有していたことである。</p>
+
+  <p>2005年に発足したSDCに関する卓越センター(助成契約番号25200.2005.001-2005.619)の任務の一つは、統計的開示制御に関するハンドブックを執筆することであった。ハンドブックの執筆はAnco Hundepoolが統括し、彼自身もソフトウェアツールに関する章の一部(ソフトウェアの節、およびτ-ARGUSによる抑制に関する節)を執筆した。Jane LonghurstとLuisa Franconiが序論の章(<a href="01-introduction.html">第1章</a>)を執筆し、Eric Schulte Nordholtが規制に関する章(<a href="02-regulations.html">第2章</a>)を執筆した。Josep Domingo-Ferrerは、Anco Hundepool、Luisa Franconi、Jane Longhurst、Peter-Paul de Wolfの協力を得て、ミクロデータの章(<a href="03-microdata.html">第3章</a>)を担当した。Sarah Giessingは規模表データの章(<a href="04-magnitude-tabular-data.html">第4章</a>)を、Jane Longhurstは度数表の章(<a href="05-frequency-tables.html">第5章</a>)を担当した。リモートアクセスに関する章(<a href="06-remote-access-issues.html">第6章</a>)は、Anco HundepoolとJane Longhurstが執筆した。さらに、卓越センターの他の多くのパートナーが、より小規模な部分に貢献した。Glòria Pujol CrespoとCaroline Tudorは校正において貴重な貢献をした。また、校正という骨の折れる作業や、貴重なコメントによる支援を行ってくれた他のパートナーたちの尽力にも、深く感謝の意を表する。</p>
+
+  <p>2020年に発足した(期間4年間の)SDCに関する卓越センターは、STACEプロジェクト(Statistical methods and tools Centers of Excellence、助成契約番号899218–2019-BG-Methodology、2020年〜2024年)の一環として、本ハンドブックを改訂するという任務を担った。原著者全員の許可を得て、STACEプロジェクトのパートナーによって現行の第2版が作成された。ハンドブックの形式は、オンライン出版とオフライン出版の双方を容易にするために改訂され、いくつかの新しい内容が追加された。</p>
+
+  <p>原著者たちには、それぞれの章の改訂が依頼された。原著者に加えて、3名の新たな著者が本ハンドブック第2版に貢献した。Reinhard Tentは、規模表データおよび度数表におけるセルキー法(CKM)に関する新しい部分を執筆した。Andrzej Młodakは、ミクロデータ保護におけるリスク評価と情報損失に関する部分、および規模表データと度数表の章における開示リスクと情報損失の測定に関する部分に貢献した。Johannes Gussenbauerは、ターゲット型レコードスワッピング(Targeted Record Swapping)に関する新しい部分を執筆した。Julien Jammeは、ハンドブックを新しい技術的な制作体制へ移行する作業を主導した。</p>
+
+  <p>本ハンドブックの一部には、初読の際に必ずしも必要ではない、やや高度な内容が含まれていると考えられる箇所がある。そのような節には、以下のような印が付けられている。</p>
+
+  <div class="expert-level">
+    <span class="badge">上級者向け</span>
+    <p>オンライン版(Quarto book形式)のハンドブックでは、「∨」記号または「&gt;」記号をクリックすることで、これらの部分を非表示または表示に切り替えることができる。</p>
+    <p>PDF版のハンドブックでは、これらの部分は常に表示されるが、このように印が付けられる。</p>
+  </div>
+
+  <p>詳細な例には、以下のような印が付けられている。</p>
+
+  <div class="callout">
+    <div class="callout-title">例</div>
+    <p>非負の連続変数 $X$ を仮定する……</p>
+  </div>
+
+  <p>数々の改善と追加が行われたものの、著者たちは本ハンドブックの現行版を、今後も随時更新され得る「生きた文書」であると引き続き考えている。そのため、さらなる改善のためのご意見やご提案を歓迎する。ご意見・ご提案は、GitHub上のUser SupportリポジトリのIssuesページ(<a href="https://github.com/sdcTools/UserSupport" target="_blank" rel="noopener">https://github.com/sdcTools/UserSupport</a>)までお寄せいただきたい。</p>
+
+  <div class="callout">
+    <div class="callout-title">ヒント</div>
+    <p>本ハンドブックのオンライン版は、<a href="https://sdctools.github.io/HandbookSDC" target="_blank" rel="noopener">https://sdctools.github.io/HandbookSDC</a> で閲覧できる。</p>
+  </div>
+
+  <h2>ライセンス</h2>
+
+  <p><img src="https://raw.githubusercontent.com/sdcTools/HandbookSDC/main/Images/media/by-sa.png" alt="CC BY-SA 4.0" style="width:0.8in;"></p>
+
+  <p>Handbook on Statistical Disclosure Control © 2024 by Anco Hundepool, Josep Domingo-Ferrer, Luisa Franconi, Sarah Giessing, Rainer Lenz, Jane Naylor, Eric Schulte Nordholt, Giovanni Seri, Peter-Paul De Wolf, Reinhard Tent, Andrzej Młodak, Johannes Gussenbauer, Kamil Wilak は、CC BY-SA 4.0 のもとでライセンスされている。このライセンスの全文は、<a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">https://creativecommons.org/licenses/by-sa/4.0/</a> で閲覧できる。</p>
+
+  <div class="pagenav">
+    <a class="prev" href="index.html">← 目次</a>
+    <a class="next" href="01-introduction.html">第1章 序論 →</a>
+  </div>
+</div>
+</body>
+</html>

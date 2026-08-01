@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第3章 ミクロデータ保護手法 ― PRAM・合成データ | SDCハンドブック和訳</title>
+<link rel="stylesheet" href="assets/style.css">
+<script>
+  window.MathJax = { tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] } };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
+</head>
+<body>
+<div class="page">
+  <div class="masthead">
+    <nav class="crumbs"><a href="index.html">目次</a> / 第3章 (5/7)</nav>
+    <div class="kicker">Handbook on Statistical Disclosure Control (2nd Edition) 和訳</div>
+    <h1>第3章 ミクロデータ保護手法 ― PRAM・合成データ</h1>
+    <div class="note-origtitle">原題: Microdata protection methods (PRAM / Synthetic data)</div>
+  </div>
+
+  <h2 id="sec-PRAM">PRAM(事後ランダム化法)</h2>
+
+  <p>PRAM(事後ランダム化法)はカテゴリカルデータに適用できる開示制御手法である。基本的には、既知かつあらかじめ定められた確率機構を用いた、意図的な誤分類の一種である。PRAMを適用するとは、ミクロデータファイルの各レコードについて、1つまたは複数のカテゴリカル変数のスコアがある確率で変更されることを意味する。これは各レコードについて独立に行われる。したがってPRAMは摂動的手法である。PRAMは確率機構を用いるため、開示リスクはこの手法によって直接的な影響を受ける。侵入者は、自分が識別できたと考えるレコードが実際にその識別された人物のものであるとは決して確信できない。ある確率でそのレコードは摂動されたものである可能性があるからである。</p>
+
+  <p>PRAMを適用する際に用いられる確率機構は既知であるため、摂動後のデータファイルから(潜在的な)真のデータの特性を依然として推定することができる。そのためには、誤分類やランダム化回答(randomised response)の状況で用いられるものと類似した補正手法を利用することができる。</p>
+
+  <p>PRAMは2001年の英国国勢調査において、匿名化記録標本(Samples of Anonymised Records, SARs)のエンドユーザーライセンス版を作成するために用いられた。詳細な説明についてはGross(2004)を参照のこと。</p>
+
+  <h3>PRAMという手法</h3>
+
+  <div class="expert-level">
+  <span class="badge">上級者向け</span>
+
+  <p>本節ではPRAMの簡単な理論的説明を示す。手法の詳細な説明についてはGouweleeuw et al.(1998a, 1998b)などを参照のこと。この手法とその帰結に関する諸論点についてはDe Wolf et al.(1998)などを参照のこと。</p>
+
+  <p>原ファイルにおいてPRAMを適用するカテゴリカル変数を $\xi$ とし、摂動後のファイルにおける同じ変数を $X$ とする。さらに、$\xi$(したがって $X$ も)は $1,\ldots,K$ とラベル付けされた $K$ 個のカテゴリを持つと仮定する。PRAMを定義する確率は以下のように表される。</p>
+
+  $$
+  p_{\text{kl}} = \mathbb{P}(X = l \mid \xi = k)
+  $$
+
+  <p>すなわち、原スコア $\xi = k$ がスコア $X = l$ に変更される確率である。これらはいわゆる遷移確率と呼ばれ、すべての $k, l = 1, ..., K$ について定義される。これらの遷移確率を $K \times K$ 行列の成分として用いると、PRAM行列と呼ぶマルコフ行列 $\mathbf{P}$ が得られる。</p>
+
+  <p>PRAMを適用するとは、レコード $r$ のスコアが $\xi = k$ であるとき、そのレコードのスコア $X$ を確率分布 $p_{k1},\ldots,p_{kK}$ から抽出することを意味する。原ファイルの各レコードについて、この手続きは他のレコードとは独立に実行される。</p>
+
+  <p>この考え方を説明するために、変数 $\xi$ を性別とし、男性であれば $\xi =1$、女性であれば $\xi = 2$ とする。男性110人、女性90人からなるミクロデータファイルに $p_{11} = p_{22} = 0.9$ としてPRAMを適用すると、期待値として男性108人、女性92人からなる摂動後のミクロデータファイルが得られる。しかし期待値としては、これらの男性のうち9人はもともと女性であり、同様に女性のうち11人はもともと男性であったことになる。</p>
+
+  <p><strong>分析の補正</strong><br>
+  より一般に、PRAMが1次元度数表に及ぼす効果は次のようになる。</p>
+
+  $$
+  \mathbb{E}(T_{X} \mid \xi) = \mathbf{P}^t T_{\xi}
+  $$
+
+  <p>ここで $T_{\xi} = (T_{\xi}(1),\ldots,T_{\xi}(K))^T$ は原ミクロデータファイルによる度数表を、$T_X$ は摂動後のミクロデータファイルによる度数表を表す。このとき、原ファイルにおける度数表の条件付き不偏推定量は次式で与えられる。</p>
+
+  $$
+  {\hat{T}}_{\xi} = \left( \mathbf{P}^{- 1} \right)^t T_{X}
+  $$
+
+  <p>これは、そのような表をベクトル化することで2次元度数表にも拡張できる。この場合、対応するPRAM行列は各次元のPRAM行列のクロネッカー積で与えられる。</p>
+
+  <p>あるいは、原データについての2次元度数表 $T_{\xi\eta}$ と摂動後データについての $T_{XY}$ を、行列表記のまま直接用いることもできる。</p>
+
+  $$
+  \hat{T}_{\xi\eta} = \left( \mathbf{P}_{X}^{- 1} \right)^t T_{XY}\mathbf{P}_{Y}^{- 1}
+  $$
+
+  <p>ここで $\mathbf{P}_{X}$ はカテゴリカル変数 $X$ に対応するPRAM行列、$\mathbf{P}_{Y}$ はカテゴリカル変数 $Y$ に対応するPRAM行列である(なお、$X$ が $K$ 個、$Y$ が $L$ 個のカテゴリを持つ場合、2次元度数表 $T_{XY}$ は $K\times L$ 型の行列となる)。</p>
+
+  <p>PRAMによって保護されたデータに適用する統計分析の補正手法についての詳細は、Gouweleeuw et al.(1998a)およびVan den Hout(1999, 2004)などを参照のこと。</p>
+
+  <p><strong>PRAM行列の選択</strong><br>
+  遷移確率の具体的な選び方は、情報損失の大きさと開示制限の程度の両方に影響を与える。さらに、状況によっては「論理的に矛盾した」変更が生じる可能性がある。例えば、卵巣がんの女性回答者の性別を男性に変更してしまうような場合である。この種の変更は、侵入者の注意を引きつけてしまう可能性があるため、避けるべきである。</p>
+
+  <p>したがって、遷移確率を適切な方法で選ぶことが重要である。論理的に矛盾したスコアに確率0を割り当てることで、そのような変更を避けることができる。上記の例では、PRAMは性別という変数単独に適用するのではなく、性別と疾患を組み合わせた変数に適用すべきである。この場合、(男性、卵巣がん)というスコアへの変更に対応する各遷移確率をすべて0に設定すればよい。</p>
+
+  <p>開示制限と情報損失との関係における遷移確率の選択は、より微妙な問題である。これらの効果に関する実証研究はDe Wolf and Van Gelder(2004)に示されている。遷移確率を(ある意味で)最適に選ぶ可能性についての理論的考察はCator et al.(2005)に示されている。</p>
+  </div>
+
+  <h3>PRAMを使うべき場面</h3>
+
+  <p>状況によっては、安全なミクロデータファイルを作成するために全体再コード化、局所抑制、上限コーディングのような手法を用いると、詳細情報の損失が大きくなりすぎることがある。このような状況では、PRAMが代替手段となる。PRAMを用いることで詳細さは保持されたまま、識別変数のスコアに不確実性を導入することによって開示制御の水準が達成される。</p>
+
+  <p>しかし、PRAMを適用したミクロデータファイルについて適切な推論を行うためには、統計担当者は標準的な手法に高度な変更を組み込む必要がある。これにはPRAMと、適用する統計分析の両方について十分な知識が求められる。</p>
+
+  <p>研究者がリモート実行施設を利用する意思がある場合、PRAMを用いて、原ミクロデータファイルと同じ構造を持ちながら、ある種の合成データからなるミクロデータファイルを作成することができる。このようなミクロデータファイルは、研究者がスクリプトをリモート実行施設に送る前に試すための「テスト用」ミクロデータファイルとして使用できる。スクリプトの結果を直接使用するわけではないため、原ミクロデータファイルの歪曲の程度はかなり大きく選ぶことができる。このようにして、原ミクロデータファイルと同じ構造(および詳細さ)を維持しながらも安全なミクロデータファイルが作成される。</p>
+
+  <p>その他の状況では、PRAMによって、安全でありながら、ある種の統計的特性が(多少なりとも)保たれたミクロデータファイルを作成できる場合がある。この場合、研究者はそのミクロデータファイル上で研究を行うことで、最終的に必要となる研究戦略についての見当をつけることができる。その戦略が定まった時点で、研究者はオンサイト施設に赴き、原ミクロデータについて改めて分析を行うことができ、結果としてオンサイト施設に滞在すべき時間を短縮できる。</p>
+
+  <h3>PRAMに関する参考文献</h3>
+
+  <p class="ref">Gross, B., Guiblin, Ph., and K. Merrett (2004), <em>Implementing the Post Randomisation method To the Individual Sample of Anonymised Records (SAR) from the 2001 Census</em>, Office for National Statistics.<br>
+  (<a href="https://doc.ukdataservice.ac.uk/doc/7208/mrdoc/pdf/7208_implementing_the_post_randomisation_method_to_the_individual_sar_from_the_2001_census.pdf">https://doc.ukdataservice.ac.uk/doc/7208/mrdoc/pdf/7208_implementing_the_post_randomisation_method_to_the_individual_sar_from_the_2001_census.pdf</a>)</p>
+
+  <p class="ref">Cator, E., Hensbergen A. and Y. Rozenholc (2005), <em>Statistical Disclosure Control using PRAM</em>, Proceedings of the 48th European Study Group Mathematics with Industry, Delft, The Netherlands, 15-19 March 2004. Delft University Press, 2005, p. 23–30.</p>
+
+  <p class="ref">Gouweleeuw, J.M., P. Kooiman, L.C.R.J. Willenborg and P.P. de Wolf (1998a), <em>Post Randomisation for Statistical Disclosure Control: Theory and Implementation</em>, Journal of Official Statistics, Vol. 14, 4, pp. 463–478.</p>
+
+  <p class="ref">Gouweleeuw, J.M., P. Kooiman, L.C.R.J. Willenborg and P.P. de Wolf (1998b), <em>The post randomisation method for protecting microdata</em>, Qüestiió, Quaderns d'Estadística i Investigació Operativa, Vol. 22, 1, pp. 145–156.</p>
+
+  <p class="ref">Van den Hout, A. (2000), <em>The analysis of data perturbed by PRAM</em>, Delft University Press, ISBN 90-407-2014-2.</p>
+
+  <p class="ref">Van den Hout, A. (2004), <em>Analyzing misclassified data: randomized response and post randomization</em>, Ph.D. thesis, Utrecht University.</p>
+
+  <p class="ref">De Wolf, P.P. and I. Van Gelder (2004), <em>An empirical evaluation of PRAM</em>, Discussion paper 04012, Statistics Netherlands. (<a href="https://research.cbs.nl/casc/Related/discussion-paper-04012.pdf">https://research.cbs.nl/casc/Related/discussion-paper-04012.pdf</a>)</p>
+
+  <p class="ref">De Wolf, P.P., J.M. Gouweleeuw, P. Kooiman and L.C.R.J. Willenborg (1998), <em>Reflections on PRAM</em>, Proceedings of the conference "Statistical Data Protection", March 25-27 1998, Lisbon, Portugal. (<a href="https://research.cbs.nl/casc/Related/Sdp_98_2.pdf">https://research.cbs.nl/casc/Related/Sdp_98_2.pdf</a>)</p>
+
+  <h2 id="sec-synthetic-data">合成ミクロデータ</h2>
+
+  <p>合成――すなわちシミュレートされた――データの公表は、統計的開示から保護する方法として古くから提案されてきた。その考え方は、原データセットのある種の統計量や内部的な関係性が保持されるという制約の下で、データをランダムに生成するというものである。</p>
+
+  <p>以下では、合成データ生成に関する文献中のいくつかの手法を概観し、その後で合成データ利用の全体的な長所と短所について議論する。</p>
+
+  <h3>先駆け:確率分布によるデータ歪曲</h3>
+
+  <p>確率分布によるデータ歪曲は1985年に提案された手法であり(Liew, Choi and Liew, 1985)、通常は合成データ生成手法のカテゴリには含まれない。しかし、その動作原理は、原データセットの背後にある分布からランダムに抽出することによって保護されたデータセットを得るというものである。したがって、これは合成手法の先駆けとみなすことができる。</p>
+
+  <p>この手法はカテゴリカル変数・連続変数のいずれにも適用可能であり、次の3段階からなる。</p>
+
+  <ol>
+  <li>データセット中の各機密変数の背後にある密度関数を特定し、その密度関数に関連するパラメータを推定する。</li>
+  <li>各機密変数について、推定された密度関数からランダムに抽出することで保護された系列を生成する。</li>
+  <li>機密系列を保護された系列に対応づけ、機密系列の代わりに保護された系列を公表する。</li>
+  </ol>
+
+  <p>識別・推定の段階では、機密変数(例えば給与)の原系列を調べ、あらかじめ定められた密度関数の集合のうちどれが最もよくデータに適合するかを判定する。適合度はコルモゴロフ‐スミルノフ検定によって検証できる。所与の有意水準で複数の密度関数が許容される場合には、コルモゴロフ‐スミルノフ統計量が最小となるものを選ぶことが推奨される。あらかじめ定められた集合の中にデータに適合する密度関数がない場合には、頻度賦課型歪曲法(frequency imposed distortion method)を用いることができる。この方法では、原系列をいくつかの区間(おおむね8から20程度)に分割する。原系列について各区間内の頻度を数え、それを歪曲系列を生成する際の指針とする。一様乱数生成サブルーチンを用いて、その頻度が原系列の頻度と同じになるまで歪曲系列を生成する。一部の区間で頻度が超過した場合には、それらは単に破棄される。</p>
+
+  <p>最適な密度関数が選択されたら、生成段階ではその推定パラメータを乱数生成ルーチンに与えて歪曲系列を生成する。</p>
+
+  <p>最後に、対応づけ・置換の段階は、歪曲された変数を他の歪曲されていない変数と併せて利用する場合にのみ必要となる。対応づけは、歪曲系列と原系列を同じ順序で順位付けし、原系列の各要素を対応する歪曲要素に置き換えることからなる。</p>
+
+  <p>ここで強調しておくべきは、(Liew, Choi and Liew, 1985)で述べられた手法は一度に1つの変数のみを対象としたものであるという点である。多変量密度関数を用いてこの手法を一般化することも考えられるが、そのような一般化は、(i) 多変量の順位付け・対応づけが必要となるため自明ではなく、(ii) 適合度が非常に悪くなる可能性がある、という理由から容易ではない。</p>
+
+  <div class="callout">
+  <div class="callout-title">例</div>
+  <p>分布適合ソフトウェア(Crystal.Ball, 2004)を、原データセット(順位付け済み)186, 693, 830, 1177, 1219, 1428, 1902, 1903, 2496, 3406に対して用いた。試行した連続分布は正規分布、三角分布、指数分布、対数正規分布、ワイブル分布、一様分布、ベータ分布、ガンマ分布、ロジスティック分布、パレート分布、極値分布であり、試行した離散分布は二項分布、ポアソン分布、幾何分布、超幾何分布であった。このソフトウェアでは、コルモゴロフ‐スミルノフ、$\chi^{2}$、アンダーソン‐ダーリングの3種類の適合度基準を使用できた。最初の基準によれば、最良の適合は極値分布(モード・パラメータ1105.78、スケール・パラメータ732.43)で得られ、この適合に対するコルモゴロフ統計量は0.1138であった。適合した分布を用いて、以下の(順位付け済み)データセットが生成され、原データセットの代わりに用いられた。425.60, 660.97, 843.43, 855.76, 880.68, 895.73, 1086.25, 1102.57, 1485.37, 2035.34。</p>
+  </div>
+
+  <h3>多重代入による合成データ</h3>
+
+  <p>Rubin(1993)は、原調査データと多重代入に基づいて完全合成データセットを作成することを提案した。Rubinの提案はRaghunathan, Reiter, and Rubin(2003)においてより完全に発展させられた。そのシミュレーション研究はReiter(2002)で示されている。Reiter(2005)では合成データに関する推論が議論されており、Reiter(2005b)では応用例が示されている。</p>
+
+  <p>以下では、Rubinによる原提案の手続きを概説する。$N$ 人の個体からなるはるかに大きな母集団から抽出された $n$ 件のレコードからなる原ミクロデータセット $X$ を考える。ここには背景変数 $A$、非機密変数 $B$、機密変数 $C$ が存在する。背景変数は母集団の $N$ 人全員について観測され利用可能であるのに対し、$B$ と $C$ は標本 $X$ の $n$ 件のレコードについてのみ利用可能である。第一段階は、$X$ から $N$ 人の個体からなる多重代入済み母集団を構築することである。この母集団は、$X$ に含まれる $n$ 件のレコードと、非標本抽出個体 $N - n$ 人分の $(B,C)$ データからなる $M$ 個(多重代入数。通常3から10程度)の行列から構成される。代入値のばらつきによって、理論的には多重代入済み母集団について妥当な推論が得られることが保証される。母集団における $(B,C)$ の多重代入には、$A$ から $(B,C)$ を予測するモデルが用いられる。このモデルの選択は自明な問題ではない。多重代入済み母集団が得られたら、そこから $n'$ 件のレコードからなる標本 $Z$ を抽出できる。この標本の構造は、原母集団から $n'$ 件のレコードを抽出した標本と同様のものとなる。これを $M$ 回行うことで、$(B,C)$ の値について $M$ 個の複製を作成できる。その結果得られるのが $M$ 個の多重代入合成データセットである。合成データセットに原データが含まれないようにするため、多重代入済み母集団から標本を抽出する際には、そこに含まれる $n$ 件の原レコードを除外して抽出するのが賢明である。</p>
+
+  <h3>ブートストラップによる合成データ</h3>
+
+  <div class="expert-level">
+  <span class="badge">上級者向け</span>
+
+  <p>Fienberg(1994)は、ブートストラップ法を用いて合成ミクロデータを生成することを提案した。その後、Fienberg, Makov and Steele(1998)において、このアプローチはカテゴリカルデータに適用された。</p>
+
+  <p>ブートストラップ・アプローチは、上述の確率分布によるデータ歪曲や多重代入法といくらか類似している。$p$ 個の変数を持つ原ミクロデータセット $X$ が与えられたとき、データ保護担当者はその経験的な $p$ 変量累積分布関数(c.d.f.)$F$ を計算する。ここで、原データを歪曲してマスク済みデータを得るのではなく、データ保護担当者は c.d.f. $F$ を変更(あるいは「平滑化」)して、類似した c.d.f. $F'$ を導出する。最後に、$F'$ をサンプリングすることで合成ミクロデータセット $Z$ が得られる。</p>
+  </div>
+
+  <h3>ラテン超方格抽出法による合成データ</h3>
+
+  <div class="expert-level">
+  <span class="badge">上級者向け</span>
+
+  <p>ラテン超方格抽出法(Latin Hypercube Sampling, LHS)は、多変量合成データセットを生成するもう一つの手法として文献に登場する。Huntington and Lyrintzis(1998)では、Florian(1992)によるLHS更新技法が改良されたが、提案されたスキームは、レコード数が中程度であっても依然として時間を要するものであった。Dandekar, Cohen and Kirkendall(2002)では、順位相関による精緻化とあわせてLHSを用いることで、原データセットの1変量構造(すなわち平均と共分散)と多変量構造(順位相関の意味において)の両方を再現している。要するに、LHSに基づく手法は反復的な精緻化に依存しており、時間を要し、その実行時間は再現すべき値の数だけでなく初期値にも依存する。</p>
+  </div>
+
+  <h3 id="sec-IPSO">コレスキー分解による部分合成データ</h3>
+
+  <div class="expert-level">
+  <span class="badge">上級者向け</span>
+
+  <p>データベース内の全変数についてもっともらしい合成値を生成することは、実際には困難な場合がある。そのため、複数の著者が実データと合成データを混合することを検討してきた。</p>
+
+  <p>Burridge(2004)では、部分合成データの生成のためにIPSO(Information Preserving Statistical Obfuscation:情報保存統計難読化)として知られる手法群が提案されている。これは以下で説明する3つの手法からなる。</p>
+
+  <p><strong>手法A:基本的なIPSO手続き</strong><br>
+  IPSOの基本形をここでは手法Aと呼ぶ。非形式的に言えば、2組の変数集合 $X$ と $Y$ を考える。前者は機密の結果変数であり、後者は準識別子変数である。このとき $X$ を独立変数、$Y$ を従属変数とみなす。$Y$ の $X$ に対する重回帰を計算し、当てはめ値の変数 $Y_{A}'$ を求める。最後に、変数 $X$ と $Y$ の代わりに $X$ と $Y_{A}'$ が公開される。</p>
+
+  <p>より形式的に述べると、$y$ と $x$ を2つのデータ行列とし、行が回答者を、列が変数を表すとする。行ベクトル $y_{i}$ と $x_{i}$ は $i$ 番目の回答者($i = 1,\cdots,n$)のデータを表す。列ベクトル $u_{j}$ は準識別子変数 $j$($j = 1,\cdots,p$)を表す。言い換えれば、$u_{j}$ は準識別子行列 $Y$ の各列である。機密変数の特定の値を条件とすると、異なる回答者の準識別子変数は独立であると仮定される。特定の機密変数 $x_{i}$ を条件として、準識別子変数 $Y_{i}$ は共分散行列 $\Sigma = \left\{ \sigma_{jk} \right\}$、平均ベクトル $x_{i}B$ を持つ多変量正規分布に従うと仮定される。ここで $B$ は列 $\beta_{j}$ を持つ $m\times p$ 行列である。したがって、$Y$ の各列について、対応する $B$ の列に等しい回帰パラメータを持つ個別の1変量正規重回帰モデルが仮定される。すなわち $U_{j} \sim  N\left( x\beta_{j},\sigma_{jj}I \right)$ である。</p>
+
+  <p>完全データセット $(y,x)$ から導出される $B$ と $\Sigma$ の最尤推定量を、それぞれ $\hat{B}$、$\hat{\Sigma}$ とする。これらの推定量は回帰モデルに対する十分統計量の組である。以下では、$u_{j}$ に対する当てはめ値と残差のベクトルを、それぞれ ${\hat{\mu}}_{j}$、${\hat{r}}_{j}$ と表す。したがって、$\hat{\mu}$、$\hat{r}$、$\hat{\Sigma}$ は、それぞれ行列 $x\hat{B}$、$y - x\hat{B}$、$n^{- 1}{\hat{r}}^t\hat{r}$ を表す。</p>
+
+  <p>IPSO手法Aの出力は $y'_{A} = x\hat{B}$ である。</p>
+
+  <p><strong>手法B:$\hat{B}$ を保存するIPSO</strong><br>
+  利用者が $\left( y_{A}',x \right)$ に重回帰モデルを当てはめると、推定量 ${\hat{B}}_{A}$ と ${\hat{\Sigma}}_{A}$ が得られるが、これらは一般に、原データ $(y,x)$ にモデルを当てはめて得られる推定量 $\hat{B}$、$\hat{\Sigma}$ とは異なる。</p>
+
+  <p>IPSO手法Bは、$y_{A}'$ を $y_{B}'$ に修正することで、$\left( y_{B}',x \right)$ から重線形回帰によって得られる推定量 ${\hat{B}}_{B}$ が ${\hat{B}}_{B} = \hat{B}$ を満たすようにする。</p>
+
+  <p>$\tilde{y}$ を新しい人工的な準識別子の値の集合とする。これらは最初はどのような数値の集合でもよく、例えばi.i.d.正規乱数標本や、決定論的に選ばれた集合であってもよい。各成分について、上記の多変量重回帰を新しい「データ」$\tilde{y}$ に当てはめることで新しい残差 ${\tilde{r}}_{j}$ を計算する。次のように定義する。</p>
+
+  $$
+  y_{B}' = \hat{\mu} + \tilde{r} = x\hat{B} + \tilde{r}
+  $$
+
+  <p>IPSO-Bについては、次の情報保存の結果が成り立つ。</p>
+
+  <p><strong>補題3.3.7.1</strong> 初期選択 $\tilde{y}$ によらず、$\left( y_{B}',x \right)$ は十分統計量 $\hat{B}$ を保存する。</p>
+
+  <p><strong>証明:</strong> 次が成り立つ。</p>
+
+  $$
+  y_{B}' = x\hat{B} + \tilde{r} = x\hat{B} + \left( \tilde{y} - x\tilde{B} \right)
+  $$
+
+  <p>ここで $\hat{B}$ は $\left( \tilde{y},x \right)$ から得られる $B$ の最尤推定量である。ここで、$\hat{B}$ と $\tilde{B}$ の式はそれぞれ次のとおりである。</p>
+
+  $$
+  \hat{B} = \left( x^{t}x \right)^{- 1}x^{t}y
+  $$
+
+  <p>および</p>
+
+  $$
+  \tilde{B} = \left( x^{t}x \right)^{- 1}x^{t}\tilde{y}
+  $$
+
+  <p>同様に、$\left( y_{B}',x \right)$ から得られる ${\hat{B}}_{B}$ の最尤推定量の式は次のとおりである。</p>
+
+  $$
+  {\hat{B}}_{B} = \left( x^{t}x \right)^{- 1}x^{t}y_{B}'
+  $$
+
+  <p>上式に $y_{B}'$ の式(前掲の式)を代入すると、次を得る。</p>
+
+  $$
+  {\hat{B}}_{B} = \left( x^{t}x \right)^{- 1}\left( x^{t}x \right)\hat{B} + \left( x^{t}x \right)^{- 1}x^{t}(\tilde{y} - x\tilde{B}) = \hat{B} + \tilde{B} - \tilde{B} = \hat{B}
+  $$
+
+  <p><strong>手法C:$\hat{B}$ と $\hat{\Sigma}$ を保存するIPSO</strong><br>
+  さらに野心的な目標は、$\left( y_{C}',x \right)$ に多変量重回帰モデルを当てはめたとき、原データ $(y,x)$ について得られる十分統計量 $\hat{B}$ と $\hat{\Sigma}$ の<em>両方</em>が保存されるようなデータ行列 $y_{C}'$ を得ることである。</p>
+
+  <p>$y_{C}'$ を得るためにBurridge(2004)で提案されているアルゴリズムは次のとおりである。</p>
+
+  <ol>
+  <li>暫定的な新しい「データ」$\tilde{y}$ を生成する(これは $n\times p$ 行列となる)。</li>
+  <li>$\tilde{y}$ の各列に重回帰モデルを当てはめることで、暫定的な新しい残差 $\tilde{r}$ を計算する。</li>
+  <li>$\tilde{r}^t\tilde{r}' = n\hat{\Sigma}$ となるように、$\tilde{r}$ を変換した新しい残差 ${\tilde{r}}'$ を定義する。これは以下の手順で容易に行える。
+    <ol type="a">
+    <li>$n\hat{\Sigma} = LL^{t}$ および ${\tilde{r}}^t\tilde{r} = L_{O}^{\strut}L_{O}^t$ というコレスキー分解における下三角行列を、それぞれ $L$、$L_{O}$ とする。</li>
+    <li>${\tilde{r}}' = \tilde{r}\left(L_{O}^{-1}\right)^t L^t$ と定義する。$({\tilde{r}}')^t {\tilde{r}}' = n\hat{\Sigma}$ であることは容易に確認できる。</li>
+    </ol>
+  </li>
+  </ol>
+
+  <p>IPSO-Cにおける情報保存は次のとおりである。</p>
+
+  <p>次のように定義する。</p>
+
+  $$
+  y_{C}' = x\hat{B} + {\tilde{r}}'
+  $$
+
+  <p><strong>補題3.3.7.2</strong> $\left( y_{C}',x \right)$ は十分統計量 $\hat{B}$ と $\hat{\Sigma}$ を保存する。</p>
+
+  <p><strong>証明:</strong> $\left( y_{C}',x \right)$ から得られる $\hat{B}$ の最尤推定量の式は次のとおりである。</p>
+
+  \begin{align}
+  {\hat{B}}_{C} &= \left( x^t x \right)^{- 1}x^t y_{C}' = \left( x^t x \right)^{- 1}x^t \left( x\hat{B} + {\tilde{r}}' \right) \\
+  &= \hat{B} + \left( x^t x \right)^{- 1}x^t \tilde{r}L_{O}^t L^t = \hat{B} + \left( x^t x \right)^{- 1}x^t \left( \tilde{y} - x\tilde{B} \right)L_{O}^t L^t \\
+  &= \hat{B} + \left( \tilde{B} - \tilde{B} \right)L_{O}^t L^t = \hat{B} \\
+  \end{align}
+
+  <p>${\hat{B}}_{C} = \hat{B}$ であることを用いると、$\left( y_{C}',x \right)$ から得られる $\hat{\Sigma}$ の最尤推定量の式は次のとおりである。</p>
+
+  \begin{align}
+  {\hat{\Sigma}}_{C} &= \frac{\left( y_{C}',x\hat{B} \right)^t \left( y_{C}',x\hat{B} \right)}{n}\\
+  &= \frac{\left( x\hat{B} + {\tilde{r}}' - x\hat{B} \right)^t \left( x\hat{B} + {\tilde{r}}' - x\hat{B} \right)}{n} \\
+  &= \frac{{\tilde{r}}^t {\tilde{r}}'}{n} \\
+  &= \hat{\Sigma}
+  \end{align}
+
+  <p>最後の等号では、${\tilde{r}}'$ に要求される性質を用いた。</p>
+
+  <p><strong>IPSOを用いて完全合成ミクロデータを得る</strong><br>
+  Mateo-Sanz, Martínez-Ballesté and Domingo-Ferrer(2004)では、コレスキー分解を通じて完全合成連続ミクロデータを生成する非反復的な手法が提案されている。これはIPSOの特殊ケースとみなすことができる。この手法は、単一の計算ステップで原データセットの平均と共分散行列を厳密に再現する。実行時間はレコード数に対して線形に増加する。原共分散行列が厳密に保存されることは、合成データセットにおいても分散とピアソン相関が厳密に保存されることを意味する。</p>
+
+  <p>この手法の考え方は次のとおりである。データセット $X$ を、行がレコード、列が変数である $n\times m$ 行列とみなす。まず、$X$ の共分散行列 $C$ を計算する(共分散は変数間、すなわち列間で定義される)。次に、共分散行列が単位行列となるようなランダムな $n\times m$ 行列 $A$ を生成する。続いて $C$ のコレスキー分解を計算する。すなわち、$C=U^t U$ を満たす上三角行列 $U$ を求める。最後に、合成ミクロデータセット $Z$ を $n\times m$ 行列 $Z = A U$ として得る。</p>
+  </div>
+
+  <h3>その他の部分合成ミクロデータ手法</h3>
+
+  <div class="expert-level">
+  <span class="badge">上級者向け</span>
+
+  <p>Rubin(1993)で述べられている、完全合成ミクロデータを作成するための多重代入アプローチは、部分合成ミクロデータに対しても拡張できる。その結果、実データと代入(合成)値が混在する多重代入部分合成データセットが得られる。その考え方は、機密の値を多重代入し、非機密の値は摂動を加えずに公表するというものである。このアプローチは、米国消費者金融調査(US Survey of Consumer Finances)の保護に最初に適用された(Kennickell, 1999)、(Kennickell, 1999b)。Abowd and Woodcock(2001)およびAbowd and Woodcock(2004)では、この技法が縦断的連結データ、すなわち2つ以上の関連する時点(連続した年など)の観測を含むミクロデータの保護に採用された。この種の部分合成データに対する妥当な推論の手法はReiter(2003)で開発され、多重代入部分合成データを生成するためのノンパラメトリックな手法はReiter(2003b)で示された。</p>
+
+  <p>多重代入による部分合成ミクロデータと密接に関連するのが、モデルに基づく開示保護(model-based disclosure protection)である(Franconi and Stander, 2002)、(Polettini, Franconi, and Stander, 2002)。このアプローチでは、機密の連続結果変数の集合を、それとは独立な非機密変数の集合に回帰し、機密変数については原値の代わりに当てはめ値が公表される。</p>
+  </div>
+
+  <h3>Muralidhar-Sarathyハイブリッド生成器</h3>
+
+  <div class="expert-level">
+  <span class="badge">上級者向け</span>
+
+  <p>ハイブリッドデータとは、原データと合成データの混合である。$V$ を、属性が数値であり、機密属性 $X (=X_1\dots X_L)$ と非機密属性 $Y (=Y_1\dots Y_M)$ からなる原データセットとする。$V'$ を $V$ から得られるハイブリッドデータセットとし、その属性は $X (=X'_1\dots X'_L)$($X$ のハイブリッド版)と $Y$ からなるとする。</p>
+
+  <p>Muralidhar and Sarathy(2008)は、以下のようにハイブリッドデータを生成する手続き(以下ではMSと呼ぶ)を提案した。</p>
+
+  $$
+  X'_j = \gamma + X_j\alpha^t + Y_j\beta^t + e_i, \quad j = 1, \dots, n
+  $$
+
+  <p>MSは、原データの平均と共分散を保存するハイブリッドデータを生成できる。そのためには、以下の等式が満たされなければならない。</p>
+
+  \begin{align}
+  \beta^t &= \Sigma_{YY}^{-1} \Sigma_{YX}^{\strut} (I-\alpha^t) \\
+  \gamma &= (I-\alpha) \bar{X} - \beta \bar{Y} \\
+  \Sigma_{ee} &= (\Sigma_{XX}^{\strut} - \Sigma_{XY}^{\strut}\Sigma_{YY}^{-1}\Sigma_{YX}^{\strut}) - \alpha (\Sigma_{XX}^{\strut} - \Sigma_{XY}^{\strut}\Sigma_{YY}^{-1}\Sigma_{YX}^{\strut}) \alpha^t
+  \end{align}
+
+  <p>ここで $I$ は単位行列であり、$\Sigma_{ee}$ は雑音項 $e$ の共分散行列である。</p>
+
+  <p>したがって、$\alpha$ によって手続きが完全に規定される。MSの著者らは、$\Sigma_{ee}$ が半正定値であることを保証するために $\alpha$ を慎重に選ぶ必要があることを認めている。彼らは $\alpha$ 行列の指定について3つの選択肢を検討している。</p>
+
+  <ol>
+  <li>$\alpha$ を、対角成分がすべて等しい対角行列とする。この場合、$\Sigma_{ee}$ は半正定値となり、ハイブリッド属性 $X_i'$ の値は $X_i$ のみに依存し、$j \neq i$ の $X_j$ には依存しない。すべての機密属性 $X_i$ は同じ水準で摂動される。</li>
+  <li>$\alpha$ を、対角成分がすべては等しくない対角行列とする。この場合も $X_i'$ は $X_i$ のみに依存し、$j \neq i$ の $X_j$ には依存しない。異なる点は、機密属性が異なる水準で摂動されること、および $\Sigma_{ee}$ が半正定値であるという保証がないため、半正定値性が達成されるまで複数の $\alpha$ の値を試す必要があるかもしれないという点である。</li>
+  <li>$\alpha$ を非対角行列とすることも同様に半正定値性を保証しないため、MSの著者らはこれに利点を見出していないが、$X_i'$ を $(X_1 \dots X_L)$ のうち複数の属性に依存させる唯一の方法ではある。$\mathbb{R}$-Microhybridでは、$X_i'$ の原機密属性への依存性は、基礎となるIPSO手法によって与えられるものとなる。</li>
+  </ol>
+  </div>
+
+  <h3>マイクロアグリゲーションに基づくハイブリッドデータ</h3>
+
+  <div class="expert-level">
+  <span class="badge">上級者向け</span>
+
+  <p>(Domingo-Ferrer and González-Nicolás, 2009)では、マイクロアグリゲーションに基づいてハイブリッドデータを生成する代替的な手続きが提案されている。$V$ を $n$ 件のレコードからなる原データセットとする。整数パラメータ $k \in \{1,\dots,n\}$ を入力として、本節で説明する手続きはハイブリッドデータセット $V'$ を生成する。$k$ が大きいほど $V'$ はより合成的になる。極端なケースは、(i) $k = 1$ の場合で $V' = V$ となる(出力データは厳密に原入力データと一致する)、および (ii) $k = n$ の場合で、完全に合成された出力データセット $V'$ が得られる、の2つである。</p>
+
+  <p>この手続きは2つのアルゴリズムを呼び出す。</p>
+
+  <ul>
+  <li>汎用の合成データ生成器 $S(C,C', \text{parms})$。すなわち、原データ(部分)集合 $C$ が与えられたとき、$\text{parms}$ で指定された $C$ の統計量・パラメータ・モデルを保存するように合成データ(部分)集合 $C'$ を生成するアルゴリズムである。</li>
+  <li>マイクロアグリゲーション・ヒューリスティック。$n$ 件のレコードの集合とパラメータ $k$ を入力として、レコードの集合を $k$ 件から $2k-1$ 件のレコードを含むクラスタに分割する。クラスタの生成に際してはクラスタ内の均質性を最大化しようとする。</li>
+  </ul>
+
+  <p><strong>手続き1(Microhybrid($V$,$V'$, $\text{parms}$, $k$))</strong></p>
+
+  <ol>
+  <li>microaggregation($V$, $k$)を呼び出す。あるkについて、その結果得られるレコードのクラスタを $C_1,\dots,C_k$ とする。</li>
+  <li>$i = 1, \dots, k$ について $S(C_i,C_{i}', \text{parms})$ を呼び出す。</li>
+  <li>クラスタ $C_{1}',\dots,C_{k}'$ 内のレコードからなるハイブリッドデータセット $V'$ を出力する。</li>
+  </ol>
+
+  <p>上記のMicrohybrid手続きのステップ1では、$k$ 件から $2k-1$ 件のレコードを含むクラスタが作成される。続くステップ2では、各クラスタの合成版が生成される。ステップ3では、各クラスタ内の原レコードが、対応する合成クラスタ内のレコードに置き換えられる(従来のマイクロアグリゲーションのようにクラスタの平均レコードで置き換えるのではない)。</p>
+
+  <p>Microhybrid手続きは(Aggarwal and Yu, 2004)によって提案された凝縮(condensation)アプローチといくらか類似しているが、Microhybridは以下の点でより一般的である。</p>
+
+  <ul>
+  <li>あらゆるデータ型に適用できる(凝縮は数値データのみを対象として設計されている)。</li>
+  <li>クラスタはすべてサイズ $k$ である必要はない(サイズは $k$ から $2k-1$ の範囲で変化しうる)。</li>
+  <li>Microhybridでは、(あらかじめ選ばれた統計量やモデルを保存するように選択された)任意の合成データ生成器を用いることができる。</li>
+  <li>凝縮のようなアドホックなクラスタリング・ヒューリスティックを用いる代わりに、Microhybridでは上記で引用した最良のマイクロアグリゲーション・ヒューリスティックのいずれかを使用でき、それによってクラスタ内均質性が高まり、情報損失が小さくなるはずである。</li>
+  </ul>
+
+  <p><strong>パラメータ $k$ の役割</strong><br>
+  ここでは、Microhybridにおけるパラメータ $k$ の役割について説明する。</p>
+
+  <ul>
+  <li>$k = 1$ であり、$\text{parms}$ に原クラスタの各属性の平均を保存することが含まれる場合、手続きは(原レコード数と同数の)$n$ 個のクラスタを作成するため、出力は原データセットと同一になる。$k = 1$ の場合、可変サイズのヒューリスティックであっても、すべてのクラスタがサイズ1になる。なぜなら、クラスタがすべて単一のレコードからなるときにクラスタ内類似度が最大となるからである。</li>
+  <li>$k = n$ の場合、出力は単一の合成クラスタとなる。すなわち、この手続きはデータセット全体に対して合成データ生成器 $S$ を1回呼び出すことと等価である。</li>
+  <li>$k$ が中間的な値の場合、ステップ1で複数のクラスタが得られ、それらのパラメータ $\text{parms}$ はステップ2で生成される合成クラスタによって保存される。$k$ が小さくなるほど、(ステップ3の出力データにおいてパラメータが保存される)クラスタの数が増加し、その結果、出力データは原データにより近く見えるようになる。各クラスタは合成データ生成に対する制約とみなすことができ、制約が多いほど合成データ生成の自由度は小さくなり、出力は原データにより近くなる。これが、出力データを「ハイブリッド」と呼ぶことができる理由である。</li>
+  </ul>
+
+  <p>ここで注意すべきは、用いる合成生成器によっては、$k$ の下限が1より大きくなる場合があるという点である。例えば、機密属性が $|X|$ 個、非機密属性が $|Y|$ 個あるときに<a href="#sec-IPSO">前掲のコレスキー分解による部分合成データの節</a>で述べたIPSOを用いる場合、$k$ は少なくとも $2|X|+|Y|+1$ でなければならないことが分かる。そうでなければ、生成器が機能するための自由度が不足する。</p>
+
+  <p>パラメータ $k$ の選択は、上記のMS手続きにおける $\alpha$ の選択よりも単純であることに注意されたい。また、数値ミクロデータの場合、Microhybridは平均と共分散の厳密な保存に加えて、3次・4次モーメントの近似的保存、さらにデータセット中のランダムに選ばれた部分領域における4次までの全モーメントの近似的保存を提供できる。詳細は、Microhybridについて説明した上記の参照論文に示されている。</p>
+  </div>
+
+  <h3>その他のハイブリッドミクロデータ手法</h3>
+
+  <div class="expert-level">
+  <span class="badge">上級者向け</span>
+
+  <p>ハイブリッド・マスキングと呼ばれる別のアプローチが、Dandekar, Domingo-Ferrer and Sebé(2002)で提案されている。その考え方は、マスク済みデータを原データと合成データの組み合わせとして計算するというものである。このような組み合わせにより、純粋な合成データよりもマスク済みレコードの個々の特性をよく制御できる。ハイブリッド・マスキングを実現可能にするためには、1件の原データレコードを1件の合成データレコードと対応づける規則が必要である。Dandekar, Domingo-Ferrer and Sebé(2002)で示されている一つの選択肢は、すべての原データレコードを走査し、各原レコードを何らかの距離に基づいて最も近い合成レコードと対応づけることである。レコードが対応づけられたら、Dandekar, Domingo-Ferrer, and Sebé(2002)は、1件の原レコード $X$ と1件の合成レコード $X_{S}$ を組み合わせる2通りの方法、すなわち加法的組み合わせと乗法的組み合わせを提案している。加法的組み合わせでは次が得られる。</p>
+
+  $$
+  Z = \alpha X + (1 - \alpha)X_{S}
+  $$
+
+  <p>また、乗法的組み合わせでは次が得られる。</p>
+
+  $$
+  Z = X^{\alpha} \cdot X_{s}^{(1 - \alpha)}
+  $$
+
+  <p>ここで $\alpha$ は $[0,1]$ の範囲の入力パラメータであり、$Z$ はハイブリッド・レコードである。著者らは、ハイブリッド・アプローチを順位スワッピングおよびマイクロアグリゲーション・マスキングと比較した実証結果を示している(ハイブリッドデータの合成成分は、Dandekar, Cohen, and Kirkendall(2002)によるラテン超方格抽出法を用いて生成されている)。</p>
+
+  <p>マスキング後最適化(post-masking optimization)は、原ミクロデータと合成ミクロデータを組み合わせるもう一つのアプローチであり、Sebé et al.(2002)で提案されている。ここでの考え方は、まずマスキング手法を用いて原データセットをマスクすることである。次に、初期のマスク済みデータに対して開示リスクを増加させることなく、原データセットの1次・2次モーメントをできる限り保存するようにマスク済みデータを修正しようとする山登り法(hill-climbing)最適化ヒューリスティックを実行する。この最適化ヒューリスティックは、より高次のモーメントを保存するように修正することも可能だが、その場合計算量が大幅に増加する。また、この最適化ヒューリスティックでは、マスク済みデータセットの代わりにランダムなデータセットを初期データセットとして用いることもでき、その場合出力データセットは純粋な合成データとなる。</p>
+  </div>
+
+  <h3>合成ミクロデータ・ハイブリッドミクロデータの長所と短所</h3>
+
+  <p>合成データが魅力的に見えるのは、一見すると再識別問題を回避しているように思われる点である。公表されるレコードは作り出されたものであり、いかなる原レコードにも由来しないため、再識別されたと苦情を述べられる個人は存在しないと結論づけられるかもしれない。しかし、より詳しく見るとこの利点は必ずしも明確ではない。仮に、公表された合成レコードが偶然にも、ある特定の市民の非機密変数(年齢、婚姻状況、居住地など)と機密変数(給与、住宅ローンなど)に一致してしまった場合、非機密変数を用いた再識別は容易であり、その市民は自分の機密変数が不当に明らかにされたと感じるかもしれない。この場合、そのレコードが合成的に生成されたものであるという説明に、その市民が満足したり、それを理解したりすることはまず期待できない。</p>
+
+  <p>他方で、データの有用性が限られていることも合成データのもう一つの問題である。保存されるのは、データ保護担当者が用いたモデルによって明示的に捉えられた統計的性質のみである。ここで当然浮かぶ疑問は、合成ミクロデータセットを公表するくらいなら、保存したい統計量を直接公表すればよいのではないか、というものである。</p>
+
+  <p>合成ミクロデータを正当化しうる一つの理由は、複数の部分領域について妥当な分析結果が得られる場合、すなわち原データセットの複数の部分集合と、それに対応する合成データセットの部分集合とで類似した結果が得られる場合であろう。部分合成ミクロデータやハイブリッドミクロデータは、部分領域分析にとって有用であり続けることに成功する可能性がより高い。しかし、部分合成ミクロデータやハイブリッドミクロデータを用いる場合には、保護された(合成)データセットのレコード数が原データセットのレコード数から独立であるという、純粋な合成データの魅力的な特徴が失われる。</p>
+
+  <h3>参考文献</h3>
+
+  <p class="ref">Abowd, J. M., and Woodcock, S. D. (2001). <em>Disclosure limitation in longitudinal linked tables</em>. In P. Doyle, J. I. Lane, J. J. Theeuwes, and L. V. Zayatz, editors, Confidentiality, Disclosure and Data Access: Theory and Practical Applications for Statistical Agencies, pages 215–278, Amsterdam, 2001. North-Holland.</p>
+
+  <p class="ref">Abowd, J. M. and Woodcock, S. D. (2004). <em>Multiply-imputing confidential characteristics and file links in longitudinal linked data</em>. In J. Domingo-Ferrer and V. Torra, editors, Privacy in Statistical Databases, volume 3050 of LNCS, pages 290–297, Berlin Heidelberg, 2004. Springer.</p>
+
+  <p class="ref">Aggarwal, C. C., and Yu, P. S. (2004). <em>A condensation approach to privacy preserving data mining</em>. In E. Bertino, S. Christodoulakis, D. Plexousakis, V. Christophides, M. Koubarakis, K. Böhm, and E. Ferrari, editors, Advances in Database Technology - EDBT 2004, volume 2992 of Lecture Notes in Computer Science, pages 183–199, Berlin Heidelberg, 2004.</p>
+
+  <p class="ref">Burridge, J. (2004). <em>Information preserving statistical obfuscation.</em> Statistics and Computing, 13:321–327, 2003.</p>
+
+  <p class="ref">Crystal.Ball. <a href="http://www.aertia.com/en/productos.asp?pid=245">http://www.aertia.com/en/productos.asp?pid=245</a>.</p>
+
+  <p class="ref">Dandekar, R., Cohen, M., and Kirkendall, N. (2002). <em>Sensitive micro data protection using latin hypercube sampling technique.</em> In J. Domingo-Ferrer, editor, Inference Control in Statistical Databases, volume 2316 of LNCS, pages 245–253, Berlin Heidelberg, Springer.</p>
+
+  <p class="ref">Dandekar, R., Domingo-Ferrer, J., and Sebé, F. (2002). <em>LHS-based hybrid microdata vs. rank swapping and microaggregation for numeric microdata protection.</em> In J. Domingo-Ferrer, editor, Inference Control in Statistical Databases, volume 2316 of LNCS, pages 153–162, Berlin Heidelberg. Springer.</p>
+
+  <p class="ref">Domingo-Ferrer, J., and González-Nicolás, Ú. (2009). <em>Hybrid Microdata Using Microaggregation</em>. Manuscript.</p>
+
+  <p class="ref">Fienberg, S. E. (1994). <em>A radical proposal for the provision of micro-data samples and the preservation of confidentiality</em>. Technical Report 611, Carnegie Mellon University Department of Statistics.</p>
+
+  <p class="ref">Fienberg, S.E., Makov, U. E., and Steele, R. J. (1998). <em>Disclosure limitation using perturbation and related methods for categorical data</em>. Journal of Official Statistics, 14(4):485–502.</p>
+
+  <p class="ref">Florian, A. (1992). <em>An efficient sampling scheme: updated latin hypercube sampling</em>. Probabilistic Engineering Mechanics, 7(2):123–130.</p>
+
+  <p class="ref">Franconi, L., and Stander, J. (2002). <em>A model based method for disclosure limitation of business microdata</em>. Journal of the Royal Statistical Society D - Statistician, 51:1–11.</p>
+
+  <p class="ref">Huntington, D. E., and Lyrintzis, C. S. (1998). <em>Improvements to and limitations of latin hypercube sampling</em>. Probabilistic Engineering Mechanics, 13(4):245–253.</p>
+
+  <p class="ref">Kennickell, A. B. (1999). <em>Multiple imputation and disclosure control: the case of the 1995 survey of consumer finances.</em> In Record Linkage Techniques, pages 248–267, Washington DC, 1999. National Academy Press.</p>
+
+  <p class="ref">Kennickell, A. B. (1999b). <em>Multiple imputation and disclosure protection: the case of the 1995 survey of consumer finances.</em> In J. Domingo-Ferrer, editor, Statistical Data Protection, pages 248–267, Luxemburg, 1999. Office for Official Publications of the European Communities.</p>
+
+  <p class="ref">Liew, C. K., Choi, U. J., and Liew, C. J. (1985). <em>A data distortion by probability distribution.</em> ACM Transactions on Database Systems, 10:395–411, 1985.</p>
+
+  <p class="ref">Mateo-Sanz, J. M., Martínez-Ballesté, A., and Domingo-Ferrer, J. (2004). <em>Fast generation of accurate synthetic microdata.</em> In J. Domingo-Ferrer and V. Torra, editors, Privacy in Statistical Databases, volume 3050 of LNCS, pages 298–306, Berlin Heidelberg, Springer.</p>
+
+  <p class="ref">Muralidhar, K, and Sarathy, R, (2008). <em>Generating sufficiency-based nonsynthetic perturbed data</em>. Transactions on Data Privacy, 1(1):17–33, 2008. <a href="https://www.tdp.cat/issues/tdp.a005a08.pdf">https://www.tdp.cat/issues/tdp.a005a08.pdf</a>.</p>
+
+  <p class="ref">Polettini, S., Franconi, L., and Stander, J. (2002). <em>Model based disclosure protection.</em> In J. Domingo-Ferrer, editor, Inference Control in Statistical Databases, volume 2316 of LNCS, pages 83–96, Berlin Heidelberg. Springer.</p>
+
+  <p class="ref">Raghunathan, T. J., Reiter, J. P., and Rubin, D. (2003). <em>Multiple imputation for statistical disclosure limitation.</em> Journal of Official Statistics, 19(1):1–16.</p>
+
+  <p class="ref">Reiter, J. P. (2002). Satisfying disclosure restrictions with synthetic data sets. <em>Journal of Official Statistics</em>, 18(4):531–544.</p>
+
+  <p class="ref">Reiter, J. P. (2003). Inference for partially synthetic, public use microdata sets. <em>Survey Methodology</em>, 29:181–188.</p>
+
+  <p class="ref">Reiter, J. P. (2003b). <em>Using CART to generate partially synthetic public use microdata, 2003</em>. Duke University working paper.</p>
+
+  <p class="ref">Reiter, J. P. (2005). <em>Releasing multiply-imputed, synthetic public use microdata: An illustration and empirical study.</em> Journal of the Royal Statistical Society, Series A, 168:185–205.</p>
+
+  <p class="ref">Reiter, J. P. (2005b). <em>Significance tests for multi-component estimands from multiply-imputed, synthetic microdata</em>. Journal of Statistical Planning and Inference, 131(2):365–377.</p>
+
+  <p class="ref">Rubin, D. E. (1993). <em>Discussion of statistical disclosure limitation.</em> Journal of Official Statistics, 9(2):461–468.</p>
+
+  <p class="ref">Sebé, F., Domingo-Ferrer, J., Mateo-Sanz, J. M. and Torra, V. (2002). <em>Post-masking optimization of the tradeoff between information loss and disclosure risk in masked microdata sets.</em> In J. Domingo-Ferrer, editor, Inference Control in Statistical Databases, volume 2316 of LNCS, pages 163–171, Berlin Heidelberg, Springer.</p>
+
+  <div class="pagenav">
+    <a class="prev" href="03-3b-protection-methods-2.html">← 第3章 保護手法・詳細1</a>
+    <a class="next" href="03-4-infoloss-software.html">第3章 情報損失とソフトウェア (6/7) →</a>
+  </div>
+</div>
+</body>
+</html>

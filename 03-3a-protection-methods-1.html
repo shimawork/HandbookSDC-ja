@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第3章 ミクロデータ保護手法 ― 概要 | SDCハンドブック和訳</title>
+<link rel="stylesheet" href="assets/style.css">
+<script>
+  window.MathJax = { tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] } };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
+</head>
+<body>
+<div class="page">
+  <div class="masthead">
+    <nav class="crumbs"><a href="index.html">目次</a> / 第3章 (3/7)</nav>
+    <div class="kicker">Handbook on Statistical Disclosure Control (2nd Edition) 和訳</div>
+    <h1>第3章 ミクロデータ保護手法 ― 概要</h1>
+    <div class="note-origtitle">原題: Microdata protection methods (overview)</div>
+  </div>
+
+  <h2 id="sec-microdata-protection-methods">ミクロデータ保護手法</h2>
+
+  <h3>概念と手法の概要</h3>
+
+  <p>本節では、ミクロデータ保護に関する基本的な概念と手法について説明する。「摂動的マスキング」「非摂動的マスキング」の各節、および別項の「雑音付加の詳細」「マイクロアグリゲーションの詳細」では、特に複雑ないくつかの手法――マイクロアグリゲーション、順位スワッピング、加法性雑音、合成データ――について詳しく解説する(このうち最初の2つはμ‑ARGUSに実装されている)。</p>
+
+  <p>ミクロデータセット $\mathbf{X}$ は、$n$件のレコードから成るファイルとみなすことができ、各レコードには個々の回答者に関する $m$個の変数が含まれる。変数は、必ずしも互いに排他的ではない次の4つのカテゴリーに分類できる。</p>
+
+  <ul>
+    <li><em>識別子(Identifiers)</em>。回答者を<em>一意に</em>識別する変数である。例としてパスポート番号、社会保障番号などが挙げられる。</li>
+    <li><em>準識別子・識別変数(Quasi-identifiers or key variables)</em>。ある程度の曖昧さを伴いながら回答者を識別する変数である(ただし、複数の準識別子の組み合わせによって一意の識別が可能になる場合がある)。例として氏名、住所、性別、年齢、電話番号などが挙げられる。</li>
+    <li><em>機密な結果変数(Confidential outcome variables)</em>。回答者に関する機微な情報を含む変数である。例として給与、宗教、政治的所属、健康状態などが挙げられる。</li>
+    <li><em>非機密の結果変数(Non-confidential outcome variables)</em>。上記のいずれのカテゴリーにも該当しない変数である。</li>
+  </ul>
+
+  <p>SDCの目的は、機密情報が特定の回答者と結び付けられることを防ぐことである。したがって以下では、保護対象となる元のミクロデータセットは、識別子および曖昧さの低い準識別子(氏名など)を除去する前処理が既に施されているものと仮定する。</p>
+
+  <p>前節で述べたミクロデータSDCの目的は、より形式的には次のように述べることができる。すなわち、元のミクロデータセット $\mathbf{X}$ が与えられたとき、以下を満たすように保護済みミクロデータセット $\mathbf{X}'$ を公開することが目標である。</p>
+
+  <ol>
+    <li>開示リスク(すなわち、利用者または侵入者が $\mathbf{X}'$ を用いて、$\mathbf{X}$ に含まれる特定の個人の機密変数を特定できるリスク)が低いこと。</li>
+    <li>$\mathbf{X}'$ に対する利用者の分析(回帰分析、平均値の算出など)が、$\mathbf{X}$ に対する分析結果と同一、または少なくとも類似した結果を与えること。</li>
+  </ol>
+
+  <p>ミクロデータ保護手法は、保護済みミクロデータセット $\mathbf{X}'$ を次のいずれかの方法で生成する。</p>
+
+  <ul>
+    <li>元データの<em>マスキング</em>による方法、すなわち元のミクロデータセット $\mathbf{X}$ を改変したものとして $\mathbf{X}'$ を生成する方法。</li>
+    <li><em>合成データ</em>の生成による方法、すなわち元データ $\mathbf{X}$ の統計的性質の一部を保持する $\mathbf{X}'$ を生成する方法。</li>
+  </ul>
+
+  <p>マスキング手法は、元データへの影響の与え方に応じて、さらに2つのカテゴリーに分けられる(Willenborg and DeWaal, 2001)。</p>
+
+  <ul>
+    <li><em>摂動的マスキング</em>。公開前にミクロデータセットを歪める(distort)。これにより、元のデータセットにおける値の一意な組み合わせが消失し、摂動後のデータセットに新たな一意の組み合わせが出現しうる。このような「かく乱」は統計的機密性の保持にとって有益である。用いる摂動手法は、摂動後のデータセットで計算された統計量が、元のデータセットで得られたであろう統計量と有意に異ならないようなものであるべきである。</li>
+    <li><em>非摂動的マスキング</em>。非摂動的手法はデータを改変しない。その代わりに、元のデータセットの一部を抑制したり、詳細度を低下させたりする。全体再コード化、局所抑制、サンプリングは非摂動的マスキングの例である。</li>
+  </ul>
+
+  <p>一見すると、合成データには再識別問題を回避できるという哲学的な利点があるように思われる。公開されるレコードは架空のものであり、いかなる元レコードにも由来しないため、一部の論者は、元データを提供したいかなる個人も再識別されたと不満を述べることはできないと主張する。しかしより詳しく検討すると、一部の論者(例えばWinkler, 2004やReiter, 2005)は、合成データであっても機密情報の再識別を可能にするレコードが含まれうると主張している。要するに、元データに過剰適合(overfit)した合成データは、元データと同様に開示につながりかねない。他方で、合成データの明白な問題はデータの有用性である。データ保護担当者が明示的に選択した統計的性質のみが保持されるため、そもそも合成ミクロデータセットを公開するのではなく、保持したい統計量そのものを直接公開すべきではないか、という疑問が生じる。</p>
+
+  <p>ここまで本節では、ミクロデータ保護手法をその動作原理によって分類してきた。適用できるデータの種類に着目すると、別の二分法による分類が可能である。</p>
+
+  <ul>
+    <li><em>連続データ(Continuous data)</em>。数値であり、算術演算が可能な変数は連続データとみなされる。例として所得や年齢が挙げられる。なお、数値変数は必ずしも無限の値域を持つとは限らない(年齢がその例である)。連続データを保護する手法を設計する際には、算術演算が可能であるという利点がある一方、元のデータセットにおける数値の組み合わせのほとんどが一意になりやすく、何も対策を講じなければ開示につながるという欠点がある。</li>
+    <li><em>カテゴリカルデータ(Categorical data)</em>。有限の集合の中から値を取り、標準的な算術演算が意味を持たない変数はカテゴリカルデータとみなされる。カテゴリカル変数には、順序尺度(ordinal scale)と名義尺度(nominal scale)の区別がある。順序尺度では値の間の順序が意味を持つのに対し、名義尺度では順序に意味がない。前者では最大値・最小値の演算が意味を持つが、後者では2値間の一致・不一致の比較のみが可能である。学歴(教育水準)は順序変数の例であり、瞳の色は名義変数の例である。実際、ミクロデータセットに含まれる準識別子は通常すべてカテゴリカルな名義変数である。カテゴリカルデータを保護する手法を設計する際には、算術演算ができないことは確かに不便であるが、値域が有限であるという性質をうまく利用できる。</li>
+  </ul>
+
+  <h3 id="sec-perturbative-masking">摂動的マスキング</h3>
+
+  <p>摂動的統計的開示制御(SDC)手法では、正確な値ではなく摂動を加えた値が公開されるものの、ミクロデータセット全体を公開することができる。すべての摂動的手法が連続データ向けに設計されているわけではなく、この点については以下で手法ごとに述べる。</p>
+
+  <p>以下で取り上げる摂動的手法の多く(雑音付加、順位スワッピング、マイクロアグリゲーション、事後ランダム化を含む)は、行列マスキング(matrix masking)の特殊ケースである。元のミクロデータセットを $\mathbf{X}$ とすると、マスキング後のミクロデータセット $\mathbf{X}'$ は次のように計算される。</p>
+
+  $$
+  \mathbf{X}'=\mathbf{A}\mathbf{X}\mathbf{B} + \mathbf{C}
+  $$
+
+  <p>ここで $\mathbf{A}$ はレコード変換マスク、$\mathbf{B}$ は変数変換マスク、$\mathbf{C}$ は移動マスク(displacing mask)または雑音である(Duncan and Pearson, 1991)。</p>
+
+  <p>下表に、以下で説明する摂動的手法の一覧を示す。各手法について、連続データおよび/またはカテゴリカルデータに適用可能かどうかを示している。</p>
+
+  <table>
+    <caption>摂動的手法とデータ型の対応。「X」は適用可能、「(X)」は一部調整の上で適用可能であることを示す。</caption>
+    <thead>
+      <tr><th>手法</th><th>連続データ</th><th>カテゴリカルデータ</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>雑音付加</td><td>X</td><td></td></tr>
+      <tr><td>マイクロアグリゲーション</td><td>X</td><td>(X)</td></tr>
+      <tr><td>順位スワッピング</td><td>X</td><td>X</td></tr>
+      <tr><td>丸め処理</td><td>X</td><td></td></tr>
+      <tr><td>リサンプリング</td><td>X</td><td></td></tr>
+      <tr><td>PRAM</td><td></td><td>X</td></tr>
+      <tr><td>MASSC</td><td></td><td>X</td></tr>
+    </tbody>
+  </table>
+
+  <h4 id="sec-noise-addition">雑音付加</h4>
+
+  <p>文献における主な雑音付加アルゴリズムは次のとおりである。</p>
+
+  <ul>
+    <li>無相関雑音付加によるマスキング</li>
+    <li>相関雑音付加によるマスキング</li>
+    <li>雑音付加と線形変換によるマスキング</li>
+    <li>雑音付加と非線形変換によるマスキング(Sullivan, 1989)</li>
+  </ul>
+
+  <p>個々のアルゴリズムの詳細については、Brand (2002)を参照されたい。</p>
+
+  <p>実務上は、上記のうち最初の3つの手法など、限られた雑音付加手法のみが広く用いられている。線形変換を用いる場合、部分母集団に対するバイアス調整を可能にするために、変換を決定するパラメータ $c$ をデータ利用者に開示するかどうかを判断する必要がある。</p>
+
+  <p>あまり実用的とはいえないSullivan(1989)の手法を除けば、雑音付加はカテゴリカルデータの保護には適さない。他方、連続データに対しては次の理由から適している。</p>
+
+  <ul>
+    <li>変数 $\mathbf{X}_{i}$ の取りうる値の範囲(無限であってもよい)について、何ら仮定を必要としない。</li>
+    <li>付加される雑音は通常連続的であり、平均0であるため、連続的な元データによく適合する。</li>
+    <li>外部ファイルとの完全一致(exact matching)ができない。付加する雑音の量によっては、近似的な(区間)マッチングが可能になる場合がある。詳細は本節を参照されたい。</li>
+  </ul>
+
+  <h4>乗法性雑音</h4>
+
+  <p>分散が一定の加法性雑音に関する主な課題の一つは、小さい値が強く摂動される一方で、大きい値は弱くしか摂動されないという点である。例えば事業所ミクロデータセットにおいては、小規模事業所よりもはるかに再識別されやすい大規模事業所が、雑音付加後もなお高いリスクにさらされたままとなる。この問題への一つの解決策が、以下で説明する乗法性雑音(multiplicative noise)によるアプローチである。</p>
+
+  <div class="expert-level">
+  <span class="badge">上級者向け</span>
+
+  <p>$\mathbf{X}$ を元データの行列とし、$\mathbf{Z}$ を期待値1、分散 $\sigma_{\mathbf{Z}}^{2} > 0$ の連続的な摂動変数の行列とする。このとき対応する匿名化データ $\mathbf{X}^{a}$ は、各 $(i,j)$ について次のように得られる。</p>
+
+  $$
+  \left(\mathbf{X}^{a}\right)_{ij} : = \mathbf{Z}_{ij} \cdot \mathbf{X}_{ij}
+  $$
+
+  <p>Höhne (2004)は次のアプローチを提案している。まず第一段階として、各レコードについて、その値を増加させるか減少させるかを、それぞれ確率0.5でランダムに決定する。これは主要因子 $1 - f$ と $1 + f$ を用いて行われる。あるレコードのすべての値が同一の雑音で摂動されることを避けるため、これらの主要因子自体にも加法性雑音 $s$(ただし $s < f/2$)による摂動を加える。分布の1次および2次のモーメントを保持するためには、次の変換が必要となる。</p>
+
+  $$
+  \mathbf{X}_{i}^{a^{R}} : = \frac{ \sigma_{\mathbf{X}} }{\sigma_{\mathbf{X}^{a}}} \left( \mathbf{X}_{i}^{a} - \mu_{\mathbf{X}^{a}} \right) + \mu_{\mathbf{X}},
+  $$
+
+  <p>ここで $\mu_{\mathbf{X}}$ と $\mu_{\mathbf{X}^{a}}$ はそれぞれ元の変数と匿名化変数の平均、$\sigma_{\mathbf{X}}$ と $\sigma_{\mathbf{X}^{a}}$ はそれぞれ対応する標準偏差を表す。</p>
+
+  <p>特に元データが強く歪んだ(skewed)分布に従う場合、この手法による偏差は、少数ではあるが大きな値に対する雑音因子の設定に強く依存することがある。すなわち、一致性(consistency)は保たれるものの、平均値や合計値が満足に再現されない場合がある。このため、Höhne (2004)は本手法をわずかに修正することを提案している。まず、期待値が0より大きく分散が「小さい」正規分布に従う確率変数 $\mathbf{W}_{i}$ を生成し、その実現値が正の値を取るようにする。次に、対象とする変数についてデータを降順に並べ替える。そのうえで、この変数の値が最大のレコードを次のように減少させる。</p>
+
+  $$
+  \mathbf{X}_{1}^{a} = \left( 1 - \mathbf{W}_{1} \right) \mathbf{X}_{1} \quad .
+  $$
+
+  <p>続いてレコード $\mathbf{X}_{2} , \ldots , \mathbf{X}_{n-1}$ は次のように摂動される。</p>
+
+  $$
+  \mathbf{X}_{i}^{a} = \begin{cases}
+   \left( 1 - \mathbf{W}_{i} \right) \mathbf{X}_{i} , &\text{もし}\quad \sum\limits_{k=1}^{i-1}\mathbf{X}_{k}^{a} > \sum\limits_{k=1}^{i-1}\mathbf{X}_{k}\\
+   \left( 1 + \mathbf{W}_{i}\right) \mathbf{X}_{i} , &\text{もし}\quad \sum\limits_{k=1}^{i-1}\mathbf{X}_{k}^{a} \leq \sum\limits_{k=1}^{i-1}\mathbf{X}_{k} \quad .
+  \end{cases}
+  $$
+
+  <p>これにより平均値と合計値が保持され、個々の値の減少・増加の効果が互いに打ち消し合う。残る最後のレコード $\mathbf{X}_{n}$ については、全体の合計を保持するために次のように設定する。</p>
+
+  $$
+  \mathbf{X}_{n}^{a} = \mathbf{X}_{n} - \left( \sum\limits_{k=1}^{n-1} \mathbf{X}_{k}^{a} - \sum\limits_{k=1}^{n-1} \mathbf{X}_{k} \right)
+  $$
+  </div>
+
+  <h4 id="sec-microaggregation">マイクロアグリゲーション</h4>
+
+  <p>マイクロアグリゲーションは、連続ミクロデータを対象とするSDC手法群である。マイクロアグリゲーションの背景にある考え方は、実務で用いられる機密性ルールが、レコードが $k$人以上の個人からなるグループに対応し、かつどの個人もそのグループを支配していない(すなわち過度に寄与していない)場合に、ミクロデータセットの公開を認めるというものである。ここで $k$ は閾値である。このような機密性ルールを厳格に適用すると、公開前に個々の値を小さな集約値(マイクロアグリゲート)に基づいて計算された値に置き換えることになる。これがマイクロアグリゲーションの基本原理である。</p>
+
+  <p>$n$件のレコードから成るミクロデータセットでマイクロアグリゲートを得るには、これらのレコードを組み合わせて、サイズが少なくとも $k$ 以上の $g$個のグループを形成する。各変数について、グループごとの平均値を計算し、そのグループに属する元の値をすべてこの平均値で置き換える。グループの形成には最大類似性の基準を用いる。この手順が完了すると、得られた(改変済みの)レコードを公開することができる。</p>
+
+  <p>マイクロアグリゲーションにはいくつかのバリエーションが存在する。</p>
+
+  <ul>
+    <li>固定サイズグループ vs. 可変サイズグループ(Defays and Nanopoulos, 1993; Mateo-Sanz and Domingo-Ferrer, 1999; Domingo-Ferrer and Mateo-Sanz, 2002; Sande, 2002)。</li>
+    <li>厳密最適 vs. ヒューリスティックなマイクロアグリゲーション(Hansen and Mukherjee, 2003; Oganian and Domingo-Ferrer, 2001)。</li>
+    <li>カテゴリカルデータのマイクロアグリゲーション(V. Torra, 2004)。</li>
+  </ul>
+
+  <p>μ‑ARGUSに実装されているマイクロアグリゲーションの詳細については、別項「マイクロアグリゲーションの詳細」を参照されたい。</p>
+
+  <h4 id="sec-data-rank-swapping">データスワッピングと順位スワッピング</h4>
+
+  <p>データスワッピングは元来、カテゴリカル変数のみを含むデータベースを対象としたSDC手法として提案された(Dalenius and Reiss, 1978)。この手法の基本的な考え方は、個々のレコード間で機密変数の値を交換することによってデータベースを変換するというものである。交換は、低次の度数や周辺分布(marginals)が維持されるように行われる。</p>
+
+  <p>元の手法は実務ではあまり用いられなかったが(Fienberg and McIntyre, 2004を参照)、その基本的な考え方はその後の手法に明らかな影響を与えた。Reiss, Post and Dalenius (1982)およびReiss (1984)では、それぞれ連続ミクロデータおよびカテゴリカルミクロデータを保護するためにデータスワッピングが導入された。ミクロデータに対するデータスワッピングのもう一つのバリエーションが<em>順位スワッピング</em>(rank swapping)である。当初は順序変数のみを対象として記述されていたが(Greenberg, 1987)、順位スワッピングは任意の数値変数に対しても使用できる(Moore, 1996)。まず変数 $\mathbf{X}_{i}$ の値を昇順にランク付けし、次に各ランク付けされた値を、限定された範囲内でランダムに選ばれた別のランク付け値と交換する(例えば、交換される2つの値のランクの差が、レコード総数の $p\%$ を超えてはならない。$p$ は入力パラメータである)。このアルゴリズムは、元のデータセットの各変数に対して独立に適用される。</p>
+
+  <p>このアルゴリズムでスワップされたデータから計算される多変量統計量は、制約のないスワップの場合と比べて歪みが小さいと期待するのが妥当である。連続ミクロデータの保護に関するこれらの著者による初期の実証研究(Domingo-Ferrer and Torra, 2001)において、順位スワッピングは、開示リスクと情報損失のトレードオフの観点から特に優れた性能を示す手法として同定された。この結果、順位スワッピングはμ‑ARGUSパッケージに実装された手法の一つとなっている(例えばHundepool <em>et al.</em>, 2014を参照)。</p>
+
+  <div class="callout">
+    <div class="callout-title">例</div>
+    <p>下表に、元のミクロデータセット(左)とその順位スワッピング後のバージョン(右)を示す。元のデータセットには4つの変数と10件のレコードが含まれており、2番目の変数は英数字であり、標準的なアルファベット順を用いてランク付けを行っている。すべての変数について $p=10$ の値を用いている。</p>
+
+    <table>
+      <caption>元のファイル</caption>
+      <thead><tr><th></th><th></th><th></th><th></th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>K</td><td>3.7</td><td>4.4</td></tr>
+        <tr><td>2</td><td>L</td><td>3.8</td><td>3.4</td></tr>
+        <tr><td>3</td><td>N</td><td>3.0</td><td>4.8</td></tr>
+        <tr><td>4</td><td>M</td><td>4.5</td><td>5.0</td></tr>
+        <tr><td>5</td><td>L</td><td>5.0</td><td>6.0</td></tr>
+        <tr><td>6</td><td>H</td><td>6.0</td><td>7.5</td></tr>
+        <tr><td>7</td><td>H</td><td>4.5</td><td>10.0</td></tr>
+        <tr><td>8</td><td>F</td><td>6.7</td><td>11.0</td></tr>
+        <tr><td>9</td><td>D</td><td>8.0</td><td>9.5</td></tr>
+        <tr><td>10</td><td>C</td><td>10.0</td><td>3.2</td></tr>
+      </tbody>
+    </table>
+
+    <table>
+      <caption>順位スワップ後のファイル</caption>
+      <thead><tr><th></th><th></th><th></th><th></th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>H</td><td>3.0</td><td>4.8</td></tr>
+        <tr><td>2</td><td>L</td><td>4.5</td><td>3.2</td></tr>
+        <tr><td>3</td><td>M</td><td>3.7</td><td>4.4</td></tr>
+        <tr><td>4</td><td>N</td><td>5.0</td><td>6.0</td></tr>
+        <tr><td>5</td><td>L</td><td>4.5</td><td>5.0</td></tr>
+        <tr><td>6</td><td>F</td><td>6.7</td><td>9.5</td></tr>
+        <tr><td>7</td><td>K</td><td>3.8</td><td>11.0</td></tr>
+        <tr><td>8</td><td>H</td><td>6.0</td><td>10.0</td></tr>
+        <tr><td>9</td><td>C</td><td>10.0</td><td>7.5</td></tr>
+        <tr><td>10</td><td>D</td><td>8.0</td><td>3.4</td></tr>
+      </tbody>
+    </table>
+    <p><em>順位スワッピングの例。</em></p>
+  </div>
+
+  <h4 id="sec-rounding">丸め処理</h4>
+
+  <p>丸め処理は、変数の元の値を丸めた値で置き換える手法である。ある変数 $X_{i}$ について、丸めた値は、丸め集合(rounding set)を構成する丸め点(rounding points)の集合の中から選ばれる。多変量の元データセットにおいて、丸め処理は通常、1変数ずつ行われる(単変量丸め処理)が、多変量丸め処理も可能である(Willenborg and DeWaal, 2001)。丸め処理の動作原理上、連続データに適した手法である。</p>
+
+  <div class="callout">
+    <div class="callout-title">例</div>
+    <p>非負の連続変数 $X$ を仮定する。このとき、丸め点の集合 $\left\{ p_0,\cdots,p_r \right\}$ を定める必要がある。一つの方法は、丸め点を基準値 $b$ の倍数として、すなわち $i = 1,\cdots,r$ に対して $p_{i} = b i$ とすることである。各丸め点 $p_i$ の吸引集合(set of attraction)は、$i = 1$ から $r - 1$ について区間 $\left\lbrack p_{i} - b/2,p_{i} + b/2 \right)$ として定義される。$p_0$ と $p_r$ については、それぞれ吸引集合は $\left\lbrack 0, b/2 \right)$ および $\left\lbrack p_{r} - b/2, X_{\text{max}} \right\rbrack$ であり、$X_{\text{max}}$ は変数 $X$ の取りうる最大値である。このとき、$X$ の元の値 $x$ は、$x$ が属する吸引集合に対応する丸め点で置き換えられる。</p>
+  </div>
+
+  <h4>リサンプリング</h4>
+
+  <p>リサンプリングは元来、表形式データの保護のために提案された手法であるが(Heer, 1993; Domingo-Ferrer and Mateo-Sanz, 1999)、ミクロデータに対しても使用できる。元の変数 $X_{i}$ の値について、$t$個の独立な標本 $S_{1},\cdots,S_{t}$ を取る。すべての標本を同一のランク付け基準で並べ替える。マスキング後の変数 $Z_{i}$ を ${\overline{x}}_{1},\cdots,{\overline{x}}_{n}$ として構築する。ここで $n$ はレコード数、${\overline{x}}_{j}$ は $S_{1},\cdots,S_{t}$ における $j$番目にランクされた値の平均である。</p>
+
+  <h4>PRAM</h4>
+
+  <p>事後ランダム化法(Post-RAndomization Method、PRAM)(Gouweleeuw <em>et al.</em>, 1997)は、ミクロデータファイルにおけるカテゴリカル変数の開示保護のための確率的な摂動的手法である。マスキング後のファイルでは、元のファイルにおける一部のレコードの一部のカテゴリカル変数のスコアが、あらかじめ定められた確率機構、すなわちマルコフ行列に従って別のスコアに変更される。このマルコフ的アプローチにより、PRAMは雑音付加、データ抑制、データ再コード化を包含する非常に汎用性の高い手法となっている。</p>
+
+  <p>PRAMにおける情報損失と開示リスクは、マルコフ行列の選択に大きく依存し、依然として(未解決の)研究課題である(De Wolf et al., 1999)。</p>
+
+  <p>PRAM行列には、保護対象となる各変数の取りうる値ごとに1行が対応する。このため、本手法を連続データに用いることはできない。PRAMの詳細については別項を参照されたい。</p>
+
+  <h4>MASSC</h4>
+
+  <p>MASSC(Singh, Yu and Dunteman, 2003)は、その頭字語が4つのステップ――Micro Agglomeration(微小凝集)、Substitution(置換)、Subsampling(副標本抽出)、Calibration(較正)――を要約したマスキング手法である。以下、これら4つのステップの目的を簡潔に振り返る。</p>
+
+  <ol>
+    <li>微小凝集(Micro agglomeration)は、元のデータセットをリスク階層(似たような開示リスクを持つレコードのグループ)に分割するために適用される。これらの階層は、キー変数、すなわちレコード中の準識別子を用いて形成される。基本的な考え方は、キー変数の組み合わせがより希少なレコードほど、より高いリスクを負うというものである。</li>
+    <li>続いて、最適確率的置換(Optimal probabilistic substitution)を用いて元データを摂動する(すなわち、置換はPRAMと同様にマルコフ行列によって制御される。詳細はSingh, Yu and Dunteman, 2003を参照)。</li>
+    <li>最適確率的副標本抽出(Optimal probabilistic subsampling)は、一部の変数、あるいはレコード全体を抑制するために用いられる(すなわち、パラメータとして設定された一定の確率で変数および/またはレコードが抑制される)。</li>
+    <li>最適サンプリングウェイト較正(Optimal sampling weight calibration)は、処理後のデータベースにおいて、意図されたデータ利用にとって精度が重要となる結果変数の推定値を保持するために用いられる。</li>
+  </ol>
+
+  <p>MASSCは、我々の知る限り、開示リスクを解析的に定量化できるような形で摂動的マスキング手法を設計した最初の試みである。その主な欠点は、開示モデルが、キー変数と外部情報源との連結によって生じる開示のみを考慮するという単純化を行っている点である。キー変数は通常カテゴリカルであるため、開示リスクの分析にはユニーク性に基づくアプローチを用いることができるが、この方法では連続的な結果変数も回答者の再識別に利用されうるという事実が無視されてしまう。例えば、回答者が企業であり、売上高が結果変数の一つである場合、ある産業部門に属する誰もが、その部門で最大の売上高を持つ企業がどれであるかを知っている。したがって実務上、MASSCは連続変数が存在しない場合にのみ適した手法である。</p>
+
+  <h3 id="sec-nonperturbative-masking">非摂動的マスキング</h3>
+
+  <p>非摂動的マスキングは、元データの歪みに依拠するのではなく、部分的な抑制や詳細度の低下に依拠する。手法の中にはカテゴリカルデータと連続データの両方に使用できるものもあるが、連続データには適さないものもある。下表に、以下で説明する非摂動的手法の一覧を示す。各手法について、連続データおよび/またはカテゴリカルデータに適用可能かどうかを示している。</p>
+
+  <table>
+    <caption>非摂動的手法とデータ型の対応。</caption>
+    <thead>
+      <tr><th>手法</th><th>連続データ</th><th>カテゴリカルデータ</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>サンプリング</td><td></td><td>X</td></tr>
+      <tr><td>全体再コード化</td><td>X</td><td>X</td></tr>
+      <tr><td>上限・下限コーディング</td><td>X</td><td>X</td></tr>
+      <tr><td>局所抑制</td><td></td><td>X</td></tr>
+    </tbody>
+  </table>
+
+  <h4 id="sec-sampling">サンプリング</h4>
+
+  <p>元のミクロデータファイルを公開する代わりに、元のレコード集合からの標本 $S$ を公開する。</p>
+
+  <p>サンプリング手法はカテゴリカルミクロデータには適しているが、一般的な開示シナリオにおいて連続ミクロデータに対する妥当性は必ずしも明確ではない。その理由は、この種の手法では、$S$に含まれるすべてのレコードについて連続変数 $V_{i}$ が摂動されずにそのまま残るためである。したがって、変数 $V_{i}$ が外部の行政公開ファイルに存在する場合、公開された標本との一意なマッチングが生じる可能性が非常に高い。実際、連続変数 $V_{i}$ と2人の回答者 $o_{1}$、$o_{2}$ が与えられたとき、$o_{1} = o_{2}$ でない限り、$V_{i}$ が $o_{1}$ と $o_{2}$ の両方について同じ値を取ることはきわめて考えにくい(これは $V_{i}$ をデジタル表現のために丸めた場合であっても成り立つ)。</p>
+
+  <p>連続的な識別変数について、攻撃者が回答者のスコアをおおよそしか把握していない場合(Willenborg and De Waal, 1996で想定されているように)には、その変数を保護するためにサンプリング手法を用いることにもなお意味があるかもしれない。しかし、攻撃者が利用できるリソースが限られているという仮定は危険であり、質の高い外部行政ファイルが入手可能な場合には、明らかに楽観的すぎる仮定となりうる。以下の例では、説明のために、サンプリングの実際の適用事例における技術仕様を示す。</p>
+
+  <div class="callout">
+    <div class="callout-title">例</div>
+    <p>カタルーニャ統計局(Statistics Catalonia)は1995年、1991年カタルーニャ人口センサスの標本を公開した。公開された情報は36のカテゴリカル変数(当初連続変数であったものを再コード化したバージョンを含む)に対応しており、変数の一部は個人に関するもの、一部は世帯に関するものであった。この標本の技術仕様は次のとおりであった。</p>
+    <ul>
+      <li>標本抽出アルゴリズム: 単純無作為抽出</li>
+      <li>抽出単位: 1991年3月1日時点でカタルーニャに居住していた母集団中の個人</li>
+      <li>母集団の大きさ: 6,059,494人</li>
+      <li>標本の大きさ: 245,944件の個人レコード</li>
+      <li>抽出率: 0.0406</li>
+    </ul>
+    <p>この抽出率のもとでは、分散が最大となる比率を推定する際の最大絶対誤差は0.2パーセントである。</p>
+  </div>
+
+  <h4 id="sec-global-recoding">全体再コード化</h4>
+
+  <p>カテゴリカル変数 $V_{i}$ については、複数のカテゴリーを統合して新たな(より粗い)カテゴリーを形成し、$\left| D\left( V_{i}' \right) \right| < \left| D\left( V_{i} \right) \right|$ を満たす新たな変数 $V_{i}'$ を得る。ここで $|\cdot |$ は濃度(カーディナリティ)演算子であり、$D(V_i)$ は変数 $V_i$ の定義域、すなわち $V_i$ が取りうる値の集合を表す。連続変数の場合、全体再コード化とは、$V_{i}$ を、その離散化されたバージョンである別の変数 $V_{i}'$ に置き換えることを意味する。言い換えれば、潜在的に無限の範囲 $D\left( V_{i} \right)$ が、有限の範囲 $D\left( V_{i}' \right)$ に写像される。これはμ‑ARGUSで用いられている手法である(例えばHundepool <em>et al.</em> 2014を参照)。</p>
+
+  <p>この手法はカテゴリカルミクロデータにより適しており、カテゴリカル変数の奇妙な組み合わせを持つレコードを目立たなくするのに役立つ。全体再コード化は統計機関で広く用いられている。</p>
+
+  <div class="callout">
+    <div class="callout-title">例</div>
+    <p>例えば「婚姻状況=配偶者と死別」かつ「年齢=17歳」というレコードが存在する場合、「婚姻状況」に全体再コード化を適用して、「配偶者と死別または離婚」というより広いカテゴリーを作成することができ、これにより上記のレコードが一意となる確率を低減できる。全体再コード化は連続変数にも使用できるが、それに伴う離散化は、しばしば許容できないほどの情報損失をもたらす。また、元の $V_{i}$ では単純であった算術演算が、離散化された $V_{i}'$ では容易でも直感的でもなくなる。</p>
+  </div>
+
+  <div class="callout">
+    <div class="callout-title">例</div>
+    <p>変数「職業」について、「統計家」と「数学者」というカテゴリーを「統計家または数学者」という単一のカテゴリーに統合するという再コード化を行うことができる。Urk(小さな町)における女性統計家の数と女性数学者の数の合計が十分に多ければ、「居住地=Urk」「性別=女性」「職業=統計家または数学者」という組み合わせは公開に際して安全とみなされる。なお、「職業」を再コード化する代わりに、例えば「居住地」を再コード化することも可能である点に留意されたい。</p>
+  </div>
+
+  <p>全体再コード化は、データセットの安全でない部分のみではなく、データセット全体に適用されるという点を理解しておくことが重要である。これは各変数について統一されたカテゴリー分けを得るために行われる。例えば、上記の方法で「職業」を再コード化するとしよう。さらに、「居住地=アムステルダム」「性別=女性」「職業=統計家」という組み合わせと、「居住地=アムステルダム」「性別=女性」「職業=数学者」という組み合わせが、どちらも安全であるとみなされるとしよう。しかし、「職業」について統一されたカテゴリー分けを得るためには、これらの組み合わせをそのまま公開するのではなく、「居住地=アムステルダム」「性別=女性」「職業=統計家または数学者」という組み合わせのみを公開することになる。</p>
+
+  <h4 id="sec-top-and-bottom-coding">上限・下限コーディング</h4>
+
+  <p>上限・下限コーディングは全体再コード化の特殊なケースであり、順位付け可能な変数、すなわち連続変数あるいはカテゴリカルな順序変数に対して用いることができる。基本的な考え方は、上位の値(ある閾値を超える値)をまとめて一つの新たなカテゴリーを形成するというものである。下位の値(ある閾値を下回る値)についても同様の処理を行う。μ‑ARGUSマニュアルを参照されたい(例えばHundepool <em>et al.</em> 2014)。</p>
+
+  <h4 id="sec-local-suppression">局所抑制</h4>
+
+  <p>局所抑制は、キー値のある組み合わせについて一致するレコードの集合を増やすことを目的として、個々の変数の特定の値を抑制する手法である。局所抑制と全体再コード化を組み合わせる方法については(De Waal and Willenborg, 1995)で議論されており、μ‑ARGUSに実装されている(例えばHundepool <em>et al.</em> 2014を参照)。</p>
+
+  <p>連続変数 $V_{i}$ がキー変数の集合に含まれている場合、キー値の各組み合わせはおそらく一意となる。$V_{i}$ の値を系統的に抑制することには意味がないため、局所抑制はむしろカテゴリカル変数を対象とした手法であるといえる。</p>
+
+  <p>局所抑制を適用する際には、安全でない組み合わせに含まれる一つ以上の値が抑制される、すなわち欠測値に置き換えられる。例えば上記の例では、Urkにおける女性の数が十分に多いと仮定すれば、「職業」の値を抑制することによって、「居住地=Urk」「性別=女性」「職業=統計家」という安全でない組み合わせを保護することができる。この結果得られる組み合わせは「居住地=Urk」「性別=女性」「職業=欠測」となる。「職業」の値を抑制する代わりに、安全でない組み合わせに含まれる別の変数の値を抑制することもできる点に留意されたい。例えば、オランダ全体における女性統計家の数が十分に多い場合には、上記の例において「職業」の値の代わりに「居住地」の値を抑制することで、安全でない組み合わせを保護することができる。局所抑制は特定の値にのみ適用される。例えば、あるレコードにおいて「職業」の値が抑制されたとしても、それは他のレコードにおいても「職業」の値を抑制しなければならないことを意味しない。抑制する値を選択する際の自由度により、局所抑制の件数を最小化することが可能となる。</p>
+
+  <h4>参考文献</h4>
+
+  <p>Brand, R. (2002). <em>Microdata protection through noise addition.</em> In J. Domingo-Ferrer, editor, Inference Control in Statistical Databases, volume 2316 of LNCS, pages 97--116, Berlin Heidelberg, 2002. Springer.</p>
+
+  <p>Dalenius T., and Reiss, S.P. (1978). <em>Data-swapping: a technique for disclosure control</em> (extended abstract). In Proc. of the ASA Section on Survey Research Methods, pages 191--194, Washington DC, 1978. American Statistical Association.</p>
+
+  <p>Defays, D., and Nanopoulos, P. (1993). <em>Panels of enterprises and confidentiality: the small aggregates method</em>. In Proc. of 92 Symposium on Design and Analysis of Longitudinal Surveys, pages 195--204, Ottawa, 1993. Statistics Canada.</p>
+
+  <p>De Waal, A.G., and Willenborg, L.C.R.J. (1995). <em>Global recodings and local suppressions in microdata sets</em>. In Proceedings of Statistics Canada Symposium'95, pages 121--132, Ottawa, 1995. Statistics Canada.</p>
+
+  <p>De Waal, A.G. and Willenborg, L.C.R.J. (1999). <em>Information loss through global recoding and local suppression</em>. Netherlands Official Statistics, 14:17--20, 1999. special issue on SDC.</p>
+
+  <p>De Wolf, P.P., Gouweleeuw, J. M., Kooiman, P., and Willenborg, L.C.R.J. (1999). <em>Reflections on PRAM</em>. In J. Domingo-Ferrer, editor, Statistical Data Protection, pages 337--349, Luxemburg, 1999. Office for Official Publications of the European Communities.</p>
+
+  <p>Domingo-Ferrer, J., and Mateo-Sanz, J.M. (1999). <em>On resampling for statistical confidentiality in contingency tables.</em> Computers & Mathematics with Applications, 38:13--32, 1999.</p>
+
+  <p>Domingo-Ferrer, J., and Mateo-Sanz, J.M. (2002). <em>Practical data-oriented microaggregation for statistical disclosure control</em>. IEEE Transactions on Knowledge and Data Engineering, 14(1):189--201, 2002.</p>
+
+  <p>Domingo-Ferrer, J., Mateo-Sanz, J.M., and Torra, V. (2001). <em>Comparing sdc methods for microdata on the basis of information loss and disclosure risk.</em> In Pre-proceedings of ETK-NTTS'2001 (vol. 2), pages 807--826, Luxemburg, 2001. Eurostat.</p>
+
+  <p>Domingo-Ferrer, J., and Torra, V., (2001). <em>Disclosure protection methods and information loss for microdata</em>. In P. Doyle, J.I. Lane, J.J.M. Theeuwes, and L. Zayatz, editors, Confidentiality, Disclosure and Data Access: Theory and Practical Applications for Statistical Agencies, pages 91--110, Amsterdam, 2001. North-Holland. <a href="https://crises-deim.urv.cat/webCrises/publications/bcpi/cliatpasa01Disclosure.pdf">https://crises-deim.urv.cat/webCrises/publications/bcpi/cliatpasa01Disclosure.pdf</a>.</p>
+
+  <p>Duncan, G.T., and Pearson, R.W. (1991). <em>Enhancing access to microdata while protecting confidentiality: prospects for the future</em>. Statistical Science, 6:219--239, 1991.</p>
+
+  <p>Fienberg, S.E., and McIntyre, J. (2004). <em>Data swapping: variations on a theme by dalenius and reiss.</em> In J. Domingo-Ferrer and V. Torra, editors, Privacy in Statistical Databases, volume 3050 of LNCS, pages 14--29, Berlin Heidelberg, 2004. Springer.</p>
+
+  <p>Gouweleeuw, J.M., Kooiman, P., Willenborg, L.C.R.J., and de Wolf, P.P. (1997). <em>Post randomisation for statistical disclosure control: Theory and implementation</em>, Research paper no. 9731 (Voorburg: Statistics Netherlands).</p>
+
+  <p>Greenberg, B. (1987). <em>Rank swapping for ordinal data</em>, Washington, DC: U. S. Bureau of the Census (unpublished manuscript).</p>
+
+  <p>Hansen, S.L., and Mukherjee, S. (2003). <em>A polynomial algorithm for optimal univariate microaggregation</em>. IEEE Transactions on Knowledge and Data Engineering, 15(4):1043--1044, 2003.</p>
+
+  <p>Heer, G.R. (1993). <em>A bootstrap procedure to preserve statistical confidentiality in contingency tables</em>. In D. Lievesley, editor, Proc. of the International Seminar on Statistical Confidentiality, pages 261--271, Luxemburg, 1993. Office for Official Publications of the European Communities.</p>
+
+  <p>Höhne (2004), Varianten von Zufallsüberlagerung (German), working paper of the project group 'De facto anonymisation of business microdata', Wiesbaden.</p>
+
+  <p>Hundepool, A., Van de Wetering, A., Ramaswamy, R., Franconi, L., Capobianchi, A., de Wolf, P.P., Domingo-Ferrer, J., Torra, V. and Giessing, S. (2014). <em>μ‑ARGUS version 5.1 Software and User's Manual</em>. Statistics Netherlands, Voorburg NL, may 2005. <a href="https://research.cbs.nl/casc/Software/MUmanual5.1.3.pdf">https://research.cbs.nl/casc/Software/MUmanual5.1.3.pdf</a>.</p>
+
+  <p>Kooiman, P., Willenborg, L, and Gouweleeuw, J.M. (1998). <em>PRAM: A method for disclosure limitation of microdata</em>. Technical report, Statistics Netherlands (Voorburg, NL), 1998.</p>
+
+  <p>Mateo-Sanz, J.M., and Domingo-Ferrer, J. (1999). <em>A method for data-oriented multivariate microaggregation</em>. In J. Domingo-Ferrer, editor, Statistical Data Protection, pages 89--99, Luxemburg, 1999. Office for Official Publications of the European Communities.</p>
+
+  <p>Moore, R. (1996). <em>Controlled data swapping techniques for masking public use microdata sets, 1996</em>. U. S. Bureau of the Census, Washington, DC, (unpublished manuscript).</p>
+
+  <p>Oganian, A., and Domingo-Ferrer, J. (2001). <em>On the complexity of optimal microaggregation for statistical disclosure control</em>. Statistical Journal of the United Nations Economic Commissions for Europe, 18(4):345--354, 2001.</p>
+
+  <p>Reiss, S.P, (1984). <em>Practical data-swapping: the first steps</em>. ACM Transactions on Database Systems, 9:20--37, 1984.</p>
+
+  <p>Reiss, S.P., Post, M.J., and Dalenius, T. (1982). <em>Non-reversible privacy transformations</em>. In Proceedings of the ACM Symposium on Principles of Database Systems, pages 139--146, Los Angeles, CA, 1982. ACM.</p>
+
+  <p>Reiter, J.P. (2005). <em>Releasing multiply-imputed, synthetic public use microdata: An illustration and empirical study.</em> Journal of the Royal Statistical Society, Series A, 168:185--205, 2005.</p>
+
+  <p>Sande, G. (2002). <em>Exact and approximate methods for data directed microaggregation in one or more dimensions</em>. International Journal of Uncertainty, Fuzziness and Knowledge-Based Systems, 10(5):459--476, 2002.</p>
+
+  <p>Singh, A. C, Yu, F., and Dunteman, G.H. (2003). <em>Massc: A new data mask for limiting statistical information loss and disclosure</em>. In H. Linden, J. Riecan, and L. Belsby, editors, Work Session on Statistical Data Confidentiality 2003, Monographs in Official Statistics, pages 373--394, Luxemburg, 2004. Eurostat.</p>
+
+  <p>Sullivan, G.R. (1989). <em>The Use of Added Error to Avoid Disclosure in Microdata Releases</em>. PhD thesis, Iowa State University, 1989.</p>
+
+  <p>Torra, V. (2004). <em>Microaggregation for categorical variables: a median based approach</em>. In J. Domingo-Ferrer and V. Torra, editors, Privacy in Statistical Databases, volume 3050 of LNCS, pages 162--174, Berlin Heidelberg, 2004. Springer.</p>
+
+  <p>Willenborg, L. and De Waal, T. (1996). <em>Statistical Disclosure Control in Practice</em>. Springer-Verlag, New York, 1996.</p>
+
+  <p>Willenborg, L., and De Waal, T. (2001). <em>Elements of Statistical Disclosure Control.</em> Springer-Verlag, New York, 2001.</p>
+
+  <p>Winkler, W.E. (2004). <em>Re-identification methods for masked microdata.</em> In J. Domingo-Ferrer and V. Torra, editors, Privacy in Statistical Databases, volume 3050 of LNCS, pages 216--230, Berlin Heidelberg, 2004. Springer.</p>
+
+  <div class="pagenav">
+    <a class="prev" href="03-2-risk-assessment.html">← 第3章 リスク評価</a>
+    <a class="next" href="03-3b-protection-methods-2.html">第3章 保護手法・詳細1 (4/7) →</a>
+  </div>
+</div>
+</body>
+</html>

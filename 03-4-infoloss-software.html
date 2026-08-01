@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第3章 ミクロデータ保護における情報損失とソフトウェア | SDCハンドブック和訳</title>
+<link rel="stylesheet" href="assets/style.css">
+<script>
+  window.MathJax = { tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] } };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
+</head>
+<body>
+<div class="page">
+  <div class="masthead">
+    <nav class="crumbs"><a href="index.html">目次</a> / 第3章 (6/7)</nav>
+    <div class="kicker">Handbook on Statistical Disclosure Control (2nd Edition) 和訳</div>
+    <h1>第3章 ミクロデータ保護における情報損失とソフトウェア</h1>
+    <div class="note-origtitle">原題: Information loss in microdata protection / Software</div>
+  </div>
+
+  <h2 id="sec-informationloss-microdata">情報損失の測定</h2>
+
+  <h3>情報損失の概念と測定方法の種類</h3>
+
+  <p>SDC手法の適用には、何らかの情報損失が伴う。これは、非摂動的SDC手法を用いた際にデータに生じる欠落や、摂動的SDCツールを用いた際の摂動などの結果として生じる。この損失により、開示されたデータの利用者にとっての分析上の価値は低下し、そのようなデータに基づく計算や分析の結果が不適切なものとなる可能性がある(例えば、推定の精度が著しく悪化する場合がある)。</p>
+
+  <p>情報損失の厳密な評価は、保護後のデータによって支えられるべきデータ利用方法に基づいて行われなければならない。特定の利用目的について、元データと保護後データとで得られる結果の差が大きいほど、情報損失は大きいということになる。しかし、ミクロデータの保護は、以下の理由から、特定のデータ利用方法を想定して行うことができない場合が非常に多い。</p>
+
+  <ul>
+    <li>想定されるデータ利用方法は非常に多様であり、データ保護担当者がデータ公開の時点でそれらすべてを特定することさえ困難な場合がある。</li>
+    <li>仮にすべてのデータ利用方法を特定できたとしても、$i$番目のバージョンが$i$番目のデータ利用に最適化された情報損失を持つように、同一の原データセットから複数バージョンを発行すると、保護方法の異なる複数のデータセットを組み合わせることによって予期しない開示につながる可能性がある。</li>
+  </ul>
+
+  <p>データは特定のデータ利用方法を想定せずに保護されなければならないことが多いため、特定のSDC手法によってデータにどの程度の損害が及んでいるかをデータ保護担当者が評価する際の指針となる、汎用的な情報損失指標が望まれる。</p>
+
+  <p>汎用的な情報損失指標とは何かを定義することは、なかなか厄介な問題となりうる。おおまかに言えば、それは妥当な範囲のデータ利用に対する情報損失量を捉えるものであるべきである。以下に示すWinkler(1998)による定義に従い、保護後のデータセットが<em>分析的に妥当(analytically valid)</em>かつ<em>分析的に興味深い(analytically interesting)</em>ものであれば、情報損失は小さいということにする。</p>
+
+  <ul>
+    <li>保護後のミクロデータセットが以下を元データに対しておおむね維持している場合、それは<em>分析的に妥当な</em>ミクロデータセットである(一部の条件は連続変数にのみ適用される)。
+      <ul>
+        <li>少数のサブドメイン(レコードや変数の部分集合)における平均値と共分散</li>
+        <li>データのいくつかの集計表における周辺値(このアプローチにおける情報損失は、主にミクロデータに基づいて作成される表に関するものであるため、<a href="04-magnitude-tabular-data.html">第4章</a>および<a href="05-frequency-tables.html">第5章</a>で論じる)</li>
+        <li>少なくとも1つの分布特性</li>
+      </ul>
+    </li>
+    <li>ミクロデータセットは、重要なサブドメインに関する6つの変数が提供され、それらが妥当に分析できる場合、<em>分析的に興味深い</em>ミクロデータセットである。<br>
+    分析的妥当性と分析的興味深さのより厳密な条件は、具体的なデータ利用方法を考慮しなければ述べることができない。これらの定義は不明確ではあるものの、いくつかの測定方法を示唆している。
+      <ul>
+        <li>元データセットと保護後データセットの生のレコードを比較する。SDC手法が恒等関数に近いほど、影響は小さくなる(しかし開示リスクは高くなる!)。これには、元データセットのレコードと保護後データセットのレコードとのペアリングが必要となる。マスキング手法の場合、保護後データセットの各レコードは、それが由来する元データセットのレコードと自然にペアリングされる。合成による保護後データセットの場合、ペアリングはより人為的なものとなる。Dandekar、Domingo-FerrerおよびSebé(2002)は、何らかの距離指標に基づき、合成レコードを最も近い元のレコードとペアリングすることを提案した。</li>
+        <li>元データセットと保護後データセットについて計算されたいくつかの統計量を比較する。上記の定義は、SDC手法によってできる限り維持されるべきいくつかの統計量を列挙している。</li>
+      </ul>
+    </li>
+  </ul>
+
+  <p>以上の前提を踏まえると、ミクロデータに関する情報損失は、分布の違い、多様性の違い、および各特徴量間の関連の形状と強さの違いに関わるものとなりうる。したがって、情報損失の測定は以下の種類に区分される。</p>
+
+  <ol>
+    <li>分布の乱れの測定 - 変数の元の値と摂動後の値との間の距離に基づく測定(例:平均、相対距離の平均、複雑な距離など)。</li>
+    <li>推定の分散への影響の測定 - SDC前後の連続変数の平均に関する分散間の距離を用いて、あるいは選択された独立カテゴリカル変数に対する選択された従属変数についての多要因分散分析(ANOVA)を用いて計算される(この場合、情報損失の測定には、元データおよび摂動後データに基づく関連モデルについて、決定係数$R^2$の構成要素(群内分散と群間分散の観点から)の比較が含まれる。Hundepool et al. (2012) を参照)。</li>
+    <li>関連の強さへの影響の測定 - 元の連続変数間、および対応する摂動後の連続変数間の、関連の方向と強さの指標の比較。このような指標としては、例えば相関係数や独立性検定が挙げられる。</li>
+  </ol>
+
+  <h3>カテゴリカルデータのための情報損失指標</h3>
+
+  <p>カテゴリカルデータに対して、加算、減算、乗算、除算などの基本的な算術演算に基づく指標を単純に計算することはできない。ユークリッド距離、平均分散、相関などのほとんどの記述統計量を用いることもできない。Domingo-FerrerおよびTorra(2001)では、以下の代替手法が検討されている。</p>
+
+  <ul>
+    <li>カテゴリカル値の直接比較</li>
+    <li>分割表の比較</li>
+    <li>エントロピーに基づく指標</li>
+  </ul>
+
+  <p>以下では、これらの各種類の指標の例について述べる。</p>
+
+  <h4 id="sec-direct-comparison">カテゴリカル値の直接比較</h4>
+  <div class="expert-level">
+    <span class="badge">上級者向け</span>
+    <p>カテゴリカルデータに対する行列$X$と$X^{\prime}$の比較には、カテゴリカル変数に対する距離の定義が必要となる。この定義は、元のレコードとその保護後バージョンを比較する際に生じうるカテゴリの組の間の距離のみを考慮する(元のレコードと保護後のレコードのペアリングについては前述の議論を参照)。</p>
+    <p>名義変数$V$(順序のない集合上の値をとるカテゴリカル変数)については、許される演算は等価性の比較のみである。これにより、以下の距離の定義が導かれる。</p>
+    $$
+    d_V(c,c')=\begin{cases}
+    0, & \text{if } c=c' \\
+    1, & \text{if } c \neq c'
+    \end{cases}
+    $$
+    <p>ここで、$c$は元のレコードにおけるカテゴリであり、$c'$は対応する保護後のレコードにおいて$c$を置き換えたカテゴリである。</p>
+    <p>順序変数$V$(全順序集合上の値をとるカテゴリカル変数)については、$V$の値域$D(V)$上の全順序演算子を$\leq V$とする。カテゴリ$c$と$c^{\prime}$の間の距離を、$c$と$c^{\prime}$の最小値と最大値の間にあるカテゴリの数を、値域の濃度で割った値として定義する。</p>
+    $$
+    \text{dc}\left(c,c^{\prime}\right)=\frac{\left|c^{\prime\prime}\text{:min}\left(c,c^{\prime}\right)\leq c^{\prime\prime}<\text{max}\left(c,c^{\prime}\right)\right|}{\left|D(V)\right|}
+    $$
+  </div>
+
+  <h4 id="sec-contingency-table">分割表の比較</h4>
+  <div class="expert-level">
+    <span class="badge">上級者向け</span>
+    <p>カテゴリカル変数の値を直接比較する方法の代替として、それらの分割表を比較する方法がある。2つのデータセット$F$と$G$(それぞれ元データと保護後データ)と、それらに対応する$t \leq K$次元の分割表が与えられたとき、変数の部分集合$W$に対する分割表に基づく情報損失指標$CTBIL$を以下のように定義できる。</p>
+    $$
+    CTBIL(F,G;W,K)=\sum_{\{V_{ji}\cdots V_{jt}\} f\subseteq W\atop|\{V_{ji}\cdots V_{jt}\}|\leq K}\sum_{i_1\cdots i_t}|x^F_{i_1\cdots i_t}-x^G_{i_1\cdots i_t} |
+    $$
+    <p>ここで、$x_{\text{subscripts}}^{\text{file}}$は、$\text{file}$の分割表における$\text{subscripts}$で示される位置のエントリである。</p>
+    <p>考慮すべき分割表の数は、変数の数$|W|$、各変数のカテゴリ数、および次元$K$に依存するため、上式の正規化版が望ましい場合がある。これは、上式を、考慮対象となるすべての表におけるセルの総数で割ることによって得られる。</p>
+    <p>分割表間の距離は、文献で用いられているいくつかの情報損失指標を一般化したものである。例えば、$\mu$-ARGUSソフトウェア(例えばHundepool et al., 2014を参照)は、局所抑制による情報損失を、抑制の回数を数えることによって測定する。1次元の2つの分割表間の距離は、抑制回数の2倍を返す。これは、あるレコードについてカテゴリ$A$が抑制されると、分割表の2つのエントリが変化するためである。すなわち、カテゴリ$A$を持つレコードの数が減少し、「欠損」カテゴリを持つレコードの数が増加する。</p>
+  </div>
+
+  <h4>エントロピーに基づく指標</h4>
+  <div class="expert-level">
+    <span class="badge">上級者向け</span>
+    <p>De WaalおよびWillenborg(1999)、Kooiman、WillenborgおよびGouweleeuw(1998)、ならびにWillenborgおよびDe Waal(2001)では、局所抑制、全体再コード化、およびPRAMという各手法について、情報損失を測定するためのシャノンのエントロピーの利用が論じられている。エントロピーは情報理論上の指標であるが、保護処理を、元のデータセットが雑音の多いチャネルを通じて伝送される際に付加される雑音としてモデル化すれば、SDCにおいても用いることができる。</p>
+    <p>前述のとおり、PRAMは雑音付加、抑制、および再コード化の各手法を一般化した手法である。したがって、ここではエントロピーの利用に関する説明をPRAMに限定する。</p>
+    <p>$V$を元のデータセットにおける変数とし、$V'$をPRAMで保護されたデータセットにおける対応する変数とする。$\mathbf{P}_{V,V'} = \left\{\mathbb{P}\left( V' = j \mid V = i \right) \right\}$をPRAMのマルコフ行列とする。このとき、$V' = j$であることが分かっているときの$V$の条件付き不確実性は次のようになる。</p>
+    $$
+    H\left( V \mid V' = j \right) = - \sum\limits_{i = 1}^{n}\mathbb{P}\left( V = i \mid V' = j \right)\log \mathbb{P}\left( V = i \mid V' = j \right)
+    $$
+    <p>上式の確率は、ベイズの公式を用いて$\mathbf{P}_{V,V'}$から導出できる。最終的に、エントロピーに基づく情報損失指標$EBIL$は、保護後のデータセット$G$に含まれるすべての個体$r$について上式を累積することで得られる。</p>
+    $$
+    EBIL\left( \mathbf{P}_{V,V'},G \right) = \sum\limits_{r \in G}^{}{H\left( V \mid V' = j_{r} \right)}
+    $$
+    <p>ここで$j_{r}$は、レコード$r$において$V'$がとる値である。</p>
+    <p>上記の指標は、$V$と$V^{\prime}$を多次元変数(すなわち複数の1次元変数を表すもの)とみなすことで、多変量データセットに対して一般化できる。</p>
+    <p>情報損失の測定にエントロピーを用いることは理論的な観点からは魅力的であるが、データ有用性の損失という観点からのその解釈は、これまでに論じた指標ほど自明ではない。</p>
+  </div>
+
+  <h3>連続データのための情報損失指標</h3>
+
+  <p>$n$個の個体(レコード)$I_{1},I_{2},\cdots,I_{n}$と$p$個の連続変数$Z_{1},Z_{2},\cdots,Z_{p}$からなるミクロデータセットを考える。$X$を元のミクロデータセットを表す行列(行がレコード、列が変数)とする。$X^{'}$を保護後のミクロデータセットを表す行列とする。データセットに含まれる情報を特徴づける上で、以下のツールが有用である。</p>
+
+  <ul>
+    <li>共分散行列$V$($X$上)と$V^{'}$($X^{'}$上)。</li>
+    <li>相関行列$R$と$R^{'}$。</li>
+    <li>$p$個の変数と、主成分分析により得られる$p$個の因子である主成分${PC}_{1},{PC}_{2},\cdots,{PC}_{p}$との間の相関行列$RF$と${RF}^{'}$。</li>
+    <li>$p$個の各変数と第1主成分${PC}_{1}$(またはその他の主成分${PC}_{i}$)との間の共通性(communality)。共通性とは、各変数のうち${PC}_{1}$(または${PC}_{i}$)によって説明される割合である。$X$についての共通性のベクトルを$C$、$X^{'}$に対応するベクトルを$C^{'}$とする。</li>
+    <li>$X$における各変数の各主成分への負荷量(loading)を含む行列$F$と$F^{'}$。$X$における$i$番目の変数は、主成分の線形結合に残差変動を加えたものとして表現できる。ここで、$j$番目の主成分には、$i$番目の変数と$j$番目の主成分との関係を表す$F$内の負荷量が乗じられる(Chatfield and Collins, 1980)。$F^{'}$は$X^{'}$に対応する行列である。</li>
+  </ul>
+
+  <p>これらの構造上の差異を完全に反映する単一の定量的指標は存在しないと考えられる。そこで、Domingo-Ferrer、Mateo-Sanz、Torra(2001)およびDomingo-FerrerとTorra(2001)では、元データについて得られた行列$X$、$V$、$R$、${RF}$、$C$、$F$と、保護後データセットについて得られた対応する$X^{'}$、$V^{'}$、$R^{'}$、${RF}^{'}$、$C^{'}$、$F^{'}$との間の乖離を通じて情報損失を測定することが提案されている。特に、相関間の乖離は、回帰分析やクロス集計などのデータ利用における情報損失と関連している。</p>
+
+  <p>行列の乖離は、少なくとも以下の3通りの方法で測定できる。</p>
+
+  <p><strong>平均二乗誤差</strong> 行列の対の各成分の差の二乗和を、いずれかの行列のセル数で割ったもの。</p>
+  <p><strong>平均絶対誤差</strong> 行列の対の各成分の差の絶対値の和を、いずれかの行列のセル数で割ったもの。</p>
+  <p><strong>平均変動</strong> 保護後データについて計算された行列の各成分の、元データについて計算された行列の対応する成分に対する絶対百分率変動の和を、いずれかの行列のセル数で割ったもの。このアプローチには、変数の尺度変化の影響を受けないという利点がある。</p>
+
+  <p>下表は、Domingo-Ferrer、Mateo-SanzおよびTorra(2001)ならびにDomingo-FerrerとV. Torra(2001)によって提案された指標をまとめたものである。この表において、$p$は変数の数、$n$はレコードの数であり、行列の成分は対応する小文字で表される(例えば、$x_{\text{ij}}$は行列$X$の成分である)。$X - X^{'}$の指標については、すべてのデータに対してではなく変数の平均値に対して計算することも意味があり(この変種を$\overline{X^{\phantom{'}}} - \overline{X^{'}}$と呼ぶ)、同様に、$V - V^{'}$の指標についても、行列全体ではなく変数の分散のみ、すなわち共分散行列の対角成分のみを比較することが妥当な場合がある(この変種を$S - S^{'}$と呼ぶ)。</p>
+
+  <table>
+    <caption>連続ミクロデータのための情報損失指標。出典: Domingo-Ferrer, Mateo-Sanz and Torra (2001)。</caption>
+    <thead>
+      <tr><th></th><th>平均二乗誤差</th><th>平均絶対誤差</th><th>平均変動</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>$X-X'$</td>
+        <td>$\frac{\sum\limits_{j=1}^{p}\sum\limits_{i=1}^{n}(x_{ij} - x_{ij}')^2}{np}$</td>
+        <td>$\frac{\sum\limits_{j=1}^{p}\sum\limits_{i=1}^{n}|x_{ij} - x_{ij}'|}{np}$</td>
+        <td>$\frac{\sum\limits_{j=1}^{p}\sum\limits_{i=1}^{n}\frac{|x_{ij} - x_{ij}'|}{|x_{ij}|}}{np}$</td>
+      </tr>
+      <tr>
+        <td>$V-V'$</td>
+        <td>$\frac{\sum\limits_{j=1}^{p}\sum\limits_{1 \leq i \leq j}(v_{ij} - v_{ij}')^2}{p(p+1)/2}$</td>
+        <td>$\frac{\sum\limits_{j=1}^{p}\sum\limits_{1 \leq i \leq j}|v_{ij} - v_{ij}'|}{p(p+1)/2}$</td>
+        <td>$\frac{\sum\limits_{j=1}^{p}\sum\limits_{1 \leq i \leq j}\frac{|v_{ij} - v_{ij}'|}{|v_{ij}|}}{p(p+1)/2}$</td>
+      </tr>
+      <tr>
+        <td>$R-R'$</td>
+        <td>$\frac{\sum\limits_{j=1}^{p}\sum\limits_{1 \leq i < j}(r_{ij} - r_{ij}')^2}{p(p-1)/2}$</td>
+        <td>$\frac{\sum\limits_{j=1}^{p}\sum\limits_{1 \leq i < j}|r_{ij} - r_{ij}'|}{p(p-1)/2}$</td>
+        <td>$\frac{\sum\limits_{j=1}^{p}\sum\limits_{1 \leq i < j}\frac{|r_{ij} - r_{ij}'|}{|r_{ij}|}}{p(p-1)/2}$</td>
+      </tr>
+      <tr>
+        <td>$RF-RF'$</td>
+        <td>$\frac{\sum\limits_{j=1}^{p}w_j\sum\limits_{i=1}^{p}(rf_{ij} - rf_{ij}')^2}{p^2}$</td>
+        <td>$\frac{\sum\limits_{j=1}^{p}w_j\sum\limits_{i=1}^{p}|rf_{ij} - rf_{ij}'|}{p^2}$</td>
+        <td>$\frac{\sum\limits_{j=1}^{p} w_j \sum\limits_{i=1}^{p}\frac{|rf_{ij} - rf_{ij}'|}{|rf_{ij}|}}{p^2}$</td>
+      </tr>
+      <tr>
+        <td>$C-C'$</td>
+        <td>$\frac{\sum\limits_{i=1}^{p}(c_i - c_i')^2}{p}$</td>
+        <td>$\frac{\sum\limits_{i=1}^{p}|c_i - c_i'|}{p}$</td>
+        <td>$\frac{\sum\limits_{i=1}^{p}\frac{|c_i - c_{i}'|}{|c_i|}}{p}$</td>
+      </tr>
+      <tr>
+        <td>$F-F'$</td>
+        <td>$\frac{\sum\limits_{j=1}^{p}w_j\sum\limits_{i=1}^{p}(f_{ij} - f_{ij}')^2}{p^2}$</td>
+        <td>$\frac{\sum\limits_{j=1}^{p}w_j\sum\limits_{i=1}^{p}|f_{ij} - f_{ij}'|}{p^2}$</td>
+        <td>$\frac{\sum\limits_{j=1}^{p} w_j \sum\limits_{i=1}^{p}\frac{|f_{ij} - f_{ij}'|}{|f_{ij}|}}{p^2}$</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>Yancey、WinklerおよびCreecy(2002)では、元の値$x_{\text{ij}}$が0に近い場合に、$x_{\text{ij}}$で割ることによって$X - X^{'}$の平均変動が急激に増大することが指摘されている。情報損失指標がこのように特定の元の値に依存することは望ましくないため、Yancey、WinklerおよびCreecy(2002)は、$X - X^{'}$の平均変動を、より安定した以下の指標IL1で置き換えることを提案している。</p>
+  $$
+    \frac{1}{np}\sum_{j=1}^p\sum_{i=1}^n\frac{|x_{ij}-x'_{ij}|}{\sqrt{2} S_j}
+  $$
+  <p>ここで$S_{j}$は、元データセットにおける$j$番目の変数の標準偏差である。この指標はsdcMicro Rパッケージに組み込まれている。IL1指標は、その一方で、小さな乱れや特徴量の値の弁別性の弱さに対して非常に敏感であり、弁別性の低い変数については過大な値を、弁別性の高い変数については過小な値をとることがある。実務上、$S_j$が0に非常に近い場合、結果としてINF(無限大)が得られる。この場合、その指標は実質的に役に立たなくなる。なぜなら、複数の方法で統計的機密性が保護された複数のミクロデータセット間で情報損失を比較することができなくなるためである。それらすべてのデータセットについてIL1指標がINFに等しくなってしまう。</p>
+
+  <p>Trottini(2003)は、情報損失は開示リスクとのトレードオフの対象であり、後者には上限があるため(100%を超えるリスクは存在しない)、情報損失指標にも上限を設けるべきであると論じている。実際には、Trottini(2003)の提案は、上表にある平均変動に基づく指標を、あらかじめ定められた最大値までに制限するというものである。</p>
+
+  <p>Młodak(2020)は、関連の強さへの影響の評価という観点から、連続変数のための新たな情報損失指標を提案し、これはMłodak、PietrzakおよびJózefowski(2022)によってわずかに改良された。この指標は、元データ($R^{-1}$)および摂動後データ(${R^{\prime}}^{-1}$)における連続変数の相関行列の逆行列の対角成分、すなわち$\rho_{jj}^{(-1)}$と${\rho_{jj}^{\prime}}^{(-1)}$($j=1,2,\ldots,m_c$、ここで$m_c$は連続変数の数)に基づいている。</p>
+  $$
+  \gamma=\frac{1}{\sqrt{2}}\sqrt{\sum_{j=1}^{m_c}{\left(\frac{\rho_{jj}^{(-1)}}{\sqrt{\sum_{l=1}^m{\left(\rho_{ll}^{(-1)}\right)^2}}}-\frac{{\rho_{jj}^{\prime}}^{(-1)}}{\sqrt{\sum_{l=1}^m{\left({\rho_{ll}^{\prime}}^{(-1)}\right)^2}}}\right)^2}}\in [0,1].
+  $$
+  <p>上式の値は解釈も容易である。これは、変数間の関連に関する情報損失の期待値と理解できる。容易にわかるとおり、この結果は%で表すことができる。もちろん、行列$R$と$R'$はいずれも同じ相関係数に基づいていなければならない。この点で最も自然な選択はピアソンの指数である。しかし、ケンドールのタウ相関行列を用いる場合には、順序変数にも適用できる。相関行列が特異である場合、この方法は適用できない。指標$\gamma$の主な利点は、すべての変数を分離不可能な全体として扱い、分析対象の変数間のあらゆる関連(観測しにくいものも含む)を考慮することである。$\gamma$はsdcMicro Rパッケージの<code>IL_correl()</code>関数を用いて計算できる。</p>
+
+  <h3>複合的な情報損失指標</h3>
+  <div class="expert-level">
+    <span class="badge">上級者向け</span>
+    <p>以上で示した情報損失の概念は、すべての測定尺度の変数を考慮した複合的な情報損失指標を構築できるかという問いを提起する。関連する提案はMłodak(2020)によって定式化され、Młodak、PietrzakおよびJózefowski(2022)によって、労働災害に関するポーランドの調査から得られたミクロデータの事例に適用された。カテゴリカル変数については、上述の「カテゴリカル値の直接比較」および「分割表の比較」の各アプローチに基づいており、すなわち変数$X_j$が名義変数である場合(NAは別個のカテゴリとして扱う)、</p>
+    $$
+    d(x_{ij}^{\prime},x_{ij})=\begin{cases}
+    1&\text{if}\; x_{ij}^{\prime}=x_{ij},\cr
+    0&\text{if}\; x_{ij}^{\prime}\ne x_{ij}.
+    \end{cases}
+    $$
+    <p>$X_j$が順序変数である場合(簡単化のため、また一般性を失うことなく、カテゴリが1から$\mathfrak{r}_j$まで番号付けされていると仮定する。ここで$\mathfrak{r}_j$はカテゴリの数である)、(NAは別個の、最も低いカテゴリとして扱う)</p>
+    $$
+    d(x_{ij}^{\prime},x_{ij})=\frac{\mathfrak{r}(x_{ij}^{\prime},x_{ij})}{\mathfrak{r}_j-1},
+    $$
+    <p>ここで$\mathfrak{r}(x_{ij}^{\prime},x_{ij})$は、$x_{ij}^{\prime}$と$x_{ij}$のカテゴリ間の絶対差である。これらの部分距離は常に[0,1]の範囲の値をとる。ただし、これらを用いることにはいくつかの問題があり、特に再コード化が適用される場合に顕著である。再コード化された変数のカテゴリ数は、元のデータセットとSDC適用後のデータセットとで異なることになる。そのため、まず、変更されずに残ったカテゴリの番号が両方のバージョンで一致していることを確認する必要がある。例えば、再コード化前に変数$X_j$が$\mathfrak{r}_j$=8個のカテゴリ(1,2,3,4,5,6,7,8と表記)を持ち、再コード化の結果としてカテゴリ2と3、および6と7が統合された場合、新たなカテゴリはそれぞれ1,2,4,5,6,8という番号になるべきである。この場合も、カテゴリカル変数に対する上式(順序変数の式)がそのまま適用される。</p>
+    <p>連続変数の場合には、はるかに複雑な状況が生じる。Młodak(2020)は、この点についていくつかの選択肢を提案している。例えば、${x_{ij}}^{\prime}$と$x_{ij}$の差の正規化された絶対値、または正規化された差の二乗、すなわち</p>
+    $$
+    d(x_{ij}^{\prime},x_{ij})=|x_{ij}^{\prime}-x_{ij}| / \max_{k=1,2,\ldots,n}⁡|x_{kj}^{\prime}-x_{kj}|,
+    $$
+    <p>あるいは</p>
+    $$
+    d(x_{ij}^{\prime},x_{ij})=(x_{ij}^{\prime}-x_{ij})^2 / \max_{k=1,2,\dots,n}⁡(x_{kj}^{\prime}-x_{kj})^2,
+    $$
+    <p>である($i=1,2,\ldots,n$、$j=1,2,\ldots,m_c$。ここで$n$はレコードの数、$m_c$は連続変数の数)。</p>
+    <p>上式の距離指標には、もう一つの重大な弱点がある。情報損失の指標は、個々の部分的な情報損失に対して単調増加する関数であるべきである。つまり、例えばある$i\in\{1,2,\ldots,n\}$について値$|x_{ij}^{\prime}-x_{ij}|$が増加し、$h\ne i$についての値$|x_{hj}^{\prime}-x_{hj}|$がすべて変わらない場合、距離の値は増加するべきである。しかし、上式の場合はそうならない。もし、同様に、元の値とSDC適用後の値との間の指定された絶対差(あるいは、それぞれ差の二乗)が最大値に達すると、$i$についての部分的な情報損失は変わらず1のままとなり、他については小さくなる。その結果、実際には情報損失が増加しているにもかかわらず、指標の値は小さくなってしまう。</p>
+    <p>以上の指摘を踏まえ、Młodak(2020)は、この場合について以下の形の距離を提案した。</p>
+    $$
+    d(x_{ij}^{\prime},x_{ij})=\frac{2}{\pi}\arctan|x_{ij}^{\prime}-x_{ij}|.
+    $$
+    <p>逆正接(アークタンジェント、arctan)関数は、元の値と摂動後の値との間の距離が$[0,1]$の範囲の値をとることを保証するために用いられた。これを実現するには、上下両側で有界な単調増加関数を用いる必要がある。arctanはこの点で良い解であり、計算も容易である。もちろん、この種の関数の常として完璧ではない。元の値と摂動後の値との間の絶対差が大きい場合、その値は$\frac{\pi}{2}$に近づく傾向がある(その結果、$d(x_{ij}^{\prime},x_{ij})$は1に近づく)。他方、この性質のおかげで、摂動による情報損失をより明確に示すことができる。</p>
+    <p>分布の乱れに関する複合的な指標は、以下の式で与えられる(Młodak, Pietrzak and Józefowski (2022)参照)。</p>
+    $$
+    \lambda=\sum_{j=1}^m{\sum_{i=1}^n{\frac{d(x_{ij}^{\prime},x_{ij})}{mn}}}\in [0,1],
+    $$
+    <p>ここで$d(\cdot,\cdot)\in [0,1]$は、対象となる値の測定尺度に応じて、上記の式(名義変数の式、順序変数の式、あるいは連続変数の式)のいずれかに従って求められる距離の指標である。</p>
+    <p>前述の論文の著者らは、個々の変数$X_j$の全体の情報損失への寄与を、以下のように測定できることも示している。</p>
+    $$
+    \lambda_j=\sum_{i=1}^n{\frac{d(x_{ij}^{\prime},x_{ij})}{n}}\in [0,1],
+    $$
+    <p>($j=1,2,\ldots,m$)</p>
+    <p>非摂動的なSDCツールが用いられる場合には、さらなる問題が生じる。この場合、元の値は抑制されるか、そのまま変更されずに残される。この場合に上式(連続変数の式)をどのように計算するかは、変数の測定尺度にも依存する。用いられている$X_j$が名義変数である場合、$x_{ij}^{\prime}$が隠蔽されていれば$d(x_{ij}^{\prime},x_{ij})=1$と仮定すべきである。$X_j$が順序変数である場合、$x_{ij}$が$\mathfrak{r}_j$に近ければ$x_{ij}^{\prime}:=1$を、$X_j$が1に近ければ$x_{ij}^{\prime}:=\mathfrak{r}_j$を割り当てる。$X_j$が連続変数である場合には、</p>
+    $$
+    x_{ij}^{\prime}:=\begin{cases}
+    \max\limits_{h=1,2,\ldots,n}{x_{hj}}&\text{if}\quad x_{ij}\le\operatorname*{med}\limits_{h=1,2,\ldots,n}{x_{hj}},\\
+    \min\limits_{h=1,2,\ldots,n}{x_{hj}}&\text{if}\quad x_{ij}>\operatorname*{med}\limits_{h=1,2,\ldots,n}{x_{hj}}.
+    \end{cases}
+    $$
+    <p>とする。</p>
+    <p>上式の指標($\lambda$と$\lambda_j$)は百分率として表すことができ、それぞれ全体の情報損失と個々の変数の寄与を示す。$\lambda/\lambda_j$の値が大きいほど、損失/寄与は大きい。これにより、利用者はSDCの適用に伴う情報損失について、明確で理解しやすい情報を得ることができる。これらの指標はsdcMicro Rパッケージに実装されており、<code>IL_variables</code>関数によって計算される。</p>
+  </div>
+
+  <h3>ミクロデータの安全性と有用性のトレードオフの実践的な実現</h3>
+
+  <p>開示リスクの最小化とミクロデータの情報損失の最小化との間で最適なバランスを達成することは容易ではない。これらの量(特にリスク)の水準を左右するあらゆる側面を考慮に入れることは、非常に困難である(場合によっては不可能である)。さらに、リスクと情報損失はいずれも様々な観点から評価しうる。したがって、まず、開示リスクの種類と水準を左右しうる要因、および利用者が最も望むデータ利用の方向性を特定すべきである。リスクについては、(異なる種類の変数とそれらの関係を含む)内部的なリスクだけでなく、利用者がその雇用先や役職に応じてアクセスしうる代替のデータソースについても評価すべきである(このような情報は通常、正式なデータアクセス申請において提供される)。利用者が重視する情報損失測定の優先事項は、この文脈で用いる指標を確立する際の基礎とすべきである。例えば、利用者がある現象の分布の比較を重視するのであれば、分布の乱れに関する指標が他の指標よりもはるかに高い優先度を持つべきである。他方、利用者の関心の対象がいくつかの特徴量間の関連である場合、カテゴリカル変数については分割表のための指標を用いて情報損失を評価すべきである(これらは実質的に度数表であるため、この問題は<a href="05-frequency-tables.html">第5章</a>で論じる)。連続変数については、もちろん、前述の関連の強さへの影響の指標を適用できる。</p>
+
+  <p>例えば統計的仮説検定における有意性と損失の場合と同様に、これら2つの期待の間で妥当な妥協点を得るための最も自明かつ容易なアプローチは、以下の2つの方法のいずれかを適用することである。</p>
+
+  <ul>
+    <li>開示リスクの許容できる最大水準を恣意的に設定し、その状況下で情報損失を最小化する - これは何よりも、プライバシー保護の観点からデータの機密性とデータ保有者への信頼を守るものである。</li>
+    <li>情報損失の許容できる最大水準を恣意的に設定し、その状況下で開示リスクを最小化する - これは何よりも、信頼性が高く有用なデータの供給源としての利用者およびデータ提供者にとってのデータの有用性を守るものである。</li>
+  </ul>
+
+  <p>実務上、データ保有者(例えば公的統計機関)は、むしろ前者のアプローチを好む。データプライバシーの厳格な保護は、通常、有効な法規制によって課された義務であるためである。したがって、機密情報の安全性の確保は非常に重要である。</p>
+
+  <h3>事例</h3>
+
+  <p>SDC手法の適用に伴う開示リスクおよび情報損失の評価方法を、International Household Survey Network(IHSN)のウェブサイト<sup>[2]</sup>に掲載された事例研究「Statistical Disclosure Control for Microdata: A Practice Guide - Case Study Data and R Script」(Benschop, MachingautaおよびWelch(2022)の著書の補足資料)のデータを用いて示す。この種の最初の研究であり、著者らがsdcMicroパッケージを用いて農家のデータセットにSDC手法を適用したものから、コードの一部を利用した。</p>
+
+  <p>以下のカテゴリカル変数が識別変数として選択された。REGION(地域)、URBRUR(居住地域の種別)、HHSIZE(世帯規模)、OWNAGLAND(農地所有)、RELIG(世帯主の宗教)。事例研究の著者らは、これらの変数に局所抑制を適用した。</p>
+
+  <p>SDCは、以下の量的変数にも適用された。1) 支出:TFOODEXP(食費総額)、TALCHEXP(酒類支出総額)、TCLTHEXP(衣料・履物支出総額)、THOUSEXP(住居費総額)、TFURNEXP(家具費総額)、THLTHEXP(医療費総額)、TTRANSEXP(交通費総額)、TCOMMEXP(通信費総額)、TRECEXP(娯楽費総額)、TEDUEXP(教育費総額)、TRESTHOTEXP(外食・宿泊費総額)、TMISCEXP(その他支出総額)。2) 所得:INCTOTGROSSHH(世帯総所得(年間))、INCRMT(受取送金総額)、INCWAGE(賃金・給与(年間))、INCFARMBSN(世帯農業事業からの総所得(年間))、INCNFARMBSN(世帯非農業事業からの総所得(年間))、INCRENT(賃貸収入(年間))、INCFIN(貯蓄・貸付・税還付・保険満期払戻等による金融所得)、INCPENSN(年金その他社会扶助(年間))、INCOTHER(その他所得(年間))。3) 土地面積:LANDSIZEHA(世帯が所有する土地面積(ha))。支出および所得のすべての構成要素に関する変数には1%の雑音が付加され、外れ値には5%の雑音が付加された。LANDSIZEHA変数の値は丸められ(1未満の区画は小数点以下1桁、1以上の区画は整数に)、グループ化された(5~19の区間の値は13に、20~39の区間の値は30に、40を超える値は40にまとめられた)。</p>
+
+  <p>事例研究では、住居設備を表す変数、すなわちROOF(屋根の種類)、WATER(主な水源)、TOILET(主なトイレ設備)、ELECTCON(電気)、FUELCOOK(主な調理用燃料)、OWNMOTORCYCLE(オートバイの所有)、CAR(自動車の所有)、TV(テレビの所有)、LIVESTOCK(所有する大型家畜の頭数)にPRAM法が適用された。データはREGION変数によって層化され、80%のケースでは変換後の変数の値が変更されないようにされた。</p>
+
+  <p>上記の方法で匿名化されたデータセットは、開示リスクと情報損失の評価の出発点として用いられた。表1・表2は、局所抑制の適用前後における識別変数の開示リスクの記述統計量を示している。リスクは大幅に低減されたが、元のデータセットにおいてもすでに開示リスクが比較的低かったことに留意すべきである。個別リスクの最大値は、元のデータセットでは5.5%であったが、局所抑制の適用後には0.3%に低下した。元のデータセットにおける全体リスクは平均0.05%であり、これは開示されると予想される単位数が0.99であることを意味する。局所抑制の適用後、全体リスクは0.02未満に低下し、これは開示されると予想される単位数が0.35であることを意味する。</p>
+
+  <p>量的変数の開示リスクの評価については、[0.0%, 83.5%]の区間が選択された。この上限は、侵入者が各最近傍が実際に正しい連結であると確信しているという最悪のシナリオを表している。</p>
+
+  <p>情報損失を評価するために、前述のいくつかの指標が開発されている。匿名化の対象となった元のデータセットにおける変数の値と、匿名化後のデータセットにおけるそれらの値との間の距離に基づき、$\lambda$指標が計算された。表3は、$\lambda$の全体の値と、個々の変数についての値($\lambda_k$)を示している。匿名化された変数についての全体の情報損失は14.3%である。最大の損失は、雑音が付加された量的変数について観察され、INCTOTGROSSHHの場合、$\lambda$によって測定された情報損失は83.4%に達する。局所抑制の対象となった識別変数、およびPRAM法によって修正された変数の場合、情報損失ははるかに小さく、それぞれ最大9.7%および9.4%であった。</p>
+
+  <p>全体の情報損失は、上記の2つの指標$IL1$と$\lambda$を用いて求められた。$IL1$は79.4に等しく、これは量的変数の匿名化後の値の標準偏差が、元の変数の標準偏差から比較的大きく乖離していることを示している。相関係数に基づく2番目の指標の値は0.6%であり、これは量的変数間の相関に関する情報損失がわずかであることを示している。ただし、量的変数において無回答のケースが多数あったため、$\lambda$の値はわずか111件の観測値、すなわち全単位数の6%未満に基づいて計算されたものであることに留意すべきである。</p>
+
+  <p>以上の評価はR sdcMicroパッケージを用いて実施された。上記で説明した情報損失指標のうち一部はこのパッケージに実装されていないため、評価には使用されなかった。</p>
+
+  <table>
+    <caption>表1: 量的変数に関する個別リスク指標の記述統計量</caption>
+    <thead>
+      <tr><th>統計量</th><th>元の値</th><th>匿名化後の値</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>最小値(Min)</td><td>0.0007</td><td>0.0007</td></tr>
+      <tr><td>第1四分位数(Q1)</td><td>0.0021</td><td>0.0021</td></tr>
+      <tr><td>中央値(Me)</td><td>0.0067</td><td>0.0059</td></tr>
+      <tr><td>第3四分位数(Q3)</td><td>0.0213</td><td>0.0161</td></tr>
+      <tr><td>最大値(Max)</td><td>5.5434</td><td>0.3225</td></tr>
+      <tr><td>平均(Mean)</td><td>0.0502</td><td>0.0176</td></tr>
+    </tbody>
+  </table>
+
+  <table>
+    <caption>表2: 量的変数に関する全体リスク指標</caption>
+    <thead>
+      <tr><th>統計量</th><th>元の値</th><th>匿名化後の値</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>リスク(%)</td><td>0.0502</td><td>0.0176</td></tr>
+      <tr><td>開示件数の期待値</td><td>0.9895</td><td>0.3476</td></tr>
+    </tbody>
+  </table>
+
+  <table>
+    <caption>表3: 匿名化による情報損失(全体および個々の変数)</caption>
+    <thead>
+      <tr><th>変数</th><th>$\lambda$ (%)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>全体(OVERALL)</strong></td><td><strong>14.3</strong></td></tr>
+      <tr><td>URBRUR</td><td>0.5</td></tr>
+      <tr><td>REGION</td><td>0.2</td></tr>
+      <tr><td>OWNAGLAND</td><td>2.5</td></tr>
+      <tr><td>RELIG</td><td>1.1</td></tr>
+      <tr><td>LANDSIZEHA</td><td>9.7</td></tr>
+      <tr><td>TANHHEXP</td><td>50.7</td></tr>
+      <tr><td>TFOODEXP</td><td>38.3</td></tr>
+      <tr><td>TALCHEXP</td><td>12.6</td></tr>
+      <tr><td>TCLTHEXP</td><td>8.4</td></tr>
+      <tr><td>THOUSEXP</td><td>14.6</td></tr>
+      <tr><td>TFURNEXP</td><td>6.0</td></tr>
+      <tr><td>THLTHEXP</td><td>12.3</td></tr>
+      <tr><td>TTRANSEXP</td><td>18.5</td></tr>
+      <tr><td>TCOMMEXP</td><td>9.2</td></tr>
+      <tr><td>TRECEXP</td><td>4.5</td></tr>
+      <tr><td>TEDUEXP</td><td>41.4</td></tr>
+      <tr><td>TRESTHOTEXP</td><td>16.6</td></tr>
+      <tr><td>TMISCEXP</td><td>6.4</td></tr>
+      <tr><td>INCTOTGROSSHH</td><td>73.6</td></tr>
+      <tr><td>INCRMT</td><td>32.1</td></tr>
+      <tr><td>INCWAGE</td><td>71.0</td></tr>
+      <tr><td>INCFARMBSN</td><td>15.1</td></tr>
+      <tr><td>INCNFARMBSN</td><td>24.0</td></tr>
+      <tr><td>INCRENT</td><td>10.4</td></tr>
+      <tr><td>INCFIN</td><td>1.3</td></tr>
+      <tr><td>INCPENSN</td><td>17.1</td></tr>
+      <tr><td>INCOTHER</td><td>17.7</td></tr>
+      <tr><td>ROOF</td><td>6.0</td></tr>
+      <tr><td>TOILET</td><td>7.6</td></tr>
+      <tr><td>WATER</td><td>9.4</td></tr>
+      <tr><td>ELECTCON</td><td>1.7</td></tr>
+      <tr><td>FUELCOOK</td><td>4.3</td></tr>
+      <tr><td>OWNMOTORCYCLE</td><td>3.3</td></tr>
+      <tr><td>CAR</td><td>1.5</td></tr>
+      <tr><td>TV</td><td>7.3</td></tr>
+      <tr><td>LIVESTOCK</td><td>1.3</td></tr>
+    </tbody>
+  </table>
+
+  <p style="font-size:0.85rem;color:var(--muted);">[2] <a href="https://www.ihsn.org/software/disclosure-control-toolbox">https://www.ihsn.org/software/disclosure-control-toolbox</a></p>
+
+  <h3>参考文献</h3>
+  <p>Benschop, T., Machingauta, C., and Welch, M. (2022). <em>Statistical Disclosure Control: A Practice Guide</em>, <a href="https://readthedocs.org/projects/sdcpractice/downloads/pdf/latest/">https://readthedocs.org/projects/sdcpractice/downloads/pdf/latest/</a></p>
+  <p>Chatfield, C., and Collins, A. J., (1980). <em>Introduction to Multivariate Analysis</em>, Chapman and Hall, London, 1980.</p>
+  <p>Dandekar, R., Domingo-Ferrer, J., and Sebé, F., (2002). <em>LHS-based hybrid microdata vs. rank swapping and microaggregation for numeric microdata protection.</em> In J. Domingo-Ferrer, editor, Inference Control in Statistical Databases, volume 2316 of LNCS, pages 153--162, Berlin Heidelberg, 2002. Springer.</p>
+  <p>De Waal, A. G., and Willenborg, L. C. R. J. (1999). <em>Information loss through global recoding and local suppression.</em> Netherlands Official Statistics, 14:17--20, 1999. special issue on SDC.</p>
+  <p>Domingo-Ferrer, J., Mateo-Sanz, J. M., and Torra, V. (2001). <em>Comparing sdc methods for microdata on the basis of information loss and disclosure risk</em>. In Pre-proceedings of ETK-NTTS'2001 (vol. 2), pages 807--826, Luxemburg, 2001. Eurostat.</p>
+  <p>Domingo-Ferrer, J., and Torra, V. (2001). <em>Disclosure protection methods and information loss for microdata.</em> In P. Doyle, J. I. Lane, J. J. M. Theeuwes, and L. Zayatz, editors, Confidentiality, Disclosure and Data Access: Theory and Practical Applications for Statistical Agencies, pages 91--110, Amsterdam, 2001. North-Holland. <a href="https://crises-deim.urv.cat/webCrises/publications/bcpi/cliatpasa01Disclosure.pdf">https://crises-deim.urv.cat/webCrises/publications/bcpi/cliatpasa01Disclosure.pdf</a>.</p>
+  <p>Hundepool, A., Van de Wetering, A., Ramaswamy, R., Franconi, L., Capobianchi, A., De Wolf, P.P., Domingo-Ferrer, J., Torra, V., Brand, R., and Giessing, S. (2005). <em>$\mu$-ARGUS version 5.1 Software and User's Manual</em>. Statistics Netherlands, Voorburg NL, 2014. <a href="https://research.cbs.nl/casc/Software/MUmanual5.1.3.pdf">https://research.cbs.nl/casc/Software/MUmanual5.1.3.pdf</a>.</p>
+  <p>Hundepool, A., Domingo–Ferrer, J., Franconi, L., Giessing, S., Nordholt, E. S., Spicer, K., &amp; de Wolf, P. (2012). <em>Statistical Disclosure Control</em>. John Wiley &amp; Sons, Ltd.</p>
+  <p>Kooiman, P. L., Willenborg, L. and Gouweleeuw, J. (1998). <em>PRAM: A method for disclosure limitation of microdata.</em> Technical report, Statistics Netherlands (Voorburg, NL), 1998.</p>
+  <p>Młodak, A. (2020). Information loss resulting from statistical disclosure control of output data. <em>Wiadomości Statystyczne. The Polish Statistician</em>, 65 (9), 7–27. (in Polish)</p>
+  <p>Młodak, A., Pietrzak, M., &amp; Józefowski, T. (2022). The trade–off between the risk of disclosure and data utility in SDC: A case of data from a survey of accidents at work. <em>Statistical Journal of the IAOS</em>, 38 (4), 1503–1511.</p>
+  <p>Trottini, M. (2003). <em>Decision models for data disclosure limitation</em>. PhD thesis, Carnegie Mellon University, 2003.</p>
+  <p>Willenborg, L., and De Waal, T., (2001). <em>Elements of Statistical Disclosure Control</em>. Springer-Verlag, New York, 2001.</p>
+  <p>Winkler, W. E. (1998). <em>Re-identification methods for evaluating the confidentiality of analytically valid microdata.</em> In J. Domingo-Ferrer, editor, Statistical Data Protection, Luxemburg, 1999. Office for Official Publications of the European Communities. (Journal version in Research in Official Statistics, vol. 1, no. 2, pp. 50-69, 1998).</p>
+  <p>Yancey, W. E., Winkler, W. E., and Creecy, R. H. (2002). <em>Disclosure risk assessment in perturbative microdata protection.</em> In J. Domingo-Ferrer, editor, Inference Control in Statistical Databases, volume 2316 of LNCS, pages 135--152, Berlin Heidelberg, 2002. Springer.</p>
+
+  <h2 id="sec-software">ソフトウェア</h2>
+
+  <h3 id="sec-mu-argus">$\mu$-ARGUS</h3>
+
+  <p>$\mu$-ARGUSソフトウェアは、主に国家統計機関(NSI)の統計家が、安全なミクロデータファイルを作成するために上述のSDC手法を適用することを容易にするために開発された。これは、SDCの方法論の背景を知らなくても安全なファイルを自動的に作成してくれるブラックボックスではなく、SDCの方法論を適用するためのツールである。$\mu$-ARGUSの開発は、オランダ統計局においてオランダの手法と規則を実装することから始まった。このソフトウェアを出発点として、その後多くの他の手法が追加されてきた。これらの手法の多くは、CASCプロジェクトの期間中に開発され、あるいは実際に実装されたものである。</p>
+
+  <p>本節では、ソフトウェアを完全に説明する詳細なマニュアルが別途用意されているため、$\mu$-ARGUSについて簡単な概観のみを示す。</p>
+
+  <p>$\mu$-ARGUSの出発点は、安全でないレコードを識別するための閾値ルール、および全体再コード化と局所抑制のための手続きの実装であった。</p>
+
+  <p><strong>データ:</strong> $\mu$-ARGUSは、固定形式とフリー形式の両方のASCIIファイルを保護できる。</p>
+
+  <figure>
+    <img src="images/mu_argus_overview.png" alt="μ-ARGUSの概観">
+    <figcaption>$\mu$-ARGUSの概観</figcaption>
+  </figure>
+
+  <p>前述の方法論の節で説明した手法の多くは、$\mu$-ARGUSを用いてデータセットに適用できる。時間が許せば、近い将来、他の手法も含める予定である。</p>
+
+  <p>$\mu$-ARGUSは柔軟な対話型プログラムであり、データ保護のプロセスを案内してくれる。ミクロデータセットの準備ができている場合、典型的な$\mu$-ARGUSの実行では、通常、以下の手順を踏むことになる。</p>
+
+  <ol>
+    <li><strong>メタデータ。</strong>$\mu$-ARGUSはデータセットの構造を知る必要がある。一般的な側面だけでなく、SDC特有の追加情報も必要である。SDC特有のメタデータ部分を指定できる適切で柔軟な標準規格は今のところ存在しないため、ARGUSのメタデータ形式に頼らざるを得ない。これは(部分的に)外部で準備することも、$\mu$-ARGUSのセッション中に対話的に指定することもできる。</li>
+    <li><strong>閾値ルール/リスクモデル。</strong>いくつかのSDC手法(リスクモデルや閾値ルールなど)の基礎となる度数表の選択と計算。</li>
+    <li><strong>全体再コード化。</strong>可能な再コード化の選択と、その結果の検証。</li>
+    <li><strong>その他の保護手法</strong>の選択と適用。例えば:
+      <ul>
+        <li>マイクロアグリゲーション</li>
+        <li>PRAM</li>
+        <li>丸め処理</li>
+        <li>上限・下限コーディング</li>
+        <li>順位スワッピング</li>
+        <li>雑音付加</li>
+      </ul>
+    </li>
+    <li><strong>リスクモデル:</strong>リスク水準の選択</li>
+    <li><strong>安全なミクロファイルの生成。</strong>この過程で、上記で指定されたすべてのデータ変換が行われる。これはまた、残っているすべての安全でない組み合わせが局所抑制によって保護される時点でもある。詳細なレポートも生成される。</li>
+  </ol>
+
+  <p>上記の手順に従うと、安全なミクロデータファイルが生成される。$\mu$-ARGUSは非常に大規模なデータセットも扱うことができる。データファイルが探索され度数表が計算される最初の段階でのみ、負荷の大きい計算が行われる。これには、データファイルの規模に応じてある程度の時間がかかることがある。しかし、実際のSDC作業(上記4および5に挙げた全体再コード化やその他の手法)はすべて、この最初の段階で準備された情報のレベルで行われる。これは非常に迅速に行われる。保護後のデータファイルが作成される最終段階でのみ、データファイルの規模に応じて処理に時間がかかることがある。</p>
+
+  <p>この$\mu$-ARGUSのアーキテクチャには、対話的に行われる実際のSDC作業すべてが非常に高速な応答時間を持つという利点がある。様々な再コード化の結果を検証することは容易かつ単純である。</p>
+
+  <p>$\mu$-ARGUSの最新リリースはGitHub(<a href="https://github.com/sdcTools/muargus/releases">https://github.com/sdcTools/muargus/releases</a>)で入手できる。</p>
+
+  <h3 id="sec-sdcmicro">sdcMicro</h3>
+
+  <p><code>sdcMicro</code>(<a href="https://github.com/sdcTools/sdcMicro">https://github.com/sdcTools/sdcMicro</a>)は、ミクロデータ保護手法の節で論じたほぼすべての手法を実装した<a href="https://r-project.org">R</a>パッケージである。パッケージを使用するために必要な手順は、本質的に$\mu$-ARGUSの節で説明したものと同じであり、以下に簡潔にまとめる。</p>
+
+  <ol>
+    <li><strong>問題の定義</strong><br>
+    現在のsdc問題を定義するオブジェクトを作成することが常に最初の手順となる。この作業は、関数<code>createSdcObj()</code>を呼び出すことで実現できる。この関数では、かなり多くのパラメータを設定できる。主なものは以下のとおりである。
+      <ul>
+        <li><strong>データ</strong>: 入力データセットは<code>data.frame</code>/<code>data.table</code>である必要があるが、SAS、SPSS、STATAなどの他のツールからエクスポートまたは生成された様々な形式のファイル(<code>.csv</code>のようなプレーンテキストファイルや、<code>.json</code>、<code>.xml</code>のような構造化形式など)から、それらが長方形のデータ構造に変換可能である限り、そのようなオブジェクトを作成するためにRのあらゆる機能を利用できることに留意すべきである。もちろん、適切な入力オブジェクトを作成するために、データベースシステムへのクエリを使用することも可能である。</li>
+        <li><strong>リスク評価のための識別変数</strong>: 利用者は、カテゴリカルな識別変数の集合を指定する必要がある。これらの変数は、リスク指標を計算する際に自動的に用いられる(概念の節を参照)。</li>
+        <li><strong>数値識別変数</strong>: 重要とみなされる数値変数の集合を指定することも可能である(ただし任意)。そのような変数は、(例えば雑音によるマスキングなど)適切な摂動手法を(自動的に)適用するために使用できる。</li>
+        <li><strong>ウェイト</strong>: 対象のミクロデータが標本調査に由来する場合、適切なウェイトを保持する変数を指定できる。これは、リスク指標が正しく計算されるようにするために必要である。</li>
+        <li><strong>層</strong>: 対象の母集団の特定の層に対して、特定の匿名化アプローチを独立に適用することが有用な場合がある。<code>sdcMicro</code>では、母集団の異なるグループに対して異なる値を保持する変数を定義することでこれを実現できる。</li>
+        <li><strong>ゴースト変数</strong>: これにより、変数を(カテゴリカルな識別)変数にリンクすることができる。すなわち、関連する識別変数への変更(例えば抑制)が、「ゴースト」変数と呼ばれる従属変数に転送・適用される。</li>
+        <li><strong>直接識別子の除外</strong>: 統計実務では、ミクロデータファイルにはしばしば直接識別子が含まれており、入力オブジェクトの作成時点ですでに特定できる場合がある。そのような変数が定義されている場合、計算に先立って除去される。</li>
+      </ul>
+      <p><code>createSdcObj()</code>で作成したオブジェクトを扱うことは非常に便利であるが、パッケージに実装されたすべての手法を、<code>data.frame</code>のようなより単純なデータ構造に対しても適用することは十分に可能であることに留意すべきである。</p>
+    </li>
+    <li><strong>SDC手法の適用</strong><br>
+    問題インスタンスが作成されると、$k$-匿名性に違反する観測値の数や、定義されたリスクシナリオが与えられたときの再識別の期待値のような(全体的な)リスク指標といった、いくつかの有用な要約統計量が、単にオブジェクトを出力するだけで直ちに利用可能となり、表示される。
+      <p>次の手順は、オブジェクトに対話的にSDC手法を適用し、その適用がリスク指標とデータ有用性の両方に与える影響を再評価することである。適用の結果が期待どおりでない、あるいは望ましくない場合には、実装されている<code>undo()</code>メソッドを使用して、特定の手法を適用する前の状態に戻すことができる。これにより、異なるパラメータ設定を素早く試すことができ、SDC手法の適用プロセスを非常に対話的なものにしている。</p>
+      <p>このパッケージでは、例えば、<code>addNoise()</code>を用いて数値変数に確率的な雑音を付加すること(雑音付加の節)、<code>pram()</code>関数を用いてカテゴリカルスケールの変数の値を事後ランダム化すること(PRAMの節)、<code>dataGen()</code>メソッドを用いて合成ミクロデータを作成すること(合成データの節)、あるいは<code>globalRecode()</code>を用いて全体再コード化を行うこと(全体再コード化の節)が可能である。さらに、<code>rankSwap()</code>関数を用いて順位スワッピングを適用すること(データの順位スワッピングの節)、<code>suda2()</code>を用いてSUDAスコアを計算すること(SUDAの節)、<code>indivRisk()</code>と<code>freqCalc()</code>を用いて個別リスク推定値を計算すること(個別リスクの節)、および<code>kAnon()</code>を用いてカテゴリカルな識別変数の集合が$k$-匿名性を満たすようにすることが可能である。現行バージョンのパッケージでは、TRS(ターゲット型レコードスワッピング)が実装されており、<code>recordSwap()</code>関数を用いて呼び出すことができる。詳細な議論と概観は、専用のvignette(<a href="https://sdctools.github.io/sdcMicro/articles/recordSwapping.html">https://sdctools.github.io/sdcMicro/articles/recordSwapping.html</a>)で入手できる。</p>
+    </li>
+    <li><strong>結果のエクスポート</strong><br>
+    対話的なプロセスが完了すると、パッケージにより、初期化時に定義された(「ゴースト変数」などの)設定も尊重しつつ、適用されたすべての手法を反映した安全なデータセットを<code>writeSafeFile()</code>関数を用いて迅速に書き出すことができる。
+      <p>さらに、sdcオブジェクトに対していつでも適用できる<code>report()</code>機能が用意されている。このメソッドを呼び出すことで、内部用または外部用のレポートを生成し、プロセスを要約できる。内部レポートと外部レポートの違いは詳細度である。外部レポートは一般公開向けであり、特定のパラメータ設定などの(機密性のある)値を含まないのに対し、内部レポートはミクロデータを保護するために適用されたあらゆる手法を詳細に列挙する。どちらの場合も、容易に共有できる<code>html</code>ファイルが生成される。</p>
+    </li>
+    <li><strong>グラフィカルユーザーインターフェース</strong><br>
+    安全な保護済みミクロデータファイルを作成することは、しばしば困難な作業である。また、手続きの複数の手順を実行するためにRに深く入り込んでコードを書く必要があることは、Rの専門家でない利用者にとって障壁となりうる。この問題を軽減し、<code>sdcMicro</code>の利用を容易にするため、このパッケージには対話的なshinyベースのグラフィカルユーザーインターフェース(Meindl, 2019)が付属している。このインターフェースは<code>sdcApp</code>関数を用いて起動でき、その機能は専用のvignette(<a href="https://sdctools.github.io/sdcMicro/articles/sdcMicro.html">https://sdctools.github.io/sdcMicro/articles/sdcMicro.html</a>)で詳しく説明されている。</li>
+  </ol>
+
+  <div class="pagenav">
+    <a class="prev" href="03-3c-protection-methods-3.html">← 第3章 保護手法・詳細2</a>
+    <a class="next" href="03-5-examples.html">第3章 事例 (7/7) →</a>
+  </div>
+</div>
+</body>
+</html>

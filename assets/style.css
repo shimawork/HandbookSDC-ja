@@ -1,0 +1,173 @@
+/* SDCハンドブック和訳 共通スタイル */
+:root {
+  --bg: #ffffff;
+  --fg: #1a1a1a;
+  --muted: #5b5b5b;
+  --accent: #0b5fa5;
+  --accent-soft: #e8f1fa;
+  --border: #dcdcdc;
+  --code-bg: #f4f4f4;
+  --callout-bg: #fff8e1;
+  --callout-border: #e0b400;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1414161a;
+    --bg: #16181c;
+    --fg: #e6e6e6;
+    --muted: #a0a0a0;
+    --accent: #6cb2f2;
+    --accent-soft: #1d2a36;
+    --border: #33363b;
+    --code-bg: #22252a;
+    --callout-bg: #2a2510;
+    --callout-border: #b98f00;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.85;
+  font-size: 16px;
+}
+
+.page {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 6rem;
+}
+
+.masthead {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+
+.masthead .kicker {
+  color: var(--muted);
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+}
+
+.masthead h1 {
+  margin: 0.3rem 0 0;
+  font-size: 1.7rem;
+}
+
+nav.crumbs a { color: var(--accent); text-decoration: none; }
+nav.crumbs { font-size: 0.85rem; color: var(--muted); margin-bottom: 0.5rem; }
+
+h1, h2, h3, h4 { line-height: 1.4; scroll-margin-top: 1.5rem; }
+h2 { border-left: 5px solid var(--accent); padding-left: 0.6rem; margin-top: 2.8rem; }
+h3 { margin-top: 2.2rem; }
+h4 { margin-top: 1.6rem; color: var(--accent); }
+
+p { margin: 1em 0; }
+
+a { color: var(--accent); }
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.5rem 0;
+  font-size: 0.92rem;
+  overflow-x: auto;
+  display: block;
+}
+th, td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.7rem;
+  text-align: left;
+}
+th { background: var(--accent-soft); }
+
+code, pre {
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  background: var(--code-bg);
+  border-radius: 4px;
+}
+code { padding: 0.1em 0.35em; font-size: 0.9em; }
+pre { padding: 1rem; overflow-x: auto; }
+pre code { padding: 0; background: none; }
+
+blockquote {
+  margin: 1.2rem 0;
+  padding: 0.2rem 1rem;
+  border-left: 3px solid var(--border);
+  color: var(--muted);
+}
+
+.callout {
+  background: var(--callout-bg);
+  border-left: 4px solid var(--callout-border);
+  border-radius: 4px;
+  padding: 0.9rem 1.1rem;
+  margin: 1.5rem 0;
+}
+.callout .callout-title {
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+}
+
+.expert-level {
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  padding: 0.9rem 1.1rem;
+  margin: 1.5rem 0;
+}
+.expert-level .badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--accent);
+  border-radius: 3px;
+  padding: 0.15em 0.5em;
+  margin-bottom: 0.4rem;
+}
+
+figure { margin: 1.5rem 0; text-align: center; }
+figure img { max-width: 100%; border: 1px solid var(--border); }
+figcaption { font-size: 0.85rem; color: var(--muted); margin-top: 0.4rem; }
+
+.pagenav {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 3.5rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+.pagenav a {
+  text-decoration: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.6rem 1rem;
+  flex: 1;
+  color: var(--fg);
+}
+.pagenav a:hover { border-color: var(--accent); color: var(--accent); }
+.pagenav .next { text-align: right; }
+.pagenav .spacer { flex: 1; }
+
+.note-origtitle {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-top: -0.6rem;
+}
+
+.toc-list { list-style: none; padding-left: 0; }
+.toc-list li { margin: 0.4rem 0; }
+.toc-list .ch { color: var(--muted); font-size: 0.8rem; margin-right: 0.4rem; }
+.toc-section { margin-top: 2rem; }
+.toc-section h2 { margin-top: 1.2rem; }

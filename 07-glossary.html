@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>用語集 | SDCハンドブック和訳</title>
+<link rel="stylesheet" href="assets/style.css">
+<script>
+  window.MathJax = { tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] } };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
+</head>
+<body>
+<div class="page">
+  <div class="masthead">
+    <nav class="crumbs"><a href="index.html">目次</a> / 用語集</nav>
+    <div class="kicker">Handbook on Statistical Disclosure Control (2nd Edition) 和訳</div>
+    <h1>用語集</h1>
+    <div class="note-origtitle">原題: Glossary</div>
+  </div>
+
+  <p>2005年、Mark Elliot(マンチェスター大学)、Anco Hundepool(オランダ統計局)、Eric Schulte Nordholt(オランダ統計局)、Jean-Louis Tambay(カナダ統計局)、Thomas Wende(ドイツ連邦統計局)が、統計的開示制御(SDC)に関する用語集を編纂する取り組みを開始した。用語集の初版は2005年11月にジュネーブで開催されたUNECEのSDCに関するワークセッションで発表された。この用語集は<a href="https://research.cbs.nl/casc/glossary.htm">https://research.cbs.nl/casc/glossary.htm</a>でも閲覧できる。</p>
+
+  <p>本用語集における下線付きのリンクは、この用語集内の他の用語を指す。本ハンドブックには索引も含まれているが、誤解を招く相互参照を避けるため、この用語集自体は索引の対象としていない。</p>
+
+  <h2>A</h2>
+  <dl>
+    <dt id="Analysis_server">Analysis server(分析サーバー)</dt>
+    <dd><a href="#Remote_data_laboratory">リモートデータラボラトリー</a>の一形態であり、安全なサーバーに保存されたデータに対して分析を実行できるように設計されたもの。利用者は分析結果を見ることができるが、データそのものを見ることはできない。</dd>
+
+    <dt id="Anonymised_data">Anonymised data(匿名化データ)</dt>
+    <dd><a href="#Anonymised_record">匿名化レコード</a>のみで構成されるデータ。</dd>
+
+    <dt id="Anonymised_record">Anonymised record(匿名化レコード)</dt>
+    <dd>直接識別子が除去されたレコード。</dd>
+
+    <dt id="Approximate_disclosure">Approximate disclosure(近似的開示)</dt>
+    <dd>利用者が回答者の値について、実際の値に近い推定値を求めることができる場合に生じる開示。推定値が実際の値と完全に一致する場合、その開示は「厳密開示」となる。</dd>
+
+    <dt id="Argus">Argus(Argus)</dt>
+    <dd>統計的開示制御(SDC)のための2つのソフトウェアパッケージがArgusと呼ばれている。$\mu$-ARGUSは<a href="#Microdata">ミクロデータ</a>の保護に特化したソフトウェアツールである。これに用いられる主な手法は2つあり、<a href="#Global_recoding">全体再コード化</a>と<a href="#Local_suppression">局所抑制</a>である。<a href="#Global_recoding">全体再コード化</a>の場合、変数のいくつかのカテゴリが1つに統合される。<a href="#Local_suppression">局所抑制</a>の効果は、安全でない組み合わせに含まれる1つ以上の値が抑制される、すなわち欠損値に置き換えられることである。<a href="#Global_recoding">全体再コード化</a>と<a href="#Local_suppression">局所抑制</a>のいずれも情報損失につながる。より詳細度の低い情報しか提供されないか、あるいは一部の情報がまったく提供されなくなるためである。$\tau$-ARGUSは<a href="#Tabular_data">表形式データ</a>の保護に特化したソフトウェアツールであり、安全な表を作成するために用いられる。$\tau$-ARGUSは$\mu$-ARGUSと同じ2つの主要な手法、すなわち<a href="#Global_recoding">全体再コード化</a>と<a href="#Local_suppression">局所抑制</a>を用いる。$\tau$-ARGUSの場合、後者(局所抑制)は表の中のセルの<a href="#Suppression">抑制</a>から成る。</dd>
+
+    <dt id="Attribute_disclosure">Attribute disclosure(属性開示)</dt>
+    <dd>属性開示とは、<a href="#Identification">識別</a>とは独立した<a href="#Attribution">属性付与</a>である。この形態の開示は、<a href="#Tabular_data">表形式データ</a>の公開に携わる<a href="#NSI">NSI</a>(国家統計機関)にとって特に懸念される問題であり、公開された表や、<a href="#Subtraction">差し引き</a>を行った後に連結可能な表の集合の中に空セルが存在することから生じる。最低限、表の中に空セルが存在するということは、<a href="#Intruder">侵入者</a>が、ある母集団単位がその表の中に含まれているという単なる知識だけから、その侵入者自身は空セルに含まれる属性の組み合わせを保持していないと推測できてしまうことを意味する。</dd>
+
+    <dt id="Attribution">Attribution(属性付与)</dt>
+    <dd>特定の属性を特定の母集団単位と関連付ける、または関連付けないこと。</dd>
+  </dl>
+
+  <h2>B</h2>
+  <dl>
+    <dt id="Barnardisation">Barnardisation(バーナード化)</dt>
+    <dd>件数を表す表に対する開示制御手法の一つで、表中の一部のセルにランダムに1を加算または減算するもの。</dd>
+
+    <dt id="Blurring">Blurring(ぼかし処理)</dt>
+    <dd>ぼかし処理は、報告された値を平均値に置き換える手法である。実装の方法は数多く存在する。平均化のためのレコードのグループは、他の変数によるマッチングや、対象変数によるソートによって形成することができる。グループに含まれるレコード数(データが平均化される単位)は固定でもランダムでもよい。特定のグループに関連付けられた平均値は、そのグループの全メンバーに割り当てることも、(移動平均のように)「中央の」メンバーにのみ割り当てることもできる。この処理は複数の変数に対して行うこともでき、変数ごとに異なるグループ化を用いることもできる。</dd>
+
+    <dt id="Bottom_coding">Bottom coding(下限コーディング)</dt>
+    <dd><a href="#Top_and_bottom_coding">上限・下限コーディング</a>を参照。</dd>
+
+    <dt id="Bounds">Bounds(境界値)</dt>
+    <dd>度数表におけるセルの値が摂動または抑制された場合に、そのセルが取り得る値の範囲。表の周辺度数のみが公開される場合、公開されていない同時分布の境界値を推測することが可能である。表全体にわたって境界値を推測する手法の一つとして<a href="#Shuttle_algorithm">シャトルアルゴリズム</a>として知られる方法がある。</dd>
+  </dl>
+
+  <h2>C</h2>
+  <dl>
+    <dt id="Cell_Key_Method">Cell Key Method (CKM)(セルキー法(CKM))</dt>
+    <dd>元のセルの値に雑音を付加する、表作成後(ポストタビュラー)適用型の摂動的SDC手法。複数の表が整合性を保って保護される一方、表はもはや加法性を持たなくなる。</dd>
+
+    <dt id="Cell_suppression">Cell suppression(セル抑制)</dt>
+    <dd><a href="#Tabular_data">表形式データ</a>において、セル抑制というSDC手法は<a href="#Primary_suppression">一次抑制</a>と<a href="#Secondary_suppression">補完的(二次)抑制</a>から構成される。<a href="#Primary_suppression">一次抑制</a>とは、すべての<a href="#Risky_cells">リスクのあるセル</a>の値を公開しないことと特徴づけられ、その値は表中に示されず、抑制を示す「×」のような記号に置き換えられる。<a href="#Risky_cells">リスクのあるセル</a>の定義によれば、度数表ではすべての小さい件数を含むセルが、規模データの表ではすべての小さい件数を含むセルまたは<a href="#Dominance_rule">支配率ルール</a>に該当するケースを示すセルが、一次抑制の対象とならなければならない。<a href="#Risky_cells">リスクのあるセル</a>に対して望ましい保護水準を達成するためには、リスクのないセルの一部も追加で抑制する必要があり、これを<a href="#Secondary_suppression">補完的(二次)抑制</a>と呼ぶ。補完的に抑制されるセルのパターンは、抑制される情報量を最小限に抑えつつ、<a href="#Risky_cells">リスクのあるセル</a>に対して望ましい水準の曖昧性を提供できるよう、慎重に選択しなければならない。</dd>
+
+    <dt id="Complementary_suppression">Complementary suppression(補完的抑制)</dt>
+    <dd><a href="#Secondary_suppression">二次抑制</a>の同義語。</dd>
+
+    <dt id="Complete_disclosure">Complete disclosure(完全開示)</dt>
+    <dd><a href="#Exact_disclosure">厳密開示</a>の同義語。</dd>
+
+    <dt id="Concentration_rule">Concentration rule(集中度ルール)</dt>
+    <dd><a href="#nk_rule">(n,k)ルール</a>の同義語。</dd>
+
+    <dt id="Controlled_rounding">Controlled rounding(制御丸め処理)</dt>
+    <dd>加法性の問題を解決するために、制御丸め処理と呼ばれる手法が開発された。これは<a href="#Random_rounding">ランダム丸め処理</a>の一種であるが、各行・各列の公開値の合計が、対応する公開された周辺合計と一致するよう制約が課される。表に対する制御丸め処理のパターンを特定するために、線形計画法が用いられる。</dd>
+
+    <dt id="Controlled_Tabular_Adjustment">Controlled Tabular Adjustment (CTA)(制御表調整(CTA))</dt>
+    <dd><a href="#Tabular_data">表形式データ</a>を保護する手法であり、セルの値を選択的に調整することに基づく。<a href="#Sensitive_cell">センシティブセル</a>の値はそれぞれ最も近い安全な値のいずれかに置き換えられ、表の加法性を回復するために他のセルにも小さな調整が加えられる。制御表調整は<a href="#Cell_suppression">セル抑制</a>の代替手法として開発された。</dd>
+
+    <dt id="Conventional_rounding">Conventional rounding(通常丸め処理)</dt>
+    <dd>件数を表す表に対する開示制御手法。通常丸め処理を用いる場合、各件数は固定の基数の最も近い倍数に丸められる。例えば基数5を用いる場合、末尾が1または2で終わる件数は切り下げられて末尾0の件数に置き換えられ、末尾が3または4で終わる件数は切り上げられて末尾5の件数に置き換えられる。末尾が6から9までの件数についても同様に処理される。末尾の数字が0または5の件数はそのまま変更されない。基数10に丸める場合、末尾が5の件数は常に切り上げられることもあれば、丸めの慣行に従って切り上げまたは切り下げのいずれかとなることもある。</dd>
+  </dl>
+
+  <h2>D</h2>
+  <dl>
+    <dt id="Data_intruder">Data intruder(データ侵入者)</dt>
+    <dd><a href="#Identification">識別</a>または<a href="#Attribution">属性付与</a>を通じて、母集団単位に関する情報を開示しようと試みるデータ利用者。</dd>
+
+    <dt id="Data_intrusion_detection">Data intrusion detection(データ侵入検知)</dt>
+    <dd><a href="#Data_intruder">データ侵入者</a>をその行動によって検知すること。これは、<a href="#Remote_data_laboratory">リモートデータラボラトリー</a>に対して送信された要求のパターンを分析することによって生じる可能性が最も高い。現時点ではこれは理論上の可能性にすぎないが、<a href="#Virtual_safe_setting">仮想セーフセッティング</a>がより普及するにつれて、より重要性を増していくと考えられる。</dd>
+
+    <dt id="Data_Intrusion_Simulation">Data Intrusion Simulation (DIS)(データ侵入シミュレーション(DIS))</dt>
+    <dd>任意の母集団単位を、ターゲットとなる<a href="#Microdata">ミクロデータ</a>ファイル中の<a href="#Sample_unique">標本ユニーク</a>とマッチングさせた<a href="#Data_intruder">データ侵入者</a>が、そのマッチングを正しく行った確率を推定する手法。</dd>
+
+    <dt id="Data_protection">Data protection(データ保護)</dt>
+    <dd>データ保護とは、個人データの収集・保存・<a href="#Dissemination">提供・公開</a>によって生じる、回答者の<a href="#Privacy">プライバシー</a>への侵害を最小限に抑えることを目的とした、<a href="#Privacy">プライバシー</a>に関わる法律・政策・手続き一式を指す。</dd>
+
+    <dt id="Data_swapping">Data swapping(データスワッピング)</dt>
+    <dd>代表的な<a href="#Key">キー</a>で一致するレコード間で変数の値を入れ替える、<a href="#Microdata">ミクロデータ</a>に対する開示制御手法。文献ではこの手法は「多次元変換」と呼ばれることもある。これは(一定の条件下で)平均、分散、単変量分布などの統計量の集合を維持することを保証する変換手法である。</dd>
+
+    <dt id="Data_utility">Data utility(データの有用性)</dt>
+    <dd>あるデータの公開が分析資源としてどれだけ価値を持つかを表す包括的な用語。これはデータの分析上の完全性と分析上の妥当性から成る。<a href="#Disclosure_control_methods">開示制御手法</a>は通常、データの有用性に悪影響を及ぼす。理想的には、あらゆる開示制御の枠組みの目標は、<a href="#Disclosure_risk">開示リスク</a>を最小化しつつデータの有用性を最大化することであるべきである。実際には、開示制御の判断は有用性と<a href="#Disclosure_risk">開示リスク</a>との間のトレードオフとなる。</dd>
+
+    <dt id="Deterministic_rounding">Deterministic rounding(決定論的丸め処理)</dt>
+    <dd><a href="#Conventional_rounding">通常丸め処理</a>の同義語。</dd>
+
+    <dt id="Direct_identification">Direct identification(直接識別)</dt>
+    <dd>統計単位を、その<a href="#Formal_identifier">形式識別子</a>から識別すること。</dd>
+
+    <dt id="Disclosive_cells">Disclosive cells(開示リスクのあるセル)</dt>
+    <dd><a href="#Risky_cells">リスクのあるセル</a>の同義語。</dd>
+
+    <dt id="Disclosure">Disclosure(開示)</dt>
+    <dd>開示とは、個人であれ組織であれ、データ主体に対する不適切な<a href="#Attribution">属性付与</a>に関わるものである。開示は<a href="#Identification">識別</a>と<a href="#Attribution">属性付与</a>という2つの要素から成る。</dd>
+
+    <dt id="Disclosure_by_fishing">Disclosure by fishing(「フィッシング」による開示)</dt>
+    <dd>これは、<a href="#Intruder">侵入者</a>がターゲットとなるデータセットの中からリスクのあるレコードを特定し、それらのレコードに対応する母集団単位を見つけ出そうと試みる攻撃手法である。これは<a href="#Special_uniques_analysis">特殊ユニーク分析</a>によって評価できるタイプの開示である。</dd>
+
+    <dt id="Disclosure_by_matching">Disclosure by matching(マッチングによる開示)</dt>
+    <dd><a href="#Identification_dataset">識別データセット</a>内のレコードと<a href="#Anonymised_data">匿名化データ</a>セット内のレコードとを連結することによる開示。</dd>
+
+    <dt id="Disclosure_by_response_knowledge">Disclosure by response knowledge(回答知識による開示)</dt>
+    <dd>これは、ある人物が特定の調査に参加していたという知識から生じる開示である。<a href="#Intruder">侵入者</a>が、特定の個人がその調査に参加しており、したがってその人物のデータがデータセットに含まれていることを知っている場合、<a href="#Identification">識別</a>と開示をより容易に達成することができる。</dd>
+
+    <dt id="Disclosure_by_spontaneous_recognition">Disclosure by spontaneous recognition(自発的認識による開示)</dt>
+    <dd>これは、データセット内の個人が(偶然、あるいは<a href="#Data_intruder">データ侵入者</a>が特定の個人を探しているために)認識されることを意味する。これは、その個人が<a href="#Intruder">侵入者</a>に知られている珍しい特徴の組み合わせを持っている場合に、成功する可能性がより高くなる。</dd>
+
+    <dt id="Disclosure_control_methods">Disclosure control methods(開示制御手法)</dt>
+    <dd>機密データの開示を制御するには、主に2つのアプローチがある。第一は、外部利用者に提供されるデータの情報量を削減するアプローチである。<a href="#Tabular_data">表形式データ</a>の公開についてはこの種の手法は<a href="#Restriction_based_disclosure_control_method">制限に基づく開示制御手法</a>と呼ばれ、<a href="#Microdata">ミクロデータ</a>の公開についてはデータ削減による開示制御という表現が用いられる。第二は、機密データに対する<a href="#Disclosure_risk">開示リスク</a>を低減しつつ、情報量をできる限り保持できるように、<a href="#Dissemination">提供・公開</a>前にデータを変更するアプローチである。これらは<a href="#Perturbation_based_disclosure_control_methods">摂動に基づく開示制御手法</a>と呼ばれる。</dd>
+
+    <dt id="Disclosure_from_analytical_outputs">Disclosure from analytical outputs(分析出力からの開示)</dt>
+    <dd>出力を利用して個々の母集団単位に関する<a href="#Attribution">属性付与</a>を行うこと。この状況は、<a href="#Remote_data_laboratory">リモートデータラボラトリー</a>のように、データに対して問い合わせを行うことはできるが直接アクセスできない利用者において生じ得る。特に懸念される点の一つは、残差の公開である。</dd>
+
+    <dt id="Disclosure_limitation_methods">Disclosure limitation methods(開示制限手法)</dt>
+    <dd><a href="#Disclosure_control_methods">開示制御手法</a>の同義語。</dd>
+
+    <dt id="Disclosure_risk">Disclosure risk(開示リスク)</dt>
+    <dd>回答者の機密情報について許容できないほど狭い範囲での推定が可能である場合、または高い確信度で<a href="#Exact_disclosure">厳密開示</a>が可能である場合に、開示リスクが生じているとされる。</dd>
+
+    <dt id="Disclosure_scenarios">Disclosure scenarios(開示シナリオ)</dt>
+    <dd><a href="#Intruder">侵入者</a>の意図、その事前知識の種類、および利用可能な<a href="#Microdata">ミクロデータ</a>に応じて、<a href="#Microdata">ミクロデータ</a>については3種類の異なる開示、すなわち開示シナリオが考えられる。<a href="#Disclosure_by_matching">マッチングによる開示</a>、<a href="#Disclosure_by_response_knowledge">回答知識による開示</a>、および<a href="#Disclosure_by_spontaneous_recognition">自発的認識による開示</a>である。</dd>
+
+    <dt id="Dissemination">Dissemination(提供・公開(ディセミネーション))</dt>
+    <dd>刊行物、データベースへのアクセス、マイクロフィッシュ、電話による伝達など、いかなる形式であってもデータを供給すること。</dd>
+
+    <dt id="Disturbing_the_data">Disturbing the data(データの攪乱)</dt>
+    <dd>これは、何らかの系統的な方法でデータを変更する処理であり、その結果、数値が個々のケースに関する情報を開示するには不十分な精度になる。</dd>
+
+    <dt id="Dominance_rule">Dominance rule(支配率ルール(ドミナンスルール))</dt>
+    <dd><a href="#nk_rule">(n,k)ルール</a>の同義語。</dd>
+  </dl>
+
+  <h2>E</h2>
+  <dl>
+    <dt id="Exact_disclosure">Exact disclosure(厳密開示)</dt>
+    <dd>利用者が公開された情報から、個々のエンティティの正確な属性を特定できる場合に生じる開示。</dd>
+  </dl>
+
+  <h2>F</h2>
+  <dl>
+    <dt id="Feasibility_interval">Feasibility interval(実行可能区間)</dt>
+    <dd>表の構造および公開された値が与えられたとき、抑制されたセルが取り得る値を含む区間。</dd>
+
+    <dt id="Formal_identifier">Formal identifier(形式識別子)</dt>
+    <dd>あらゆる母集団単位について構造的に一意となる変数、または変数の集合。例として住民登録番号が挙げられる。形式識別子が<a href="#Intruder">侵入者</a>に知られている場合、<a href="#Microdata">ミクロデータ</a>を調べる前に追加の知識を持つ必要なく、その侵入者にとって対象個人の<a href="#Identification">識別</a>が直接可能となる。氏名や住所のような変数の組み合わせの中には、実務上の形式識別子と見なせるものもあるが、これらは経験的には一意でない事例が発生し得るものの、その確率は無視できるほど小さい。</dd>
+  </dl>
+
+  <h2>G</h2>
+  <dl>
+    <dt id="Global_recoding">Global recoding(全体再コード化)</dt>
+    <dd>機密性の問題は、データの構造を変更することによって対処できる。すなわち、表の行や列をより大きな階級区間や、特性の新たなグループ分けへと統合することができる。これは個々の項目を<a href="#Suppression">抑制</a>するよりも簡便な解決策となり得るが、表の記述的・分析的価値を低下させる傾向がある。この保護技術は<a href="#Microdata">ミクロデータ</a>の保護にも用いられることがある。</dd>
+  </dl>
+
+  <h2>H</h2>
+  <dl>
+    <dt id="HITAS">HITAS(HITAS)</dt>
+    <dd>階層表における<a href="#Cell_suppression">セル抑制</a>に対するヒューリスティックな手法。</dd>
+  </dl>
+
+  <h2>I</h2>
+  <dl>
+    <dt id="Identification">Identification(識別)</dt>
+    <dd>データ集合内の特定のレコードを、特定の母集団単位と関連付けること。</dd>
+
+    <dt id="Identification_dataset">Identification dataset(識別データセット)</dt>
+    <dd><a href="#Formal_identifier">形式識別子</a>を含むデータセット。</dd>
+
+    <dt id="Identification_data">Identification data(識別データ)</dt>
+    <dd>データ主体の<a href="#Direct_identification">直接識別</a>を可能にする個人データであって、データの収集・チェック・マッチングのために必要とされるが、統計結果の作成には以降用いられないもの。</dd>
+
+    <dt id="Identification_key">Identification key(識別キー)</dt>
+    <dd><a href="#Key">キー</a>の同義語。</dd>
+
+    <dt id="Identification_risk">Identification risk(識別リスク)</dt>
+    <dd><a href="#Intruder">侵入者</a>が公開された<a href="#Microdata">ミクロデータ</a>の中の少なくとも1人の回答者を識別する確率として定義されるリスク。この識別は、回答者に関する(センシティブな)情報の開示につながる可能性がある。識別リスクの大きさは、<a href="#Microdata">ミクロデータ</a>に含まれる<a href="#Quasi-identifier">準識別子</a>の数と性質、および<a href="#Intruder">侵入者</a>の事前知識に依存する。</dd>
+
+    <dt id="Identifying_variable">Identifying variable(識別変数)</dt>
+    <dd><a href="#Formal_identifier">形式識別子</a>そのもの、または<a href="#Formal_identifier">形式識別子</a>の一部を構成する変数。</dd>
+
+    <dt id="Indirect_identification">Indirect identification(間接識別)</dt>
+    <dd><a href="#Direct_identification">直接識別</a>以外の方法によって、公開された<a href="#Microdata">ミクロデータ</a>内の母集団単位の身元を推測すること。</dd>
+
+    <dt id="Inferential_disclosure">Inferential disclosure(推測による開示)</dt>
+    <dd>公開されたデータの統計的な性質から、高い確信度で情報を推測できる場合に生じる開示。例えば、データが所得と住宅の購入価格との間に高い相関を示すことがある。住宅の購入価格は一般に公開情報であるため、第三者はこの情報を用いてデータ主体の所得を推測するかもしれない。一般に、<a href="#NSI">NSI</a>はこの推測による開示について、2つの理由から懸念していない。第一に、統計データの主要な目的の一つは、利用者が変数間の関係を推測し理解できるようにすることである。もし<a href="#NSI">NSI</a>が開示を推測と同一視するならば、いかなるデータも公開できなくなってしまう。第二に、推測は個々の属性ではなく集計的な行動を予測するために設計されており、そのため個々のデータ値の予測としてはしばしば精度が低い。</dd>
+
+    <dt id="Informed_consent">Informed consent(インフォームド・コンセント)</dt>
+    <dd>人間集団を対象とする科学的研究における基本的な倫理原則。社会学者は、特に別段の定めがある場合を除き、被験者本人またはその法定代理人によるインフォームド・コンセントなしに、人間を研究対象として関与させることはない。インフォームド・コンセントとは、研究・統計目的のために個人データを提供することを認める本人の同意を指す。同意は、伴うリスクの認識、データの用途・利用者、およびデータを提供しない場合の代替手段の認識を含め、本人が的確に判断を下せるよう必要な事実を十分に開示した上でなされるものである。</dd>
+
+    <dt id="Intruder">Intruder(侵入者)</dt>
+    <dd><a href="#Data_intruder">データ侵入者</a>の同義語。</dd>
+  </dl>
+
+  <h2>J</h2>
+  <p>(該当する用語なし)</p>
+
+  <h2>K</h2>
+  <dl>
+    <dt id="Key">Key(キー)</dt>
+    <dd><a href="#Key_variable">キー変数</a>の集合。</dd>
+
+    <dt id="Key_variable">Key variable(キー変数)</dt>
+    <dd>2つのデータセットに共通する変数であり、それゆえデータセット間でレコードを連結するために利用できる。キー変数は<a href="#Formal_identifier">形式識別子</a>であることも、<a href="#Quasi-identifier">準識別子</a>であることもある。</dd>
+  </dl>
+
+  <h2>L</h2>
+  <dl>
+    <dt id="Licensing_agreement">Licensing agreement(ライセンス契約)</dt>
+    <dd>特定の目的のため、特定の期間、研究者が機密データを利用することを一定の条件の下で認める許可。この契約は、契約上・倫理上の義務、および識別可能な情報の不適切な開示・利用に対する罰則から成る。これらの罰則は、ライセンスの取り消しや追加データセットへのアクセス拒否から、<a href="#Microdata">ミクロデータ</a>ファイルの公開前に支払われた保証金の没収まで、さまざまなものがあり得る。ライセンス契約はほとんどの場合、契約書への署名と組み合わされる。この契約書には、データの意図された利用目的の明記、<a href="#Microdata">ミクロデータ</a>ファイルを他の受領者に提供しないことの指示、公表・提供されるすべての利用者出力に対する提供機関による事前の審査・承認、アクセスの条件・場所、および実効性のある罰則といった要件が含まれる。</dd>
+
+    <dt id="Local_recoding">Local recoding(局所再コード化)</dt>
+    <dd>他の変数に応じて、ある変数について2つ(またはそれ以上)の異なるバージョンを用いる、<a href="#Microdata">ミクロデータ</a>に対する開示制御手法。異なるバージョンは異なるコード化の水準を持つ。これは、第一の変数の分布が第二の変数に条件づけられた場合の分布にどのように依存するかによって決まる。典型的な例は、ある地理的地域において変数の分布が大きく偏っている場合に生じる。分布が偏っている地域では、粗いカテゴリの変数を作成するために、少数派のカテゴリが統合されることがある。</dd>
+
+    <dt id="Local_suppression">Local suppression(局所抑制)</dt>
+    <dd><a href="#Identifying_variable">識別変数</a>における個々のスコアを抑制することによって、個人または企業に関する情報が認識されるリスクを低減する保護技術。</dd>
+
+    <dt id="Lower_bound">Lower bound(下限値)</dt>
+    <dd>セルの値が摂動または抑制された度数表において、そのセルが取り得る最小の値。</dd>
+  </dl>
+
+  <h2>M</h2>
+  <dl>
+    <dt id="Macrodata">Macrodata(マクロデータ)</dt>
+    <dd><a href="#Tabular_data">表形式データ</a>の同義語。</dd>
+
+    <dt id="Microaggregation">Microaggregation(マイクロアグリゲーション)</dt>
+    <dd>対象となる変数の近接性の尺度に基づいてレコードがグループ化され、それらの変数について集計値を計算する際に同一の小グループが用いられる。個々のレコードの値の代わりに集計値が公開される。</dd>
+
+    <dt id="Microdata">Microdata(ミクロデータ)</dt>
+    <dd>ミクロデータセットは、個々の回答者または経済主体に関する情報を含むレコードの集合から成る。</dd>
+
+    <dt id="Minimal_unique">Minimal unique(最小ユニーク)</dt>
+    <dd>手元にある<a href="#Microdata">ミクロデータ</a>セットの中で一意であり、かつ、この一意性(<a href="#Uniqueness">ユニーク性</a>)の性質を持つ真部分集合を含まない変数値の組み合わせ。</dd>
+  </dl>
+
+  <h2>N</h2>
+  <dl>
+    <dt id="NSI">NSI(s)(NSI(国家統計機関))</dt>
+    <dd>国家統計機関(National Statistical Institute)の略称。</dd>
+
+    <dt id="nk_rule">(n,k) rule((n,k)ルール)</dt>
+    <dd>上位n単位がセル合計に対してk%を超えて寄与している場合、そのセルは機密とみなされる。例えばn=2、k=85の場合、上位2単位でセル合計の85%を超えて寄与しているセルはリスクがあると定義される。nとkの値は統計当局によって定められる。一部の<a href="#NSI">NSI</a>ではnとkの値自体が機密情報とされている。</dd>
+  </dl>
+
+  <h2>O</h2>
+  <dl>
+    <dt id="On-site_facility">On-site facility(オンサイト施設)</dt>
+    <dd>いくつかの<a href="#NSI">NSI</a>の施設内に設置された設備。ここでは、外部の研究者が、機密保持を担保し、データの用途に厳格な制限を課す契約上の合意の下で、開示リスクのあるデータへのアクセスを許可される。オンサイト施設は、機密データを分析できる「<a href="#Safe_setting">セーフセッティング</a>」と見なすことができる。オンサイト施設自体は、研究のためのデータの機密性を確保できる、安全で外部から隔離された作業・データ保存環境から構成される。ここでは<a href="#Security">セキュリティ</a>の物理的側面とIT的側面の両方が考慮される。オンサイト施設には外部利用者への管理・支援機能も含まれ、データへのアクセスについて合意された条件が遵守されていることを確認する。</dd>
+
+    <dt id="Ordinary_rounding">Ordinary rounding(通常丸め処理)</dt>
+    <dd><a href="#Conventional_rounding">通常丸め処理(Conventional rounding)</a>の同義語。</dd>
+
+    <dt id="Oversuppression">Oversuppression(過剰抑制)</dt>
+    <dd><a href="#Cell_suppression">セル抑制</a>という手法を適用する過程で生じ得る状況。これは、機密性を維持するために厳密に必要な量よりも多くの情報が抑制されてしまったという事実を指す。</dd>
+  </dl>
+
+  <h2>P</h2>
+  <dl>
+    <dt id="Partial_disclosure">Partial disclosure(部分開示)</dt>
+    <dd><a href="#Approximate_disclosure">近似的開示</a>の同義語。</dd>
+
+    <dt id="Passive_confidentiality">Passive confidentiality(受動的機密保持)</dt>
+    <dd>貿易統計について、EU加盟国は一般に「受動的機密保持」の原則を適用している。すなわち、データの<a href="#Dissemination">提供・公開</a>によって自らの利益が損なわれると感じる輸入業者または輸出業者からの要請があった場合にのみ、適切な措置を講じるというものである。</dd>
+
+    <dt id="Personal_data">Personal data(個人データ)</dt>
+    <dd>識別された、または識別され得る自然人(「データ主体」)に関するあらゆる情報。識別され得る人物とは、直接的または間接的に識別され得る人物を指す。ある個人が識別され得ない場合、そのデータは匿名であるとされる。</dd>
+
+    <dt id="Perturbation_based_disclosure_control_methods">Perturbation based disclosure control methods(摂動に基づく開示制御手法)</dt>
+    <dd>機密データに対する<a href="#Disclosure_risk">開示リスク</a>を低減しつつ、情報量をできる限り保持できるように、<a href="#Dissemination">提供・公開</a>前にデータを変更する、データ公開のための手法。摂動に基づく手法は、機密保持を目的として意図的に誤差の要素を導入することで、公開前にデータを改変する。例えば、表が作成された後にセルの値に誤差を挿入することができ、これはデータの出力に対して誤差が導入されることを意味するため、出力摂動と呼ばれる。また、誤差は<a href="#Microdata">ミクロデータ</a>水準の元データ、すなわち作成しようとする表の入力データに挿入することもでき、この手法はデータ摂動と呼ばれる――より適切であるが一般的には用いられない表現では入力摂動と呼ばれる。考えられる摂動手法には以下がある。
+      <ul>
+        <li><a href="#Rounding">丸め処理</a></li>
+        <li>ランダムノイズの付加や<a href="#Post_Randomisation_Method">事後ランダム化法(PRAM)</a>による摂動</li>
+        <li><a href="#Tabular_data">表形式データ</a>に適用される、<a href="#Microdata">ミクロデータ</a>向けの<a href="#Disclosure_control_methods">開示制御手法</a></li>
+      </ul>
+    </dd>
+
+    <dt id="Population_unique">Population unique(母集団ユニーク)</dt>
+    <dd>与えられた<a href="#Key">キー</a>について、母集団の中で一意であるデータセット内のレコード。</dd>
+
+    <dt id="P-percent_rule">P-percent rule(P%ルール)</dt>
+    <dd>qが100%である<a href="#pq_rule">(p,q)ルール</a>の特別な場合であり、一般的な知識から、任意の回答者が他の回答者の寄与を100%以内で推定できることを意味する(すなわち、その値が非負であり、実際の値の最大2倍までの一定値未満であることを知っている)。</dd>
+
+    <dt id="pq_rule">(p,q) rule((p,q)ルール)</dt>
+    <dd>公開されている情報から、ある個人のセル合計に対する寄与がq%以内で推定できると仮定する(q=公開前誤差)。統計量の公開後には、その値はp%以内で推定できるようになる(p=公開後誤差)。(p,q)ルールでは、比p/qが公開による情報利得を表す。この情報利得が許容できない場合、そのセルは機密であると宣言される。パラメータpおよびqの値は統計当局によって定められ、これにより許容される情報利得の水準が定義される。一部の<a href="#NSI">NSI</a>ではpとqの値自体が機密情報とされている。</dd>
+
+    <dt id="Post_Randomisation_Method">Post Randomisation Method (PRAM)(事後ランダム化法(PRAM))</dt>
+    <dd>カテゴリ変数のスコアが一定の確率で他のスコアに変更される、<a href="#Microdata">ミクロデータ</a>に対する保護手法。これはすなわち、既知の誤分類確率を用いた意図的な誤分類である。</dd>
+
+    <dt id="Primary_confidentiality">Primary confidentiality(一次的機密性)</dt>
+    <dd>これは、公開すると<a href="#Attribute_disclosure">属性開示</a>を許してしまう、表のセルデータに関するものである。データを一次的に機密とみなす主な理由は2つある。
+      <ul>
+        <li>セルに含まれる単位数が少なすぎること</li>
+        <li>セル内で1つまたは2つの単位が支配的であること</li>
+      </ul>
+      「少なすぎる」あるいは「支配的」を構成する基準は、統計分野によって異なる。
+    </dd>
+
+    <dt id="Primary_protection">Primary protection(一次保護)</dt>
+    <dd>小さい件数を含むセルや支配的なケースにあたるすべてのセルに対して<a href="#Disclosure_control_methods">開示制御手法</a>を用いた保護。</dd>
+
+    <dt id="Primary_suppression">Primary suppression(一次抑制)</dt>
+    <dd>この手法は、すべての<a href="#Disclosive_cells">開示リスクのあるセル</a>を公開しないことと特徴づけられ、その値は表中に示されず、抑制を示す「×」のような記号に置き換えられる。<a href="#Disclosive_cells">開示リスクのあるセル</a>の定義によれば、度数表ではすべての小さい件数を含むセルが、規模データの表ではすべての小さい件数を含むセルまたは支配的なケースを表すセルが、一次抑制の対象とならなければならない。</dd>
+
+    <dt id="Prior-posterior_rule">Prior-posterior rule(事前事後ルール)</dt>
+    <dd><a href="#pq_rule">(p,q)ルール</a>の同義語。</dd>
+
+    <dt id="Privacy">Privacy(プライバシー)</dt>
+    <dd>プライバシーはデータ主体に適用される概念であり、一方で機密性はデータに適用される概念である。この概念は次のように定義される。「データを提供する個人または組織と、それを受領する組織との間で合意された、当該データに付与される地位であって、提供される保護の程度を示すもの」。機密性とプライバシーの間には明確な関係がある。機密性の侵害は、個人に害を及ぼすデータの開示につながり得る。これはプライバシーへの攻撃である。なぜなら、それは、本人の<a href="#Personal_data">個人データ</a>がどのように使われるかについての自己決定への侵入だからである。情報プライバシーには、情報の探求における過度な干渉からの個人の自由、および、本人の信条・行動・意見・態度をどの程度、どのような状況下で他者と共有するか、あるいは共有しないかを選択できる能力が含まれる。</dd>
+
+    <dt id="Probability_based_disclosures">Probability based disclosures (approximate or exact)(確率に基づく開示(近似または厳密))</dt>
+    <dd>ある事実が確実性をもって開示されるわけではない場合であっても、公開されたデータを用いて、正しい確率の高い言明を行うことができることがある。</dd>
+  </dl>
+
+  <h2>Q</h2>
+  <dl>
+    <dt id="Quasi-identifier">Quasi-identifier(準識別子)</dt>
+    <dd>データセット内の変数値またはその組み合わせであって、構造的に一意ではないが経験的には一意である可能性があり、それゆえ原理的には母集団単位を一意に識別し得るもの。</dd>
+  </dl>
+
+  <h2>R</h2>
+  <dl>
+    <dt id="Random_perturbation">Random perturbation(ランダム摂動)</dt>
+    <dd>これは開示制御手法の一つであり、真の値にランダムな値の形で雑音が付加される、あるいはカテゴリ変数の場合には真の値の代わりに別の値がランダムに代入される。</dd>
+
+    <dt id="Random_rounding">Random rounding(ランダム丸め処理)</dt>
+    <dd><a href="#Suppression">抑制</a>によって生じるデータ損失量を削減するため、度数表における<a href="#Sensitive_cell">センシティブセル</a>を保護する代替手法が検討されてきた。ランダム丸め処理や<a href="#Controlled_rounding">制御丸め処理</a>のような摂動手法はその代替手法の例である。ランダム丸め処理では、セルの値は丸められるが、標準的な丸めの慣行を用いる代わりに、切り上げるか切り下げるかがランダムに決定される。この丸めの仕組みは、偏りのない丸め結果を生み出すよう設計することができる。</dd>
+
+    <dt id="Rank_swapping">Rank swapping(順位スワッピング)</dt>
+    <dd>順位スワッピングは、連続変数を用いてスワッピングの対となるレコードを定義する方法を提供する。変数が(完全に)一致することを要求する代わりに、連続変数でソートしたリストにおける互いの近接性に基づいて「近い」と定義される。ソートされた変数上で順位が近いレコードが、スワッピングの対として指定される。多くの場合、順位スワッピングにおいてソートに用いられる変数は、スワッピングされる変数と同じものである。</dd>
+
+    <dt id="Record_linkage_process">Record linkage process(レコード連結処理)</dt>
+    <dd>ファイルAとファイルBの直積空間A×Bにおけるマッチのペアを、真のリンクの集合Mと、真のリンクではない集合Uとに分類しようと試みる処理。</dd>
+
+    <dt id="Record_swapping">Record swapping(レコードスワッピング)</dt>
+    <dd><a href="#Data_swapping">データスワッピング</a>の特殊な場合であり、レコードの地理コードが入れ替えられるもの。</dd>
+
+    <dt id="Remote_access">Remote access(リモートアクセス)</dt>
+    <dd>保護された<a href="#Microdata">ミクロデータ</a>へのオンラインアクセス。</dd>
+
+    <dt id="Remote_data_laboratory">Remote data laboratory(リモートデータラボラトリー)</dt>
+    <dd><a href="#Remote_execution">リモート実行</a>機能を提供する仮想環境。</dd>
+
+    <dt id="Remote_execution">Remote execution(リモート実行)</dt>
+    <dd>機関の保護されたネットワーク内に保存された、開示リスクのある<a href="#Microdata">ミクロデータ</a>に対して実行するためのスクリプトをオンラインで送信すること。結果が<a href="#Safe_data">安全なデータ</a>とみなされる場合、その結果はスクリプトの送信者に送られる。そうでない場合、送信者にはその要求に応じられない旨が通知される。リモート実行は、SAS、SPSS、STATAなどの特定の統計パッケージ用のスクリプトをリモートサーバー上で実行する形で送信することによって行われることも、利用者のデスクトップ上に置かれる専用のクライアントシステムを介して行われることもある。</dd>
+
+    <dt id="Residual_disclosure">Residual disclosure(残差開示)</dt>
+    <dd>公開された情報を、以前に公開された情報や公に入手可能な情報と組み合わせることによって生じる開示。例えば、重複しない地域についての表を、より大きな地域全体の表から差し引くことで、小地域に関する機密の残差情報が残ってしまうことがある。</dd>
+
+    <dt id="Restricted_access">Restricted access(制限付きアクセス)</dt>
+    <dd><a href="#Microdata">ミクロデータ</a>へのアクセスに条件を課すこと。利用者は、保護された生データの全範囲にアクセスし、自らが関心を持つ情報を個別に処理できる場合(これは利用者にとって理想的な状況である)もあれば、保護されたデータへのアクセスが制限され、一定数の出力(例えば表)、あるいは特定の構造を持つ出力のみが許される場合もある。制限付きアクセスは、表同士の連結が生じないことを確保するために必要となることがある。</dd>
+
+    <dt id="Restriction_based_disclosure_control_method">Restriction based disclosure control method(制限に基づく開示制御手法)</dt>
+    <dd><a href="#Tabular_data">表形式データ</a>の公開のための手法であり、外部利用者に提供されるデータへのアクセスを削減することから成る。この手法は、<a href="#Tabular_data">表形式データ</a>の利用者に提供される情報の内容を削減する。これは、収集されたデータから導出されるすべての数値を公開しないこと、あるいは可能な限り詳細な形式では情報を公開しないことによって実施される。</dd>
+
+    <dt id="Risky_cells">Risky cells(リスクのあるセル)</dt>
+    <dd><a href="#Statistical_disclosure">統計的開示</a>のリスクのために公開できない表のセルは、リスクのあるセルと呼ばれる。定義上、リスクのあるセルには3つの種類がある。小さい件数、支配、および<a href="#Complementary_suppression">補完的抑制</a>によるセルである。</dd>
+
+    <dt id="Risky_data">Risky data(リスクのあるデータ)</dt>
+    <dd>統計単位が直接的または間接的に識別されることを許し、それによって個々の情報を開示してしまう場合、データは開示リスクがあるとみなされる。ある統計単位が識別可能かどうかを判断するには、第三者がその統計単位を識別するために合理的に用いる可能性のあるあらゆる手段を考慮に入れる必要がある。</dd>
+
+    <dt id="Rounding">Rounding(丸め処理)</dt>
+    <dd>丸め処理は、出力摂動に基づく<a href="#Disclosure_control_methods">開示制御手法</a>の一群に属する。これは<a href="#Tabular_data">表形式データ</a>における小さい件数を開示から保護するために用いられる。この開示制御手法の基本的な考え方は、各件数を決定論的または確率的に、丸めの基数の最も近い整数倍に切り上げまたは切り下げることである。この処理によって、表の加法的な性質は一般に失われる。丸め処理は<a href="#Microdata">ミクロデータ</a>に対する再コード化手法として用いられることもある。</dd>
+
+    <dt id="R-U_confidentiality_map">R-U confidentiality map(R-U機密性マップ)</dt>
+    <dd><a href="#Disclosure_risk">開示リスク</a>と<a href="#Data_utility">データの有用性</a>との間のトレードオフを図示した表現。</dd>
+  </dl>
+
+  <h2>S</h2>
+  <dl>
+    <dt id="Safe_data">Safe data(安全なデータ)</dt>
+    <dd>適切な<a href="#Statistical_Disclosure_Control">統計的開示制御</a>手法によって保護された<a href="#Microdata">ミクロデータ</a>または<a href="#Macrodata">マクロデータ</a>。</dd>
+
+    <dt id="Safe_setting">Safe setting(セーフセッティング)</dt>
+    <dd><a href="#Microdata">ミクロデータ</a>ラボのような、開示リスクのあるデータセットへのアクセスを制御できる環境。</dd>
+
+    <dt id="Safety_interval">Safety interval(安全区間)</dt>
+    <dd><a href="#Primary_suppression">一次抑制</a>のルールを満たさないセルの値について要求される最小の<a href="#Feasibility_interval">実行可能区間</a>。</dd>
+
+    <dt id="Sample_unique">Sample unique(標本ユニーク)</dt>
+    <dd>与えられた<a href="#Key">キー</a>について、そのデータセットの中で一意であるレコード。</dd>
+
+    <dt id="Sampling">Sampling(サンプリング)</dt>
+    <dd>開示制御の文脈においては、<a href="#Microdata">ミクロデータ</a>ファイルの元のデータレコードのうち一部の割合のみを公開することを指す。</dd>
+
+    <dt id="Sampling_fraction">Sampling fraction(サンプリング率(抽出率))</dt>
+    <dd>データの公開に含まれる母集団の割合。単純無作為抽出の場合、サンプリング率は標本に選ばれた母集団単位の割合を表す。より複雑な抽出方法の場合、これは通常、標本を抽出した母集団の単位数に対する標本中の単位数の比を指す。</dd>
+
+    <dt id="Scenario_analysis">Scenario analysis(シナリオ分析)</dt>
+    <dd>データ侵入の起こり得るリスク経路を分析・分類するための、犯罪学的手法に類する一連の手法。これらの手法は、<a href="#Intruder">侵入者</a>が攻撃を行う可能性のある手段・動機・機会をまず明らかにすることを基本としている。このような分析の成果は、<a href="#Data_intruder">データ侵入者</a>が保有している可能性の高い<a href="#Key">キー</a>の集合を特定することである。</dd>
+
+    <dt id="Secondary_data_intrusion">Secondary data intrusion(二次的データ侵入)</dt>
+    <dd><a href="#Identification">識別</a>データセットと<a href="#Target_dataset">ターゲットデータセット</a>との間でマッチングを試みた後、<a href="#Intruder">侵入者</a>は追加の変数を用いたさらなる直接調査によって、一意でないマッチの間で判別を行うことがある。</dd>
+
+    <dt id="Secondary_disclosure_risk">Secondary disclosure risk(二次的開示リスク)</dt>
+    <dd>これは、それ自体は一次的な開示リスクを持たないが、他のデータと組み合わせて<a href="#Dissemination">提供・公開</a>されると、<a href="#Microdata">ミクロデータ</a>単位の<a href="#Identification">識別</a>や、ある単位の属性の開示を可能にしてしまうデータに関するものである。</dd>
+
+    <dt id="Secondary_suppression">Secondary suppression(二次抑制)</dt>
+    <dd><a href="#Risky_cells">リスクのあるセル</a>に対して望ましい保護を達成するためには、リスクのない他のセルも追加で抑制する必要があり、これを二次抑制、または<a href="#Complementary_suppression">補完的抑制</a>と呼ぶ。補完的に抑制されるセルのパターンは、公開される統計に含まれる情報を最大限に保ちつつ、<a href="#Disclosive_cells">開示リスクのあるセル</a>に対して望ましい水準の曖昧性を提供できるよう、慎重に選択しなければならない。</dd>
+
+    <dt id="Security">Security(セキュリティ)</dt>
+    <dd>効果的な開示制御手法は、<a href="#Exact_disclosure">厳密開示</a>や、個々のエンティティの属性についての望ましくない狭い範囲の推定に対する保護を提供する。言い換えれば、有用な手法は厳密開示または<a href="#Partial_disclosure">部分開示</a>を防止する。これによりセキュリティの水準は高くなる。<a href="#Microdata">ミクロデータ</a>の公開に対する<a href="#Disclosure_control_methods">開示制御手法</a>の場合、この保護は、回答者の<a href="#Identification">識別</a>が不可能であるときに確保される。なぜなら、<a href="#Identification">識別</a>は開示の前提条件だからである。</dd>
+
+    <dt id="Sensitive_cell">Sensitive cell(センシティブセル)</dt>
+    <dd>その値を知ることによって、個々の回答者の寄与について過度に正確な推定を許してしまうセル。センシティブセルは、<a href="#Microdata">ミクロデータ</a>に対して<a href="#nk_rule">(n,k)ルール</a>や<a href="#pq_rule">(p,q)ルール</a>といった<a href="#Dominance_rule">支配率ルール</a>を適用することによって特定される。</dd>
+
+    <dt id="Sensitive_variables">Sensitive variables(センシティブ変数)</dt>
+    <dd>データレコードに含まれる、<a href="#Key_variable">キー変数</a>以外の変数であって、開示されることを望まない回答者の私的領域に属するもの。「センシティブ変数」の厳密な定義は存在しないため、<a href="#Key">キー</a>とセンシティブ変数への区分はある程度恣意的である。犯罪歴の有無、健康状態、信用情報のように明らかにセンシティブなデータもあるが、区別が状況に依存する場合もある。例えば、ある人物の所得は、一部の国ではセンシティブ変数とみなされる一方、他の国では<a href="#Quasi-identifier">準識別子</a>とみなされることがあり、また一部の社会では個人の宗教が、キーであると同時にセンシティブ変数ともみなされることがある。個人や企業に関するセンシティブな情報を含むカテゴリ、すなわちセンシティブなカテゴリを1つ以上含むすべての変数は、センシティブ変数と呼ばれる。</dd>
+
+    <dt id="Shuttle_algorithm">Shuttle algorithm(シャトルアルゴリズム)</dt>
+    <dd>セルの件数間の依存関係を反復することによって、セルの上限値・下限値の<a href="#Bounds">境界値</a>を求める手法。分割表における個々の件数と、件数の集計値との間には多くの依存関係が存在する。個々の件数がすべては分からないが一部の集計値が分かっている場合、これらの依存関係を用いて欠測している件数について推測を行うことができる。シャトルアルゴリズムは、数多く存在し得る依存関係のうち特定の部分集合を構成し、それらを再帰的に反復することによって、欠測している件数の<a href="#Bounds">境界値</a>を求める。多くの依存関係には未知の件数が関わってくるため、これらの依存関係は単純な等式ではなく、下限値・<a href="#Upper_bound">上限値</a>を含む不等式として表現する必要がある。このアルゴリズムは、1回の完全な反復によっていずれのセルの件数の<a href="#Bounds">境界値</a>も狭めることができなくなった時点で終了する。</dd>
+
+    <dt id="Special_uniques_analysis">Special uniques analysis(特殊ユニーク分析)</dt>
+    <dd><a href="#Microdata">ミクロデータ</a>のレコードごとのリスクを分析する手法。</dd>
+
+    <dt id="Statistical_confidentiality">Statistical confidentiality(統計的機密性)</dt>
+    <dd>個々の統計単位に関連し、統計目的のために直接、または行政記録その他の情報源から間接的に得られたデータを、機密保持の権利に対するあらゆる侵害から保護すること。これは違法な開示の防止を意味する。</dd>
+
+    <dt id="Statistical_Data_Protection">Statistical Data Protection (SDP)(統計データ保護(SDP))</dt>
+    <dd>統計データ保護は、生産のすべての段階を考慮に入れる、より一般的な概念である。SDPは学際的な分野であり、計算機科学(データ<a href="#Security">セキュリティ</a>)、統計学、オペレーションズ・リサーチを取り入れている。</dd>
+
+    <dt id="Statistical_disclosure">Statistical disclosure(統計的開示)</dt>
+    <dd>ある統計量の<a href="#Dissemination">提供・公開</a>によって、外部のデータ利用者が、それがなければ得られなかったであろう、より優れた機密情報の推定値を得ることが可能になる場合に、統計的開示が生じたとされる。</dd>
+
+    <dt id="Statistical_Disclosure_Control">Statistical Disclosure Control (SDC)(統計的開示制御(SDC))</dt>
+    <dd>統計的開示制御の手法とは、個人・企業その他の組織に関する情報の開示リスクを低減するための手法の集合と定義できる。このような手法は<a href="#Dissemination">提供・公開</a>の段階にのみ関わるものであり、通常は公開されるデータの量を制限すること、またはデータを変更することに基づいている。</dd>
+
+    <dt id="Statistical_Disclosure_Limitation">Statistical Disclosure Limitation (SDL)(統計的開示制限(SDL))</dt>
+    <dd><a href="#Statistical_Disclosure_Control">統計的開示制御</a>の同義語。</dd>
+
+    <dt id="Subadditivity">Subadditivity(劣加法性)</dt>
+    <dd><a href="#nk_rule">(n,k)ルール</a>や<a href="#pq_rule">(p,q)ルール</a>の性質の一つであり、補完的なセルの探索を助けるもの。この性質は、互いに素なセルの和集合のセンシティビティが、各セルの個々のセンシティビティの和より大きくなることはない(三角不等式)ことを意味する。劣加法性は重要な性質である。なぜなら、これはセンシティブでないセルを集計した結果もセンシティブにはならず、検査する必要がないことを意味するからである。</dd>
+
+    <dt id="Subtraction">Subtraction(差し引き(サブトラクション))</dt>
+    <dd><a href="#Intruder">侵入者</a>が既知の個人を表から取り除くことによって、母集団の件数を表す表を攻撃し得るという原則。これによって表の中に特定のゼロが生じる場合、その表は<a href="#Attribute_disclosure">属性開示</a>に対して脆弱となる。</dd>
+
+    <dt id="Suppression">Suppression(抑制)</dt>
+    <dd>表における<a href="#Sensitive_cell">センシティブセル</a>を保護するために最も一般的に用いられる方法の一つが抑制である。<a href="#Sensitive_cell">センシティブセル</a>が抑制された行または列においては、少なくとも1つの追加のセルを抑制しなければ、周辺合計からの<a href="#Subtraction">差し引き</a>によって<a href="#Sensitive_cell">センシティブセル</a>の値を正確に計算できてしまうことは明らかである。このため、他の特定のセルについても抑制する必要がある。これらは<a href="#Secondary_suppression">二次抑制</a>と呼ばれる。<a href="#Secondary_suppression">二次抑制</a>の対象となるセルを手作業で選択することも可能ではあるが、その結果が十分な保護を提供することを保証するのは困難である。</dd>
+
+    <dt id="SUDA">SUDA(SUDA)</dt>
+    <dd><a href="#Population_unique">母集団ユニーク</a>および特殊な<a href="#Sample_unique">標本ユニーク</a>に対する分析を行うためのソフトウェアシステム。SUDAに実装されている、<a href="#Disclosure_risk">開示リスク</a>を測定・評価するための<a href="#Special_uniques_analysis">特殊ユニーク分析</a>手法は、リサンプリング手法に基づいており、英国国家統計局(ONS)によって利用されている。</dd>
+
+    <dt id="Swapping">Swapping (or switching)(スワッピング(または交換))</dt>
+    <dd>スワッピング(または交換)は、レコードの標本を選択し、あらかじめ定められた一連の変数についてデータベース内でマッチするものを見つけ、マッチしたレコード間で他の変数の全部または一部を入れ替えることを含む。</dd>
+
+    <dt id="Synthetic_data">Synthetic data(合成データ)</dt>
+    <dd>実データを公開する代わりに、1つまたは複数の母集団モデルから生成された合成データを公開する、機密保持へのアプローチ。</dd>
+  </dl>
+
+  <h2>T</h2>
+  <dl>
+    <dt id="Table_server">Table server(表サーバー)</dt>
+    <dd>安全な表を公開できるように設計された<a href="#Remote_data_laboratory">リモートデータラボラトリー</a>の一形態。</dd>
+
+    <dt id="Tables_of_frequency_data">Tables of frequency (count) data(度数(件数)データの表)</dt>
+    <dd>これらの表は、あるセルにおける分析単位の数を示す。データが標本から得られたものである場合、セルには重み付けされた件数が含まれることがあり、この重みは標本の結果を母集団水準に引き上げるために用いられる。度数は割合として表されることもある。</dd>
+
+    <dt id="Tables_of_magnitude_data">Tables of magnitude data(規模データの表)</dt>
+    <dd>規模データの表は、セル内のすべての分析単位についての「関心のある量」の集計値を示す。データが標本から得られたものである場合、セルには重み付けされた集計値が含まれることがあり、この場合、量は標本の結果を母集団水準に引き上げるために単位の重みを乗じられる。データは、集計値をそのセルに含まれる単位数で除することによって、平均値として示されることもある。</dd>
+
+    <dt id="Tabular_data">Tabular data(表形式データ)</dt>
+    <dd>表の形で提示される、エンティティに関する集計情報。</dd>
+
+    <dt id="Target_dataset">Target dataset(ターゲットデータセット)</dt>
+    <dd><a href="#Intruder">侵入者</a>が特定の母集団単位を識別しようと試みる対象となる<a href="#Anonymised_data">匿名化データ</a>セット。</dd>
+
+    <dt id="Targeted_Record_Swapping">Targeted Record Swapping (TRS)(ターゲット型レコードスワッピング(TRS))</dt>
+    <dd>表を作成する前の<a href="#Microdata">ミクロデータ</a>に対してスワッピング手続きを適用する、表作成前(プレタビュラー)適用型の摂動的SDC手法。表は加法性を持ち、整合性を保って保護される。</dd>
+
+    <dt id="Threshold_rule">Threshold (rule)(閾値ルール)</dt>
+    <dd>通常、閾値ルールでは、回答者数が指定された数を下回る場合に、度数表のセルはセンシティブであると定義される。少なくとも5人の回答者を要求する機関もあれば、3人を要求する機関もある。閾値が満たされない場合、機関は表を再構成してカテゴリを統合したり、<a href="#Cell_suppression">セル抑制</a>や<a href="#Rounding">丸め処理</a>を用いたり、ルールを満たすためにその他の追加的な保護を施したりすることがある。</dd>
+
+    <dt id="Top_and_bottom_coding">Top and bottom coding(上限・下限コーディング)</dt>
+    <dd>量的変数に上限コードまたは下限コードを設定することから成る。ある変数の上限コードとは、その変数の公開値すべてに対する上限を指す。この上限を超える値はすべて上限値に置き換えられるか、あるいは<a href="#Microdata">ミクロデータ</a>ファイルにまったく掲載されない。同様に、下限コードはある変数の公開値すべてに対する下限である。量的変数ごとに、あるいは部分母集団ごとに異なる上限・下限を用いることもできる。</dd>
+
+    <dt id="Top_coding">Top coding(上限コーディング)</dt>
+    <dd><a href="#Top_and_bottom_coding">上限・下限コーディング</a>を参照。</dd>
+  </dl>
+
+  <h2>U</h2>
+  <dl>
+    <dt id="Union_unique">Union unique(和集合ユニーク)</dt>
+    <dd><a href="#Population_unique">母集団ユニーク</a>でもある<a href="#Sample_unique">標本ユニーク</a>。和集合ユニークである<a href="#Sample_unique">標本ユニーク</a>の割合は、ファイル水準の<a href="#Disclosure_risk">開示リスク</a>を測る指標の一つである。</dd>
+
+    <dt id="Uniqueness">Uniqueness(ユニーク性)</dt>
+    <dd>この用語は、<a href="#Microdata">ミクロデータ</a>レコード上で得られる情報(あるいは与えられた<a href="#Key">キー</a>内の情報)に関して、ある個人が母集団または標本の他のすべての構成員と区別できる状況を特徴づけるために用いられる。ユニーク性が存在するかどうかは、母集団または標本の規模、地理的情報によってどの程度細分化されているか、およびデータセット内(あるいは<a href="#Key">キー</a>内)で各単位について提供される特性の数と詳細さによって決まる。</dd>
+
+    <dt id="Upper_bound">Upper bound(上限値)</dt>
+    <dd>セルの値が摂動または抑制された度数表において、そのセルが取り得る最大の値。</dd>
+  </dl>
+
+  <h2>V</h2>
+  <dl>
+    <dt id="Virtual_safe_setting">Virtual safe setting(仮想セーフセッティング)</dt>
+    <dd><a href="#Remote_data_laboratory">リモートデータラボラトリー</a>の同義語。</dd>
+  </dl>
+
+  <h2>W</h2>
+  <dl>
+    <dt id="Waiver_approach">Waiver approach(ウェーバー方式(権利放棄方式))</dt>
+    <dd><a href="#Tabular_data">表形式データ</a>を抑制する代わりに、一部の機関は、たとえそのセルを公開することで回答者のセンシティブな情報が正確に推定されてしまう可能性があっても、そのセルの公開を許可するよう回答者に依頼することがある。これはウェーバー方式と呼ばれる。ウェーバーとは、回答者がそのようなセルの公開を許可したことを示す署名付きの記録である。この手法は、支配的なケースがごく少数しか存在しない小規模な調査や表の集合において、必要となるウェーバーの数が少なくて済むため、最も有用である。もちろん、回答者がウェーバーに署名する前提として、自らのデータが特にセンシティブなものではないと信じている必要がある。</dd>
+  </dl>
+
+  <h2>X</h2>
+  <p>(該当する用語なし)</p>
+
+  <h2>Y</h2>
+  <p>(該当する用語なし)</p>
+
+  <h2>Z</h2>
+  <p>(該当する用語なし)</p>
+
+  <div class="pagenav">
+    <a class="prev" href="06-remote-access.html">← 第6章 リモートアクセスの課題</a>
+    <a class="next" href="index.html">目次 →</a>
+  </div>
+</div>
+</body>
+</html>

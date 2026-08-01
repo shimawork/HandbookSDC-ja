@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第3章 ミクロデータ保護手法 ― 雑音付加・マイクロアグリゲーションの詳細 | SDCハンドブック和訳</title>
+<link rel="stylesheet" href="assets/style.css">
+<script>
+  window.MathJax = { tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] } };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
+</head>
+<body>
+<div class="page">
+  <div class="masthead">
+    <nav class="crumbs"><a href="index.html">目次</a> / 第3章 (4/7)</nav>
+    <div class="kicker">Handbook on Statistical Disclosure Control (2nd Edition) 和訳</div>
+    <h1>第3章 ミクロデータ保護手法 ― 雑音付加・マイクロアグリゲーションの詳細</h1>
+    <div class="note-origtitle">原題: Microdata protection methods (Noise addition / Microaggregation details)</div>
+  </div>
+
+  <h2 id="sec-noise-addition-details">雑音付加</h2>
+
+  <p>本節では、ミクロデータ保護のために文献で提案されている主要な雑音付加アルゴリズムの動作を概説する。個々のアルゴリズムの詳細については、Brand (2002) を参照されたい。</p>
+
+  <h3>無相関雑音付加によるマスキング</h3>
+
+  <div class="expert-level">
+    <span class="badge">上級者向け</span>
+
+    <p>加法性雑音によるマスキングでは、元のデータセットの $j$ 番目の変数 $X_{j}$ の観測値ベクトル $x_{j}$ が、あるベクトルに置き換えられると仮定する。ここで $\varepsilon_{j}$ は、確率変数 $\varepsilon_{j} \sim N\left( 0,\sigma_{\varepsilon_{j}}^{2} \right)$ から抽出された正規分布に従う誤差のベクトルであり、すべての $t \neq l$ について $\text{Cov}\left( \varepsilon_{t},\varepsilon_{l} \right)=0$ を満たす(すなわちホワイトノイズである)。</p>
+
+    <p>文献における一般的な仮定は、$\varepsilon_{j}$ の分散が元の変数の分散に比例するというものである。すなわち、$\sigma_{j}^{2}$ を $X_{j}$ の分散とすると、$\sigma_{\varepsilon_{j}}^{2}: = \alpha\sigma_{j}^{2}$ となる。</p>
+
+    <p>$p$次元のデータセットの場合、単純加法性雑音によるマスキングは行列表記で $Z=X + \epsilon$ と書くことができる。ここで $X \sim (\mu,\Sigma)$、$\varepsilon \sim \left( 0,\Sigma_{\varepsilon} \right)$ であり、</p>
+
+    $$
+    \Sigma_{\varepsilon} = \alpha \cdot \text{diag}\left( \sigma_{1}^{2},\sigma_{2}^{2},\cdots,\sigma_{p}^{2} \right), \text{ ただし } \alpha > 0
+    $$
+
+    <p>この手法は平均と共分散を保存する。すなわち、</p>
+
+    \begin{align}
+    \mathbb{E}(Z) &= \mathbb{E}(X) + \mathbb{E}(\epsilon) = \mathbb{E}(X) = \mu\\
+    \operatorname{Cov}(Z_j,Z_l) &= \operatorname{Cov}(X_j,X_l) \quad \forall j\neq l
+    \end{align}
+
+    <p>残念ながら、分散も相関係数も保存されない。</p>
+
+    $$
+    \operatorname{Var}\left( Z_{j} \right) = \operatorname{Var}\left( X_{j} \right) + \alpha\operatorname{Var}\left( X_{j} \right) = (1 + \alpha)\operatorname{Var}\left( X_{j} \right)
+    $$
+
+    $$
+    \rho(Z_j, Z_l)=\frac{\operatorname{Cov}(Z_j, Z_l)}{\sqrt{\operatorname{Var}(X_j)\operatorname{Var}(X_l)}} = \frac{1}{1+\alpha} \rho(X_j, X_l),\forall j \neq l
+    $$
+  </div>
+
+  <h3>相関雑音付加によるマスキング</h3>
+
+  <div class="expert-level">
+    <span class="badge">上級者向け</span>
+
+    <p>相関雑音付加も平均を保存し、さらに相関係数の保存も可能にする。前述の手法との違いは、誤差の共分散行列が元のデータの共分散行列に比例する点にある。すなわち $\varepsilon \sim (0,\Sigma)$ であり、$\Sigma_{\varepsilon} = \alpha\Sigma$ である。</p>
+
+    <p>この手法では、マスキング後のデータの共分散行列は次のようになる。</p>
+
+    $$
+    \Sigma_{z} = \Sigma + \alpha\Sigma = (1 + \alpha)\Sigma
+    $$
+
+    <p>相関係数の保存は、以下のように成り立つ。</p>
+
+    $$
+    \rho (Z_j, Z_l) = \frac{1 + \alpha}{1 + \alpha}\frac{\operatorname{Cov}\left( X_{j},X_{l} \right)}{\sqrt{\operatorname{Var}\left( X_{j} \right)\operatorname{Var}\left( X_{l} \right)}} = \rho(X_{j},X_{l})
+    $$
+
+    <p>分散と共分散に関しては、上式から、マスキング後のデータがそれらの偏った推定値しか与えないことが分かる。しかし、Kim (1990) は、$\alpha$ が既知である限り、マスキング後のデータから元のデータの共分散行列を一致推定できることを示している。</p>
+
+    <p>まとめると、相関雑音付加によるマスキングは、無相関雑音付加によるマスキングよりも分析的妥当性の高いマスキング後データを出力する。$\alpha$ がデータ利用者に開示されている限り、いくつかの重要な統計量について一致推定量を得ることができる。しかし、本節および前節で論じた単純な雑音付加は、提供する保護水準が非常に低いため、実際にはほとんど用いられない(Tendick, 1991; Tendick and Matloff, 1994)。</p>
+  </div>
+
+  <h3>雑音付加と線形変換によるマスキング</h3>
+
+  <div class="expert-level">
+    <span class="badge">上級者向け</span>
+
+    <p>Kim (1986) では、追加の変換によって、マスキング後の変数の標本共分散行列が元の変数の共分散行列に対する不偏推定量となることを保証する手法が提案されている。その考え方は、$p$ 個の元の変数に単純加法性雑音を適用し、重ね合わせ変数(overlayed variables)を得るというものである。</p>
+
+    $$
+    Z_{j} = X_{j} + \varepsilon_{j},\quad \text{for } j = 1,\ldots,p
+    $$
+
+    <p>前節の相関マスキングの場合と同様に、誤差 $\varepsilon_{j}$ の共分散は元の変数の共分散に比例するものとする。誤差の分布は通常、正規分布または元の変数の分布が選ばれるが、Roque (2000) では多変量正規雑音の混合分布が提案されている。</p>
+
+    <p>第2段階として、各重ね合わせ変数 $Z_{j}$ は次のようにしてマスキング後の変数 $G_{j}$ に変換される。</p>
+
+    $$
+    G_{j} = cZ_{j} + d_{j}
+    $$
+
+    <p>行列表記では、これは次のようになる。</p>
+
+    $$
+    Z = X + \varepsilon
+    $$
+
+    $$
+    G = cZ_{j} + D = c(X + \varepsilon) + D
+    $$
+
+    <p>ここで、$X \sim N(\mu,\Sigma)$、$\varepsilon \sim \left( 0,\alpha\Sigma \right)$、$G \sim (\mu,\Sigma)$ であり、$D$ は $j$ 列目のすべての行にスカラー $d_{j}$ を含む行列である。パラメータ $c$ と $d_{j}$ は、$j = 1,\cdots,p$ について $\mathbb{E}\left( G_{j} \right) = \mathbb{E}\left( X_{j} \right)$ および $\operatorname{Var}\left( G_{j} \right) = \operatorname{Var}\left( X_{j} \right)$ という制約の下で決定される。実際、最初の制約から $d_{j} = (1 - c)\mathbb{E}\left( X_{j} \right)$ が導かれ、したがって線形変換は単一のパラメータ $c$ にのみ依存することになる。</p>
+
+    <p>$c$ を決定するために用いられる制約により、この手法は元の変数の期待値と共分散を保存し、分析的妥当性の観点でかなり優れている。部分母集団における回帰推定値の分析に関して、Kim (1990) は、(マスキング後の)標本平均と共分散が、元の部分母集団における対応する統計量の漸近的に偏った推定値であることを示している。バイアスの大きさはパラメータ $c$ に依存するため、$c$ がデータ利用者に開示されている限り、利用者は推定値を調整することができる。ただし、$c$ を利用者に開示することには根本的な欠点がある。利用者が線形変換を逆算できてしまい、その結果この手法は単純な無相関雑音付加と等価になってしまうのである(Domingo-Ferrer, Sebé, and Castellà, 2004)。</p>
+
+    <p>この手法の最も顕著な欠点は、元のデータの単変量分布を保存しないことと、変換の構造上、離散変数には適用できないことである。</p>
+  </div>
+
+  <h3>雑音付加と非線形変換によるマスキング</h3>
+
+  <div class="expert-level">
+    <span class="badge">上級者向け</span>
+
+    <p>単純加法性雑音と非線形変換を組み合わせたアルゴリズムが Sullivan (1989) で提案されている。この提案の利点は、離散変数に適用できることと、単変量分布が保存されることである。</p>
+
+    <p>この手法はいくつかの段階から構成される。</p>
+
+    <ol>
+      <li>各元の変数について経験分布関数を計算する。</li>
+      <li>経験分布関数を平滑化する。</li>
+      <li>平滑化された経験分布関数を一様確率変数に変換し、さらにそれを標準正規確率変数に変換する。</li>
+      <li>標準正規変数に雑音を加える。</li>
+      <li>分布関数の値へ逆変換する。</li>
+      <li>元の尺度へ逆変換する。</li>
+    </ol>
+
+    <p>欧州プロジェクトCASC(IST-2000-25069)において、このアルゴリズムの実用性と使いやすさが評価された。残念ながら、Brand and Giessing (2002) によるCASCの内部報告書は、次のように結論づけている。</p>
+
+    <blockquote>「全体として、結果はSullivanが提案したような複雑なアルゴリズムは専門家にしか適用できないことを示している。適用のたびに非常に時間がかかり、データとアルゴリズムに関する専門知識が必要となる。」</blockquote>
+  </div>
+
+  <h3>雑音付加のまとめ</h3>
+
+  <p>実務においては、単純な雑音付加、あるいは線形変換を伴う雑音付加のみが用いられる。線形変換を用いる場合には、部分母集団に対するバイアス調整を可能にするために、変換を決定するパラメータ $c$ をデータ利用者に開示するかどうかを判断する必要がある。</p>
+
+  <p>あまり実用的でないSullivan (1989) の手法を除けば、加法性雑音はカテゴリカルデータの保護には適していない。一方で、連続データに対しては以下の理由から十分に適している。</p>
+
+  <ul>
+    <li>$\mathbf{X}_{i}$ が取りうる値の範囲(無限であってもよい)について何ら仮定を置かない。</li>
+    <li>付加される雑音は通常連続的で平均がゼロであり、連続的な元データによく適合する。</li>
+    <li>外部ファイルとの完全一致照合はできない。付加された雑音の量によっては、近似的な(区間)照合が可能になる場合がある。</li>
+  </ul>
+
+  <h3>参考文献</h3>
+
+  <ul>
+    <li>Brand, R. (2002). <em>Microdata protection through noise addition</em>. In J. Domingo-Ferrer, editor, Inference Control in Statistical Databases, volume 2316 of LNCS, pages 97–116, Berlin Heidelberg, 2002. Springer.</li>
+    <li>Brand, R. and Giessing, S. (2002). <em>Tests of the applicability of Sullivan's algorithm to synthetic data and real business data in official statistics</em>, European Project IST-2000-25069 CASC, Deliverable 1.1-D1, <a href="https://research.cbs.nl/casc/deliv/11d1.pdf">https://research.cbs.nl/casc/deliv/11d1.pdf</a>.</li>
+    <li>Domingo-Ferrer, J., Sebé, F., and Castellà, J. (2004). <em>On the security of noise addition for privacy in statistical databases.</em> In J. Domingo-Ferrer and V. Torra, editors, Privacy in Statistical Databases, volume 3050 of LNCS, pages 149–161, Berlin Heidelberg, 2004. Springer.</li>
+    <li>Kim, J. J. (1986). <em>A method for limiting disclosure in microdata based on random noise and transformation.</em> In Proceedings of the Section on Survey Research Methods, pages 303–308, Alexandria VA, American Statistical Association.</li>
+    <li>Kim, J. J. (1990). <em>Subpopulation estimation for the masked data.</em> In Proceedings of the ASA Section on Survey Research Methods, pages 456–461, Alexandria VA, 1990. American Statistical Association.</li>
+    <li>Roque, G. M. (2000). <em>Masking Microdata Files with Mixtures of Multivariate Normal Distributions</em>. PhD thesis, University of California at Riverside, 2000.</li>
+    <li>Sullivan, G. R. (1989). <em>The Use of Added Error to Avoid Disclosure in Microdata Releases</em>. PhD thesis, Iowa State University.</li>
+    <li>Tendick, P. (1991). <em>Optimal noise addition for preserving confidentiality in multivariate data.</em> Journal of Statistical Planning and Inference, 27:341–353, 1991.</li>
+    <li>Tendick, P., and Matloff, N. (1994). <em>A modified random perturbation method for database security</em>. ACM Transactions on Database Systems, 19:47–63.</li>
+  </ul>
+
+  <h2 id="sec-microaggregation-further">マイクロアグリゲーション:さらなる詳細</h2>
+
+  <p>$p$個の連続変数と $n$個のレコードからなるミクロデータセット(すなわち、$n$人の個人について $p$個の変数を記録した結果)を考える。個々のレコードは $\mathbf{X}' = \left( \mathbf{X}_{1},\cdots,\mathbf{X}_{p} \right)$ のインスタンスとみなすことができる。ここで $\mathbf{X}_{i}$ は変数である。これらの個人から、$i$番目のグループに $n_{i}$人の個人を含む $g$個のグループが形成される($n_{i} \geq k$ かつ $n = \sum n_{i}$)。$i$番目のグループにおける $j$番目のレコードを $x_{\text{ij}}$ と表す。$i$番目のグループの平均レコードを ${\overline{x}}_{i}$、$n$人全体の平均レコードを $\overline{x}$ と表す。</p>
+
+  <p>(情報損失の観点から見た)最適な $k$分割とは、グループ内均質性を最大化するものと定義される。マイクロアグリゲーションはグループ内の値をグループの重心で置き換えるため、グループ内均質性が高いほど情報損失は小さくなる。クラスタリングにおいて均質性を測るには平方和基準が一般的である。グループ内平方和 $\text{SSE}$ は次のように定義される。</p>
+
+  $$
+  \text{SSE} = \sum\limits_{i = 1}^{g}\sum\limits_{j = 1}^{n_{i}}\left( x_{\text{ij}} - {\overline{x}}_{i} \right)^{T}\left( x_{\text{ij}} - {\overline{x}}_{i} \right)
+  $$
+
+  <p>$\text{SSE}$ が小さいほど、グループ内均質性は高い。全平方和は次の通りである。</p>
+
+  $$
+  \text{SST} = \sum_{i = 1}^{g}\sum_{j = 1}^{n_{i}}\left( x_{\text{ij}} - \overline{x} \right)^{T}\left( x_{\text{ij}} - \overline{x} \right)
+  $$
+
+  <p>平方和の観点では、最適な $k$分割とは $\text{SSE}$ を最小化するものである。</p>
+
+  <p>$p$個の変数からなるミクロデータセットについては、それらをまとめてマイクロアグリゲーションすることも、複数の変数グループに分割することもできる。また、グループの形成方法にもさまざまな方式がありうる。以下では、文献における主要な提案を概観する。</p>
+
+  <div class="callout">
+    <div class="callout-title">例</div>
+    <p>この例は、SDCのため、より具体的には $k$-匿名化(Samarati and Sweeney, 1998; Samarati, 2001; Sweeney, 2002; Domingo-Ferrer and Torra, 2005)のためにマイクロアグリゲーションを用いる方法を示すものである。$k$-匿名データセットとは、少なくとも $k$人の回答者からなるグループ内で回答者の再識別を許さないデータセットである。下記の表(表1「SMEデータセットの例」)に、ある町の11の中小企業(SME)について、会社名、事業所の床面積(平方メートル)、従業員数、売上高、純利益を示すデータセットを示す。会社名が識別子であることは明らかである。ここでは売上高と純利益を機密のアウトカム変数として扱う。第一のSDC対策は、データセットを公開する際に識別子「会社名」を抑制することである。しかし、事業所の床面積と従業員数は、スヌーパーによって識別変数として利用されうることに注意されたい。実際、誰であれ、標的とするSMEの床面積と従業員数を十分な精度で推測することは容易である。したがって、表1のデータセットを公開する際に取られるプライバシー対策が会社名の抑制のみである場合、K&amp;K Sarl社が約50平方メートルの狭いフラットに十数人の従業員を詰め込んでいることを知っているスヌーパーは、公開データを用いてK&amp;K Sarl社を売上高645,223ユーロ、純利益333,010ユーロと結びつけることができてしまう。表2(「3-匿名版SMEデータセットの例」)は、表1のデータセットの3-匿名版である。識別子「会社名」を抑制し、識別変数「床面積」と「従業員数」に対して $k = 3$ の最適2変量マイクロアグリゲーションを適用した(一般に、識別変数が $p$個ある場合には、それらすべてをマスキングするために次元 $p$ の多変量マイクロアグリゲーションを用いるべきである)。両変数は、尺度によらず等しい重みを与えるために、マイクロアグリゲーションの前に平均 $0$・分散 $1$ となるよう標準化した。データセットの規模が小さいため、全数探索によって最適マイクロアグリゲーションを計算することが可能であった。標準化されたこれら2変数について生じる情報損失(変動損失)は、グループ内平方和によって測定できる。全平方和 $SST=22$(標準化された(床面積、従業員数)の全11組についての、その平均からの二乗ユークリッド距離の和)で割ることで、0から1の範囲に収まる変動損失指標 $SSE_{opt}/SST=0.34$ が得られた。</p>
+    <p><em>11件のレコードが3つのグループにマイクロアグリゲーションされたことが分かる。第1グループは1、2、3、10番目のレコード(床面積が広く従業員数が多い企業)、第2グループは4、5、9番目のレコード(床面積は広いが従業員数が少ない企業)、第3グループは6、7、8、11番目のレコード(床面積の狭い企業)である。表2を見たスヌーパーは、K&amp;K Sarl社が狭いフラットに十数人の従業員を詰め込んでいることを知っていても、第3グループの4件のレコードのどれに該当するか判断がつかない。したがって、第3グループ内のすべてのレコードで売上高と純利益が異なるため、スヌーパーはK&amp;K Sarl社についてのそれらの値を確信することができない。</em></p>
+  </div>
+
+  <table>
+    <caption>表1: SMEデータセットの例。「会社名」はデータセット公開前に抑制すべき識別子である。</caption>
+    <thead>
+      <tr><th>会社名</th><th>床面積(m²)</th><th>従業員数</th><th>売上高(ユーロ)</th><th>純利益(ユーロ)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>A&amp;A Ltd</td><td>790</td><td>55</td><td>3,212,334</td><td>313,250</td></tr>
+      <tr><td>B&amp;B SpA</td><td>710</td><td>44</td><td>2,283,340</td><td>299,876</td></tr>
+      <tr><td>C&amp;C Inc</td><td>730</td><td>32</td><td>1,989,233</td><td>200,213</td></tr>
+      <tr><td>D&amp;D BV</td><td>810</td><td>17</td><td>984,983</td><td>143,211</td></tr>
+      <tr><td>E&amp;E SL</td><td>950</td><td>3</td><td>194,232</td><td>51,233</td></tr>
+      <tr><td>F&amp;F GmbH</td><td>510</td><td>25</td><td>119,332</td><td>20,333</td></tr>
+      <tr><td>G&amp;G AG</td><td>400</td><td>45</td><td>3,012,444</td><td>501,233</td></tr>
+      <tr><td>H&amp;H SA</td><td>330</td><td>50</td><td>4,233,312</td><td>777,882</td></tr>
+      <tr><td>I&amp;I LLC</td><td>510</td><td>5</td><td>159,999</td><td>60,388</td></tr>
+      <tr><td>J&amp;J Co</td><td>760</td><td>52</td><td>5,333,442</td><td>1,001,233</td></tr>
+      <tr><td>K&amp;K Sarl</td><td>50</td><td>12</td><td>645,223</td><td>333,010</td></tr>
+    </tbody>
+  </table>
+
+  <table>
+    <caption>表2: 識別変数の最適マイクロアグリゲーション後の3-匿名版SMEデータセットの例</caption>
+    <thead>
+      <tr><th>床面積(m²)</th><th>従業員数</th><th>売上高(ユーロ)</th><th>純利益(ユーロ)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>747.5</td><td>46</td><td>3,212,334</td><td>313,250</td></tr>
+      <tr><td>747.5</td><td>46</td><td>2,283,340</td><td>299,876</td></tr>
+      <tr><td>747.5</td><td>46</td><td>1,989,233</td><td>200,213</td></tr>
+      <tr><td>756.67</td><td>8</td><td>984,983</td><td>143,211</td></tr>
+      <tr><td>756.67</td><td>8</td><td>194,232</td><td>51,233</td></tr>
+      <tr><td>322.5</td><td>33</td><td>119,332</td><td>20,333</td></tr>
+      <tr><td>322.5</td><td>33</td><td>3,012,444</td><td>501,233</td></tr>
+      <tr><td>322.5</td><td>33</td><td>4,233,312</td><td>777,882</td></tr>
+      <tr><td>756.67</td><td>8</td><td>159,999</td><td>60,388</td></tr>
+      <tr><td>747.5</td><td>46</td><td>5,333,442</td><td>1,001,233</td></tr>
+      <tr><td>322.5</td><td>33</td><td>645,223</td><td>333,010</td></tr>
+    </tbody>
+  </table>
+
+  <h3>固定グループサイズと可変グループサイズ</h3>
+
+  <p>古典的なマイクロアグリゲーションアルゴリズム(Defays and Nanopoulos, 1993)では、(おそらく1つを除く)すべてのグループのサイズが $k$ であることが要求されていた。データの構造に応じてグループのサイズを $k$ 以上に変動させることを許容する方式は、<em>データ指向型マイクロアグリゲーション</em>(data-oriented microaggregation)と呼ばれる(Mateo-Sanz and Domingo-Ferrer, 1999; Domingo-Ferrer and Mateo-Sanz, 2002)。下記の図は、可変サイズグループの利点を示している。$k = 3$ の古典的な固定サイズマイクロアグリゲーションを用いると、与えられたデータの分布に対してかなり不自然に見える3グループへの分割が得られる。一方、可変サイズグループを許容すれば、左側の5個のデータを1つのグループにまとめ、右側の4個のデータを別のグループにまとめることができる。このような可変サイズのグループ化はより均質なグループを生み、情報損失がより小さくなることを意味する。</p>
+
+  <figure>
+    <figcaption>図: 可変サイズグループと固定サイズグループの比較(原文の図版は省略)</figcaption>
+  </figure>
+
+  <p>しかし、上記の図に示したような特殊なケースを除けば、可変サイズグループによって得られるグループ内均質性のわずかな向上は、固定サイズグループに対するこの方式の計算コストの増大を正当化するには至らないことが多い。これはSande (2002) が指摘するように、多変量データにおいて特に顕著である。</p>
+
+  <h3>厳密最適マイクロアグリゲーション vs. ヒューリスティックなマイクロアグリゲーション</h3>
+
+  <p>$p = 1$ の場合、すなわち単変量データセット、あるいは変数を1つずつマイクロアグリゲーションする多変量データセットの場合には、マイクロアグリゲーション問題を最適に解く $k$分割を求める、多項式時間の厳密な最短路アルゴリズムが存在する(Hansen and Mukherjee, 2003)。その説明は後述の「Hansen-Mukherjeeの最適単変量マイクロアグリゲーション」の節を参照されたい。</p>
+
+  <p>$p > 1$ の場合、マイクロアグリゲーション問題の厳密な最適解を求めること、すなわちグループが最大の均質性を持ち、サイズが $k$ 以上となるようなグループ化を求めることは、NP困難であることが示されている(Oganian and Domingo-Ferrer, 2001)。</p>
+
+  <p>残念ながら、Hansen and Mukherjee (2003) による単変量最適アルゴリズムは、実際にはあまり有用ではない。その理由は2つある。(i) ミクロデータセットは通常多変量であり、単変量マイクロアグリゲーションを用いて変数を1つずつマイクロアグリゲーションすることは、開示リスクの観点から好ましくない(Domingo-Ferrer et al., 2002を参照)。(ii) 多項式時間ではあるものの、レコード数が多い場合、この最適アルゴリズムはかなり低速である。</p>
+
+  <p>したがって、文献における実用的な手法はヒューリスティックなものである。</p>
+
+  <ul>
+    <li>単変量手法は、変数を1つずつマイクロアグリゲーションすることで多変量データセットを扱う。すなわち、変数は逐次的かつ独立にマイクロアグリゲーションされる。このヒューリスティックは個別ランキング(individual ranking)として知られている(Defays and Nanopoulos, 1993)。これらは高速で情報損失も少ないが、単変量最適マイクロアグリゲーションと同様に開示リスクが高いという問題を抱えている。</li>
+    <li>多変量手法は、多変量データを単一の軸に射影してランク付けする方法(例えば第1主成分や $z$スコアの和を用いる方法、Defays and Nanopoulos, 1993)と、射影されていないデータを直接扱う方法(Mateo-Sanz and Domingo-Ferrer, 1999; Domingo-Ferrer and Mateo-Sanz, 2002)がある。射影されていないデータを扱う場合、データセットのすべての変数を一度にマイクロアグリゲーションすることも、2変数ずつ、3変数ずつなどのグループに分けて独立にマイクロアグリゲーションすることもできる。いずれの場合も、ファイルの分析的な性質をできるだけ保持するために、一度にマイクロアグリゲーションされるグループ内の変数は相関していることが望ましい(W.E. Winkler, 2004)。</li>
+  </ul>
+
+  <p>以下では、μ-ARGUSに実装されている2つのマイクロアグリゲーションアルゴリズムについて説明する。</p>
+
+  <h3 id="sec-Hansen_Mukherjee">Hansen-Mukherjeeの最適単変量マイクロアグリゲーション</h3>
+
+  <div class="expert-level">
+    <span class="badge">上級者向け</span>
+
+    <p>Hansen and Mukherjee (2003) では、<em>単変量</em>最適マイクロアグリゲーションのための多項式時間アルゴリズムが提案されている。著者らは、マイクロアグリゲーション問題をグラフ上の最短路問題として定式化する。まずグラフを構築し、次に最適マイクロアグリゲーションがこのグラフにおける最短路に対応することを示す。グラフの各弧は、最適分割の一部となりうる候補のグループに対応する。弧のラベルは、そのグループが分割に含まれた場合に生じる $\text{SSE}$ である。以下では、グラフの構築方法を詳しく述べる。</p>
+
+    <p>$\mathbf{V} = \left\{ v_{1},\cdots,v_{n} \right\}$ を、昇順に並べ替えた $n$個の実数からなるベクトルとする。すなわち $v_{1}$ が最小値、$v_{n}$ が最大値である。$k$ を $1 \leq k < n$ を満たす整数のグループサイズとする。このとき、グラフ $G_{n,k}$ を次のように構築する。</p>
+
+    <ol>
+      <li>$\mathbf{X}$ の各値 $\mathbf{X}_{i}$ について、ラベル $i$ を持つノードを作成する。さらに、ラベル0を持つ追加のノードも作成する。</li>
+      <li>$1 + k \leq j < i + 2k$ を満たすグラフノードの各対 $(i,j)$ について、ノード $i$ からノード $j$ への有向弧 $(i,j)$ を作成する。</li>
+      <li>各弧 $(i,j)$ を値のグループ $C(i,j) = \left\{ \mathbf{X}_{h}:i < h \leq j \right\}$ に対応付ける。弧の長さ $L(i,j)$ を $C(i,j)$ に対するグループ内平方和とする。すなわち、
+      $$
+      L(i,j) = \sum\limits_{h = i + 1}^{j}\left( \mathbf{X}_{h} - {\overline{\mathbf{X}}}_{(i,j)} \right)^{2}
+      $$
+      ここで ${\overline{\mathbf{X}}}_{(i,j)} = \frac{1}{j - i}\sum_{h=i+1}^{j}\mathbf{X}_{h}$ である。</li>
+    </ol>
+
+    <p>Hansen and Mukherjee (2003) は、$V$ に対する最適な $k$分割が、ノード0とノード $n$ の間の最短路上の弧に対応する $C(i,j)$ をグループとして採用することで得られることを証明している。最小グループサイズを $k$ とし、昇順に並べ替えた $n$個の実数からなるデータセットに対して、この最適単変量マイクロアグリゲーションの計算量は $O\left( k^{2}n \right)$ であり、すなわちデータセットのサイズに対して線形である。</p>
+  </div>
+
+  <h3>多変量マイクロアグリゲーションのためのMDAVヒューリスティック</h3>
+
+  <div class="expert-level">
+    <span class="badge">上級者向け</span>
+
+    <p>μ-ARGUSに実装されている多変量マイクロアグリゲーションのヒューリスティックはMDAV(Maximum Distance to Average Vector)と呼ばれる。MDAVは、射影されていないデータに対して固定グループサイズの多変量マイクロアグリゲーションを実行する。MDAVについてはDomingo-Ferrer and Torra (2005) でも説明されている。</p>
+
+    <p><strong>MDAVアルゴリズム</strong></p>
+
+    <ol>
+      <li>データセット中のすべてのレコードの平均レコード $\overline{x}$ を計算する。平均レコード $\overline{x}$ から(二乗ユークリッド距離を用いて)最も遠いレコード $x_{r}$ を求める。</li>
+      <li>前段階で求めたレコード $x_{r}$ から最も遠いレコード $x_{s}$ を求める。</li>
+      <li>それぞれ $x_{r}$ と $x_{s}$ を中心とする2つのグループを形成する。一方のグループは $x_{r}$ と、$x_{r}$ に最も近い $k-1$個のレコードを含む。もう一方のグループは $x_{s}$ と、$x_{s}$ に最も近い $k-1$個のレコードを含む。</li>
+      <li>ステップ3で形成された2つのグループのいずれにも属さないレコードが $3k$個以上残っている場合、直前のステップ3で形成されたグループを除いたデータセットを新たなデータセットとして、ステップ1に戻る。</li>
+      <li>ステップ3で形成された2つのグループのいずれにも属さないレコードが $3k-1$個から $2k$個の間である場合:
+        <ol type="a">
+          <li>残りのレコードの平均レコード $\overline{x}$ を計算する。</li>
+          <li>$\overline{x}$ から最も遠いレコード $x_{r}$ を求める。</li>
+          <li>$x_{r}$ と、$x_{r}$ に最も近い $k-1$個のレコードを含むグループを形成する。</li>
+          <li>残りのレコードすべてを含む別のグループを形成する。アルゴリズムを終了する。</li>
+        </ol>
+      </li>
+      <li>ステップ3で形成されたグループに属さないレコードが $2k$個未満である場合、それらのレコードで新しいグループを形成し、アルゴリズムを終了する。</li>
+    </ol>
+
+    <p>上記のアルゴリズムは、データセットの変数集合を分割して得られる各変数グループに対して、それぞれ独立に適用することができる。</p>
+  </div>
+
+  <h3>カテゴリカルマイクロアグリゲーション</h3>
+
+  <p>近年(Torra, 2004)、マイクロアグリゲーションはカテゴリカルデータにも拡張されている。この拡張は、マイクロアグリゲーションに必要な2つの基本操作である集約(aggregation)とクラスタリング(clustering)について、既存の定義に基づいている。具体的には、順序データの集約には中央値が、名義データの集約には多数決ルール(投票)が用いられる。カテゴリカルデータのクラスタリングは、$c$-meansに似た分割型クラスタリング手法である $k$-modesアルゴリズムに基づいている。</p>
+
+  <h3>参考文献</h3>
+
+  <ul>
+    <li>Defays, D., and Nanopoulos, P. (1993). <em>Panels of enterprises and confidentiality: the small aggregates method</em>. In Proc. of 92 Symposium on Design and Analysis of Longitudinal Surveys, pages 195–204, Ottawa, 1993. Statistics Canada.</li>
+    <li>Domingo-Ferrer, J., and Mateo-Sanz, J. M. (2002). <em>Practical data-oriented microaggregation for statistical disclosure control</em>. IEEE Transactions on Knowledge and Data Engineering, 14(1):189–201, 2002.</li>
+    <li>Domingo-Ferrer, J., Mateo-Sanz, J. M., Oganian, A., and Torres, À. (2002). <em>On the security of microaggregation with individual ranking: analytical attacks</em>. International Journal of Uncertainty, Fuzziness and Knowledge-Based Systems, 10(5):477–492, 2002.</li>
+    <li>Domingo-Ferrer, J., and Torra, V. (2005). <em>Ordinal, continuous and heterogenerous k-anonymity through microaggregation.</em> Data Mining and Knowledge Discovery, 11(2):195–212, 2005.</li>
+    <li>Hansen, S. L. and Mukherjee, S. (2003). <em>A polynomial algorithm for optimal univariate microaggregation</em>. IEEE Transactions on Knowledge and Data Engineering, 15(4):1043–1044, 2003.</li>
+    <li>Hundepool, A., Van de Wetering, A., Ramaswamy, R., Franconi, L., Capobianchi, A., De Wolf, P.P., Domingo-Ferrer, J., Torra, V., and Giessing, S. (2014). <em>μ-ARGUS version 5.1 Software and User's Manual</em>. Statistics Netherlands, Voorburg NL, 2014. <a href="https://research.cbs.nl/casc/Software/MUmanual5.1.3.pdf">https://research.cbs.nl/casc/Software/MUmanual5.1.3.pdf</a>.</li>
+    <li>Mateo-Sanz, J. M. and Domingo-Ferrer, J. (1999). <em>A method for data-oriented multivariate microaggregation</em>. In J. Domingo-Ferrer, editor, Statistical Data Protection, pages 89–99, Luxemburg, 1999. Office for Official Publications of the European Communities.</li>
+    <li>Oganian, A., and Domingo-Ferrer, J. (2001). <em>On the complexity of optimal microaggregation for statistical disclosure control.</em> Statistical Journal of the United Nations Economic Comission for Europe, 18(4):345–354, 2001.</li>
+    <li>Samarati, P. (2001). <em>Protecting respondents' identities in microdata release.</em> IEEE Transactions on Knowledge and Data Engineering, 13(6):1010–1027, 2001.</li>
+    <li>Samarati, P., and Sweeney, L. (1998). <em>Protecting privacy when disclosing information: k-anonymity and its enforcement through generalization and suppression</em>. Technical report, SRI International, 1998.</li>
+    <li>Sande, G. (2002). <em>Exact and approximate methods for data directed microaggregation in one or more dimensions</em>. International Journal of Uncertainty, Fuzziness and Knowledge-Based Systems, 10(5):459–476, 2002.</li>
+    <li>Sweeney, L. (2002). <em>k-anonymity: A model for protecting privacy.</em> International Journal of Uncertainty, Fuzziness and Knowledge Based Systems, 10(5):557–570, 2002.</li>
+    <li>Torra, V. (2004). <em>Microaggregation for categorical variables: a median based approach</em>. In J. Domingo-Ferrer and V. Torra, editors, Privacy in Statistical Databases, volume 3050 of Lecture Notes in Computer Science, pages 162–174, Berlin Heidelberg, 2004. Springer.</li>
+    <li>Winkler, W. E. (2004). <em>Masking and re-identification methods for public-use microdata: overview and research problems.</em> In J. Domingo-Ferrer and V. Torra, editors, Privacy in Statistical Databases, volume 3050 of Lecture Notes in Computer Science, pages 231–246, Berlin Heidelberg, 2004. Springer.</li>
+  </ul>
+
+  <div class="pagenav">
+    <a class="prev" href="03-3a-protection-methods-1.html">← 第3章 保護手法・概要</a>
+    <a class="next" href="03-3c-protection-methods-3.html">第3章 保護手法・詳細2 (5/7) →</a>
+  </div>
+</div>
+</body>
+</html>

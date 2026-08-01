@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第4章 開示リスクと情報損失の測定/参考文献 | SDCハンドブック和訳</title>
+<link rel="stylesheet" href="assets/style.css">
+<script>
+  window.MathJax = { tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] } };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
+</head>
+<body>
+<div class="page">
+  <div class="masthead">
+    <nav class="crumbs"><a href="index.html">目次</a> / 第4章 (4/4)</nav>
+    <div class="kicker">Handbook on Statistical Disclosure Control (2nd Edition) 和訳</div>
+    <h1>第4章 開示リスクと情報損失の測定/参考文献</h1>
+    <div class="note-origtitle">原題: Measurement of disclosure risk and information loss / References</div>
+  </div>
+
+  <h2>開示リスクと情報損失の測定</h2>
+
+  <h3>開示リスク</h3>
+
+  <p>表形式データ(特に規模表)における開示リスクの評価は、以下2つの評価を含む。</p>
+
+  <ul>
+    <li>一次リスク</li>
+    <li>二次リスク</li>
+  </ul>
+
+  <p>一次リスクとは、セル内に提示された規模の値に基づき、頻度が低すぎることや外れ値が存在することに起因する、単位の直接識別の脅威に関するものである。二次リスクの評価が必要になるのは、詳細な表における一次機密セルだけでは、再識別に対する十分な保護が確保されない場合があるためである。すなわち、個々のセルとともに、より大きなグループの合計値(周辺度数)も計算される。そのため、差分計算によって一次機密セルの保護が破られる可能性があり、こうした事象のリスクも評価すべきである。</p>
+
+  <p>規模表における一次開示リスクの評価に用いられる主要な尺度は、$(n,k)$-支配率ルールまたは$p\%$ルールに基づくものである(セル感度に関する節、および感度ルールの表を参照)。一部の公式な規則や勧告では$n=1$、$k=75$が仮定されている。しかし、セル感度に関する節では、実務上の豊富な経験を踏まえ、この文脈では$n>1$を用いることが推奨されている。$(n,k)$-支配率ルールは、$k$-匿名性としばしば組み合わせて用いられる。すなわち、あるセルは$k$-匿名性または$(n,k)$-支配率ルールのいずれかに違反する場合、安全でないとみなされる。したがって、開示リスクは、最終的に採用された原則に違反するセルの割合として測定できる。これらのルールを開示リスク評価に適用する方法についての詳しい議論は、表に対する開示制御の概念に関する節で行われている。Hundepool et al. (2012) も参照のこと。</p>
+
+  <p>ただし、この評価は個々の表セルのレベルでのリスクに関するものである。表を設計する際には、表全体のレベルでのリスク尺度があると便利な場合がある。度数表について、Antal, Shlomo and Elliot (2014) は表レベルの開示リスク尺度が満たすべき4つの基本的性質を定式化している。</p>
+
+  <ul>
+    <li>セルの値が小さいほど、開示リスクは大きい値よりも高くなるべきである</li>
+    <li>頻度が一様に分布している場合、開示リスクは低い</li>
+    <li>センサス表においてゼロセルが多いほど、開示リスクは高い</li>
+    <li>リスク尺度は0と1の間に収まるべきである</li>
+  </ul>
+
+  <p>現在検討している規模表の場合には、このデータ表現形式特有の性質に関するもう一つの条件を加えるべきである。すなわち、あるセル内における最大寄与者の占める割合が大きいほど、開示リスクは高くなる。</p>
+
+  <p>Shlomo, Antal and Elliot (2015) はこの文脈において、エントロピーに基づく尺度を提案した。彼らのアプローチによれば、エントロピーが高いことはセル間の分布が一様であることを示し、エントロピーが低いことは行/列または表の中にゼロが多く非ゼロセルがわずかしかないことを示す。非ゼロセルの数が少ないほど、属性開示が発生する可能性が高くなる。エントロピーは次式で与えられる。
+$$
+H=-\sum_{i=1}^{k}{\frac{c_i}{n}\cdot\log{\frac{c_i}{n}}},
+$$
+ここで $c_i$ は $i$ 番目のセルに含まれる単位の数、$k$ は表におけるセルの数、$n$ は表が対象とする単位の総数である。この尺度は、次の形に正規化される。
+$$
+1-\frac{H}{\log n}.
+$$
+</p>
+
+  <p>しかし、このアプローチは先述の5番目の条件を考慮していない。そこで、以下のように両方の側面を組み合わせる形に拡張することができる。
+$$
+r=1-\frac{1}{2}\left(\frac{H}{\log n}+\frac{1}{n}\sum_{i=1}^n{\frac{x_{i(\text{max})}}{\sum_{j\in C_i}{x_j}}}\right),
+$$
+ここで $x_{i(\text{max})}$ はセル $C_i$ に対する最大寄与者の割合であり、$x_j$ は $j$ 番目の単位のセルへの寄与を表す。この尺度は $[0,1]$ の値を取り、解釈も容易である。</p>
+
+  <p>開示リスクの評価は、現在使用されているSDC手法の特性に合わせて調整することもできる。例えば、Enderle, Giessing and Tent (2020) は、セルキー法によって摂動処理された連続データに対する独自のリスク尺度を提案している。この尺度は、侵入者が雑音の量と最大偏差パラメータを知ることができると仮定する。その場合、侵入者は摂動後の値を用いて、元の内部セルおよび周辺セルの実現可能区間を決定できる。リスク推定値は、リスク確率の重み付き和として算出される。例えば、リスク確率は、「危険な」組み合わせに関連してp表によって定義される特定の確率を合計し、それを所与のテストデータセットにおける当該組み合わせが実際に生じる経験的確率で重み付けすることによって計算される。</p>
+
+  <h3>情報損失</h3>
+
+  <p>表における情報損失の評価の基礎となるのは、SDC手法を適用した後のミクロデータ(あるいは表作成時に摂動・秘匿された値)を用いて算出されたセルの値と、原データに基づいて得られた対応する値との差である。$T_0$ を原ミクロデータを用いて作成された表とし、$T_1$ を、摂動処理された対応するミクロデータに基づいて作成された(あるいは元のセルの値そのものが摂動処理された、いわゆる表作成後摂動による)類似の表とする。表 $T_l$($l=0,1$)のセル $c$ の値を $T_l(c)$ と表す。</p>
+
+  <p>規模表におけるSDC処理の適用に起因する情報損失の尺度を決定する際には、一般に以下の指標が推奨される。</p>
+
+  <ul>
+    <li>絶対偏差:$|T_1(c)-T_0(c)|$</li>
+    <li>相対絶対偏差:$\frac{|T_1(c)-T_0(c)|}{T_0(c)}$</li>
+    <li>平方根の絶対偏差:$|\sqrt{T_1(c)}-\sqrt{T_0(c)}|$</li>
+  </ul>
+
+  <p>これは任意の $c$ について成り立つ。</p>
+
+  <p>見て分かるとおり、平方根の絶対偏差は、セルの値が非負である場合にのみ実務上意味を持つ。しかし、これは最も一般的な状況である。そうでない場合には、$\sqrt{T_l(c)}$ を $-\sqrt{|T_l|}$($l=0,1$)で置き換えることができる。</p>
+
+  <p>上記の指標を用いて、所与の集計単位 $A$(表全体でも、例えば同一の空間単位に関する年齢層別人口数のようなセルの特定の部分集合でもよい)に対する複合的な情報損失尺度を定義することができる。1つ目の尺度は平均絶対偏差、すなわち原表と修正後の表におけるセルの値の絶対差の平均である。
+$$
+\text{AD}(A)=\frac{\sum_{c\in A}{|T_1(c)-T_0(c)|}}{n_A},
+$$
+ここで $n_A$ は集計単位 $A$ に含まれるセルの数である。</p>
+
+  <p>この文脈では、相対絶対偏差の和、すなわち両方の表におけるセルの値の相対的な差の総和を用いることも提案できる。
+$$
+\text{RAD}(A)=\sum_{c\in A}{\frac{|T_1(c)-T_0(c)|}{T_0(c)}}.
+$$
+</p>
+
+  <p>ここで紹介する最後の(しかし決して軽視できない)尺度は、原表と摂動後の表におけるセルの値の平方根の絶対差に基づく尺度であり、1909年にドイツの数学者エルンスト・ヘリンガー(Ernst Hellinger, 1883–1950)によって提案されたヘリンガー距離の式を用いる。
+$$
+\text{HD}(A)=\sqrt{\frac{1}{2}\sum_{c\in A}{\left(\sqrt{T_1(c)}-\sqrt{T_0(c)}\right)^2}}.
+$$
+</p>
+
+  <p>ただし、表には欠測データが存在する場合がある。摂動的SDC手法が適用される場合、こうした欠測は主に、表作成の基礎となる原ミクロデータに存在する欠測データに起因する。この場合、セルの値を計算する際に、こうした欠測を無視するか、あらかじめ補完しておくことができる。唯一不都合が生じ得るのは、セルによって定義されたカテゴリに関するデータが全く存在しない場合である。この場合には、表の所与の構造を放棄する(例えば、元のカテゴリの一部をより粗いカテゴリへ統合する)か、あるいは損失の尺度を、当該セルに対応するミクロデータのレベルでの損失測定(第3章で説明した方法による)に基づいたものにする必要がある。</p>
+
+  <p>より難しいのは、非摂動的な表作成後SDC手法が用いられる場合である。データ利用者の視点から情報損失を評価するには、SDC処理の前後の表を比較することができる。そのためには、欠測セルの値が補完された表をシミュレーションすればよい。一方で、二次セル抑制の選択プロセスを制御する観点からは、情報損失は、それによって生じるコストの総和として表現される。ここで問題となるのは、表内の各セルの重みが等しいとみなすべきか、それとも値が大きいセルほど重みを大きくすべきかという点である(実務における表形式データ保護問題の設定に関する節での議論を参照)。実務上、値の大きいセルを過度に多く抑制すると、公開データの有用性が大幅に低下し得る。情報損失の問題は、利用者の選好やニーズに応じて様々な形で表現できる。このようにして、二次抑制対象セルを選択するアルゴリズムの動作に影響を与えることが可能になる。実務における表形式データ保護問題の設定に関する節(Hundepool et al. (2012) も参照)では、セル抑制のコスト関数を定義する際に考慮される最も一般的な基準を示している。</p>
+
+  <ul>
+    <li>すべてのセルに同じ重みを与える基準 ― 二次抑制セル数の最小化を目的とする</li>
+    <li>セルが代表する集計に含まれる単位の数 ― 合計してできるだけ少ない数の単位しか代表しないセルのみを抑制対象とすることを目指す</li>
+    <li>セルの値 ― 値の大きいセルをできるだけ多く公表に残すことを最適解とする</li>
+  </ul>
+
+  <p>詳細については、実務における表形式データ保護問題の設定に関する節でのセルコストおよびコスト関数に関する議論を参照のこと。</p>
+
+  <h2>参考文献</h2>
+
+  <p>Antal, L., Shlomo, N., & Elliot, M. (2014). Measuring disclosure risk with entropy in population based frequency tables. In <em>Privacy in Statistical Databases: UNESCO Chair in Data Privacy, International Conference, PSD 2014, Ibiza, Spain, September 17-19, 2014. Proceedings</em> (pp. 62-78). Springer International Publishing.</p>
+
+  <p>Box, G. E. P. and Cox, D. R. (1964) <em>An analysis of transformations</em>, Journal of Royal Statistical Society, Series B, vol. 26, pp. 211-252.</p>
+
+  <p>Castro, J.(2002), <em>Network flows heuristics for complementary cell suppression: an empirical evaluation and extensions</em>, in LNCS 2316, Inference Control in Statistical Databases, J. Domingo-Ferrer (Ed), (2002) 59-73.</p>
+
+  <p>Castro, J. (2003 a), <em>Minimum-Distance Controlled Perturbation Methods for Large-Scale Tabular Data Protection</em>, accepted subject to revision to European Journal of Operational Research, 2003.</p>
+
+  <p>Castro, J. (2003 b) <em>User's and programmer's manual of the network flows heuristics package for cell suppression in 2D tables</em>. Technical Report DR 2003-07, Dept. of Statistics and Operations Research, Universitat Politècnica de Catalunya, Barcelona, Spain, 2003; See <a href="https://research.cbs.nl/casc/deliv/41D6_NF1H2D-Tau-Argus.pdf">https://research.cbs.nl/casc/deliv/41D6_NF1H2D-Tau-Argus.pdf</a>.</p>
+
+  <p>Castro, J. (2006). <em>Minimum-distance controlled perturbation methods for large-scale tabular data protection</em>, European Journal of Operational Research, 171, 39-52.</p>
+
+  <p>Castro, J., Giessing S. (2006a). <em>Testing variants of minimum distance controlled tabular adjustment</em>, in Monographs of Official Statistics. Work session on Statistical Data Confidentiality, Eurostat-Office for Official Publications of the European Communities, Luxembourg, 2006, pp. 333-343.</p>
+
+  <p>Castro, J., Giessing S. (2006b). <em>Quality issues minimum distance controlled tabular adjustment</em>, paper presented at the European Conference on Quality in Survey Statistics (Q2006), 24.-26. April 2006 in Cardiff.</p>
+
+  <p>Castro, J., Gonzalez J.A. (2009). <em>A Package for L1 Controlled Tabular Adjustment</em>, paper presented at the Joint UNECE/Eurostat Work Session on Statistical Data Confidentiality (Bilbao, 2-4 December 2009).</p>
+
+  <p>Cox, L. (1981), <em>Linear Sensitivity Measures in Statistical Disclosure Control</em>, Journal of Planning and Inference, 5, 153-164, 1981.</p>
+
+  <p>Cox, L. (2001), <em>Disclosure Risk for Tabular Economic Data</em>, In: Doyle, Lane, Theeuwes, Zayatz (Eds) Confidentiality, Disclosure, and Data Access: Theory and Practical Applications for Statistical Agencies, North-Holland.</p>
+
+  <p>Cox, L., Dandekar, R.H., (2002), <em>Synthetic Tabular Data -- an Alternative to Complementary Cell Suppression</em>, unpublished manuscript.</p>
+
+  <p>Cox, L. H., Kelly, J. P., and Patil, R. (2004), <em>Balancing quality and confidentiality for multivariate tabular data</em>, Lecture Notes in Computer Science, 3050, 87-98.</p>
+
+  <p>Cox, L., Orelien, J. G., Shah, B. V. (2006), <em>A Method for Preserving Statistica Distributions Subject to Controlled Tabular Adjustment</em>, In: Domingo-Ferrer, Franconi (Eds.): Privacy in Statistical Databases 2006, Lecture Notes in Computer Science, Vol. 4302, Springer, Heidelberg (2006), p.1-11.</p>
+
+  <p>De Wolf, P.P. (2002), <em>HiTaS: A Heustic Approach to Cell Suppression in Hierarchical Tables</em>, In: Domingo-Ferrer (Ed.) Inference Control in Statistical Databases, Springer (Lecture notes in computer science; Vol. 2316).</p>
+
+  <p>De Wolf, P.P. (2007), <em>Cell suppression in a special class of linked tables</em>, paper presented at the Joint ECE/Eurostat Worksession on Statistical Confidentiality in Manchester, December 2007, available at
+<a href="https://unece.org/sites/default/files/datastore/fileadmin/DAM/stats/documents/ece/ces/2007/12/confidentiality/wp.21.e.pdf">https://unece.org/sites/default/files/datastore/fileadmin/DAM/stats/documents/ece/ces/2007/12/confidentiality/wp.21.e.pdf</a>.</p>
+
+  <p>De Wolf, P.P., Giessing, S. (2008) <em>How to make the $\tau$-ARGUS Modular Method Applicable to Linked Tables</em>. In: Domingo-Ferrer, Josep; Saygin, Yücel (Eds.): Privacy in Statistical Databases 2008, Lecture Notes in Computer Science, Vol. 5262, Springer, Heidelberg (2008), p.227-238.</p>
+
+  <p>Enderle, T., Giessing, S., Tent, R. (2018), <em>Designing Confidentiality on the Fly Methodology – Three Aspects</em>, In: Domingo-Ferrer, J., Montes, F. (eds) Privacy in Statistical Databases. PSD 2018. Lecture Notes in Computer Science, vol 11126. Springer, Cham. <a href="https://doi.org/10.1007/978-3-319-99771-1_3">https://doi.org/10.1007/978-3-319-99771-1_3</a>.</p>
+
+  <p>Enderle, T., Giessing, S., Tent, R. (2020), <em>Calculation of risk probabilities for the cell key method</em>, In: Doming-Ferre, J., Muralidhar, K. (eds) Privacy in Statistical Databases. PSD 2020. Lecture Notes in Computer Science, vol 12276. Springer, Cham. <a href="https://doi.org/10.1007/978-3-030-57521-2_11">https://doi.org/10.1007/978-3-030-57521-2_11</a>.</p>
+
+  <p>EU (2004), <em>Community statistics relating to the trading of goods between Member States</em>, <a href="https://eur-lex.europa.eu/LexUriServ/LexUriServ.do?uri=CELEX:32004R0638:EN:HTML">https://eur-lex.europa.eu/LexUriServ/LexUriServ.do?uri=CELEX:32004R0638:EN:HTML</a>.</p>
+
+  <p>Fraser, B. and Wooton, J. (2005), <em>A proposed method for confidentialising tabular output to protect against differencing</em> Work session on Statistical Data Confidentiality, <a href="https://www.unece.org/fileadmin/DAM/stats/documents/ece/ces/ge.46/2005/wp.35.e.pdf">https://www.unece.org/fileadmin/DAM/stats/documents/ece/ces/ge.46/2005/wp.35.e.pdf</a>.</p>
+
+  <p>Geurts, J. (1992), <em>Heuristics for Cell Suppression in Tables</em>, working paper, Netherlands Central Bureau of Statistics.</p>
+
+  <p>Giessing, S. (2004), <em>Survey on methods for tabular protection in ARGUS</em>, Lecture Notes in Computer Science. Volume Privacy in statistical databases 3050, 1-13, J. Domingo-Ferrer and V. Torra, Springer, Berlin.</p>
+
+  <p>Giessing, S., Dittrich, S., Gehrling, D., Krüger, A., Merz, F.J., Wirtz, H. (2006), <em>Bericht der Arbeitsgruppe „Geheimhaltungskonzept des statistischen Verbundes, Pilotanwendung: Umsatzsteuerstatistik"</em>, document for the meeting of the „Ausschuss für Organisation und Umsetzung", Mai 2006, in German.</p>
+
+  <p>Giessing, S., Hundepool, A., Castro, J. (2007) <em>Rounding Methods for Protecting EU-aggregates</em>, proceedings of the Joint UNECE/Eurostat Worksession on Statistical Confidentiality in Manchester, December 2007.</p>
+
+  <p>Giessing, S. and Repsilber, D. (2002), <em>Tools and Strategies to Protect Multiple Tables with the GHQUAR Cell Suppression Engine</em>, In: Domingo-Ferrer (Ed.) Inference Control in Statistical Databases, Springer Lecture Notes in Computer Science Vol. 2316.</p>
+
+  <p>Giessing, S. and Tent, R. (2019) <em>Concepts for generalising tools implementing the cell key method to the case of continuous variables</em>, Paper presented at the Joint UNECE/Eurostat Worksession on Statistical Data Confidentiality in The Hague, October 2019. See <a href="https://unece.org/fileadmin/DAM/stats/documents/ece/ces/ge.46/2019/mtg1/SDC2019_S2_Germany_Giessing_Tent_AD.pdf">https://unece.org/fileadmin/DAM/stats/documents/ece/ces/ge.46/2019/mtg1/SDC2019_S2_Germany_Giessing_Tent_AD.pdf</a>.</p>
+
+  <p>Fischetti, M, Salazar Gonzales, J.J. (2000), <em>Models and Algorithms for Optimizing Cell Suppression Problem in Tabular Data with Linear Constraints</em>, in Journal of the American Statistical Association, Vol. 95, pp 916.</p>
+
+  <p>Hundepool. A., Domingo-Ferrer. J., Franconi, L., Giessing S., Nordholt, E.S., Spicer, K. and de Wolf, P-P. (2012), <em>Statistical Disclosure Control</em>, series: Wiley Series in Survey Methodology, John Wiley & Sons, Ltd., Chichester. ISBN: 978-1-119-97815-2.</p>
+
+  <p>Hundepool, A, Wetering, A van de, Ramaswamy, R, Wolf, P.P. de, Giessing, S, Fischetti, M, Salazar, JJ, Castro, J, Lowthian, P, (2014), <em>$\tau$-ARGUS 4.1 user manual</em>, Statistics Netherlands, Voorburg NL, Feb. 2014. <a href="https://research.cbs.nl/casc/Software/TauManualV4.1.pdf">https://research.cbs.nl/casc/Software/TauManualV4.1.pdf</a>.</p>
+
+  <p>Ichim, D., Franconi, L. (2006), <em>Calibration estimator for magnitude tabular data protection</em>, Proceedings of the conference Privacy in Statistical Databases 2006, December 2006, Rome, Italy.</p>
+
+  <p>Loeve, A. (2001), <em>Notes on sensitivity measures and protection levels</em>, Research paper, Statistics Netherlands, available at <a href="https://research.cbs.nl/casc/Related/marges.pdf">https://research.cbs.nl/casc/Related/marges.pdf</a>.</p>
+
+  <p>Meindl, B. <em>Linking Complementary Cell Suppression and the Software R</em>, paper presented at the New Techniques and Technologies (NTTS) Conference, 18.-20. Feb. 2009 in Brussels.</p>
+
+  <p>Salazar, J.J. (2003) <em>Partial Cell Suppression: a New Methodology for Statistical Disclosure Control</em>, Statistics and Computing, 13, 13-21.</p>
+
+  <p>Shlomo, N., Antal, L., & Elliot, M. (2015). <em>Measuring disclosure risk and data utility for flexible table generators</em>. Journal of Official Statistics, 31(2), 305-324.</p>
+
+  <p>Repsilber, R. D. (1994), <em>Preservation of Confidentiality in Aggregated data</em>, paper presented at the Second International Seminar on Statistical Confidentiality, Luxembourg, 1994.</p>
+
+  <p>Repsilber, D. (2002), <em>Sicherung persönlicher Angaben in Tabellendaten</em>, In: Statistische Analysen und Studien Nordrhein-Westfalen, Landesamt für Datenverarbeitung und Statistik NRW, Ausgabe 1/2002 (in German).</p>
+
+  <p>Thompson, Gwenda/Broadfoot, Stephen/Elazar, Daniel (2013), <em>Methodology for the Automatic Confidentialisation of Statistical Outputs from Remote Servers at the Australian Bureau of Statistics</em>, Paper presented at the Joint UNECE/Eurostat Work Session on
+Statistical Data Confidentiality. Ottawa 2013. See <a href="https://www.unece.org/fileadmin/DAM/stats/documents/ece/ces/ge.46/2013/Topic_1_ABS.pdf">https://www.unece.org/fileadmin/DAM/stats/documents/ece/ces/ge.46/2013/Topic_1_ABS.pdf</a>.</p>
+
+  <p>Van der Meijden, R., (2006), <em>Improving confidentiality with $\tau$-ARGUS by focussing on clever usage of microdata</em>, In: Monographs of Official Statistics. Work session on Statistical Data Confidentiality, Eurostat-Office for Official Publications of the European Communities, Luxembourg, 2006, pp. 363-370.</p>
+
+  <p>Wolf, P.P. de (2002). <em>HiTaS: a heuristic approach to cell suppression in hierarchical tables</em>, In: Domingo-Ferrer (Ed.) Inference control in statistical databases, from theory to practice, Springer, LNCS 2316, pp. 74-82.</p>
+
+  <div class="pagenav">
+    <a class="prev" href="04-3-methods-cta-ckm.html">← 第4章 二次抑制アルゴリズム・CTA・CKM</a>
+    <a class="next" href="05-1-risks-methods.html">第5章 度数表 (1/3) →</a>
+  </div>
+</div>
+</body>
+</html>

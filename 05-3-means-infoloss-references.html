@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第5章 度数表 ― 平均・情報損失・開示リスク指標・参考文献 | SDCハンドブック和訳</title>
+<link rel="stylesheet" href="assets/style.css">
+<script>
+  window.MathJax = { tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] } };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
+</head>
+<body>
+<div class="page">
+  <div class="masthead">
+    <nav class="crumbs"><a href="index.html">目次</a> / 第5章 (3/3)</nav>
+    <div class="kicker">Handbook on Statistical Disclosure Control (2nd Edition) 和訳</div>
+    <h1>第5章 度数表 ― 平均・情報損失・開示リスク指標・参考文献</h1>
+    <div class="note-origtitle">原題: Means / Information loss / Disclosure Risk measures / References</div>
+  </div>
+
+  <h2 id="sec-Means_freq">平均値の公表</h2>
+
+  <p>本節では、セルキー法(またはその他の非加法的な摂動的SDC手法、例えば丸め処理など)を度数カウントに適用する場合に、なぜ元の平均値をそのまま公表すべきでないかを説明する。具体例を用いてこれを示し、より安全な形で平均値を公表する方法を示す。</p>
+
+  <p>このために、サイズ $n$ のある母集団グループを考え、その母集団の各個人 $i\in\{1,\ldots,n\}$ について、対応する年齢を $x_i$ と表す。したがって、この母集団グループの平均年齢は $(\sum_{i=1\ldots n} x_i)/n$ と書ける。</p>
+
+  <p>ここで、(摂動後の)度数と(元の)平均値の両方が公表される、次のような例示シナリオを考える。下表は、摂動後および元の度数カウントの両方と、年齢に関する情報を示している。</p>
+
+  <div class="callout">
+    <div class="callout-title">例</div>
+    <table>
+      <thead>
+        <tr><th></th><th>セル1</th><th>セル2</th><th>周辺度数</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>元の度数 ($n$)</td><td>8</td><td>12</td><td>20</td></tr>
+        <tr><td>摂動後の度数 ($\hat{n}$)</td><td>9</td><td>14</td><td>19</td></tr>
+        <tr><td>年齢の元の合計 ($x$)</td><td>90</td><td>95</td><td>185</td></tr>
+        <tr><td>年齢の元の平均 ($x/n$)</td><td>11.25</td><td>7.9167</td><td>9.25</td></tr>
+      </tbody>
+    </table>
+    <p><em>表: (摂動後の)年齢と度数の例</em></p>
+  </div>
+
+  <p>攻撃者は、摂動後の度数と元の平均値の両方を手に入れることができる。この攻撃シナリオでは、攻撃者は度数カウントの最大偏差が2であることも知っているものと仮定する。したがって攻撃者は、内側セルの元の件数がそれぞれ7から11の間、12から16の間でなければならないこと、また周辺度数の元の値が17から21の間でなければならないことを導出できる。攻撃者にとって、これにより次のような組み合わせの可能性が生じる。</p>
+
+  <ul>
+    <li>周辺度数が元々19の場合、内側セルは
+      <ul><li>7と12</li></ul>
+    </li>
+    <li>周辺度数が元々20の場合、内側セルは
+      <ul>
+        <li>7と13</li>
+        <li>8と12</li>
+      </ul>
+    </li>
+    <li>周辺度数が元々21の場合、内側セルは
+      <ul>
+        <li>7と14</li>
+        <li>8と13</li>
+        <li>9と12</li>
+      </ul>
+    </li>
+  </ul>
+
+  <p>攻撃者は、自分が知っている各表セルの元の平均値に、こうして算出された対応する度数の候補値を掛け合わせることができる。これにより、各セルの元の量的変数の値についての推定値が得られる。さらに、これらの推定値のうち内側セルに対応するものを合計すれば、周辺度数の値についてのもう一つの推定値が得られる。これを用いれば、正しい度数の組み合わせを特定できる。なぜなら、正しい組み合わせについては、内側セルの値の合計が周辺度数の値と一致するからである。これは下表に示す通りである。</p>
+
+  <div class="callout">
+    <div class="callout-title">例</div>
+    <table>
+      <thead>
+        <tr>
+          <th>セル1</th><th>セル2</th><th>周辺度数</th>
+          <th>セル1の推定値</th><th>セル2の推定値</th>
+          <th>推定値の合計</th><th>周辺度数の推定値</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>7</td><td>12</td><td>19</td><td>78.75</td><td>95</td><td>173.75</td><td>175.75</td></tr>
+        <tr><td>7</td><td>13</td><td>20</td><td>78.75</td><td>102.917</td><td>181.667</td><td>185</td></tr>
+        <tr><td>8</td><td>12</td><td>20</td><td>90</td><td>95</td><td>185</td><td>185</td></tr>
+        <tr><td>7</td><td>14</td><td>21</td><td>78.75</td><td>110.833</td><td>189.583</td><td>194.25</td></tr>
+        <tr><td>8</td><td>13</td><td>21</td><td>90</td><td>102.917</td><td>192.917</td><td>194.25</td></tr>
+        <tr><td>9</td><td>12</td><td>21</td><td>101.25</td><td>95</td><td>196.25</td><td>194.25</td></tr>
+      </tbody>
+    </table>
+    <p><em>表: 攻撃者による計算例</em></p>
+  </div>
+
+  <p>さらに、この計算によって、対応する量的変数の値も判明してしまう。もしこれらが機密情報である場合、さらなる問題が生じる。したがって、元の平均値をそのまま公表することは推奨されない。</p>
+
+  <p>したがって、度数表に対してセルキー法を用いる場合には、平均値を算出する際にも摂動後の度数を用いることを推奨する。すなわち、$n$ を元の度数、$\hat{n}$ を対応する摂動後の度数、$m$ を公表される対応する量的変数の値とすると、ここで説明した開示リスクを回避するためには、平均値を $m/\hat{n}$ として算出する方が望ましい。</p>
+
+  <h2 id="sec-InfLoss_freq">情報損失指標</h2>
+
+  <p>これまでの節で説明したように、度数表を保護するために用いられる開示制御手法にはいくつかの異なる種類がある。これらの手法はいずれも、小さいセル(0, 1, 2のセル)による開示リスクを低減するために、表内の元のデータを変更するものである。しかし、開示リスクを低減する過程では情報損失が生じる。さまざまな統計的開示制御(SDC)手法が元の表に与える影響を判定するために、Shlomo and Young (2005 & 2006) によっていくつかの定量的な情報損失指標が開発されている。</p>
+
+  <p>情報損失指標は大きく2つのクラスに分けることができる。1つは、表の特性に応じて最適なSDC手法について十分な情報に基づく判断を行うためにデータ提供者が用いる指標であり、もう1つは、保護された表に対して統計分析を行う際の調整を容易にするために利用者が用いる指標である。本節ではデータ提供者向けの指標に焦点を当てる。SDC手法の有用性や品質の測定は主観的なものである。それは利用者、統計分析の目的、そしてデータそのものの種類や形式に依存する。したがって、SDC手法の影響を評価するためには、多様な情報損失指標を備えておくことが有用である。</p>
+
+  <p>ここでは度数カウントを含む表に対する情報損失指標に焦点を当てるが、これらの指標の一部はミクロデータにも容易に適用できる。規模表(マグニチュード表)や加重標本表の場合は、各セルへの寄与者数という追加の要素が加わる。</p>
+
+  <p>セル抑制によって保護された表について情報損失指標を評価する際には、利用者がデータを分析する前に行うであろう処理と同様に、抑制されたセルを置き換えるための補定(imputation)方法を決める必要がある(すなわち、観測値と実際の値との差を測定する必要があり、抑制されたセルについては、観測値は利用者がそのセルの取り得る値について行う推測に基づくことになる)。単純な利用者であれば抑制されたセルの代わりにゼロを用いるかもしれないが、より高度な利用者であれば、抑制された情報の総量を何らかの形で平均化した値、あるいは実行可能区間(feasibility interval)を計算した値によって抑制セルを置き換えるかもしれない。</p>
+
+  <p>以下では、いくつかの異なる情報損失指標について説明する。より詳細な技術的内容については Shlomo and Young (2005 & 2006) を参照されたい。</p>
+
+  <ul>
+    <li>確率的丸め処理のような確率的摂動方式の実現値が、期待される確率(すなわち手法のパラメータ)に従っているかどうかを確認するために、正確二項検定(exact Binomial Hypothesis Test)を用いることができる。それ以外のSDC手法については、SDC手法の適用後に経験分布の位置が変化したかどうかを確認するために、ノンパラメトリックな符号付順位検定を用いることができる。</li>
+    <li>分布の歪みを測定する情報損失指標は、元のセルと摂動後のセルとの間の距離指標(distance metric)に基づく。有用な指標のいくつかは Gomatam and Karr (2003) にも示されている。距離指標は表の内側セルについて算出できる。複数の表を組み合わせる場合には、情報損失指標として、それらの表全体にわたる平均を算出したいこともあるだろう。これらの距離指標は、表の合計値や小計についても算出できる。</li>
+    <li>SDC手法は、行・列あるいは表全体における平均セルサイズの分散に影響を与える。平均セルサイズの分散は、SDC手法の適用前後で調べられる。もう1つの重要な検討対象となる分散は、表に基づいて一元配置分散分析(one-way ANOVA)検定を行う際の「群間」分散である。ANOVAでは、独立なカテゴリ変数によって定義されるグループ内で、特定の目的変数の平均値を検討する。グループ間で平均値が等しいという帰無仮説を検定するための適合度統計量 R<sup>2</sup> は、グループ間の平均値の分散を全分散で割ったものに基づく。したがって、この情報損失指標は「群間」分散への影響、すなわちSDC手法の結果としてグループの平均値がより均質化したのか、あるいはより分散したのかを検討するものである。</li>
+    <li>表形式データに対して頻繁に行われるもう1つの統計分析手法は、表を構成するカテゴリ変数間の独立性検定である。二元表(two-way table)に対する独立性検定はピアソンのカイ二乗統計量に基づき、関連性の尺度としてはクラメールのV統計量が用いられる。多元表の場合は、条件付き従属関係を調べ、対数線形モデルの理論に基づいて期待セル度数を算出することができる。モデルの適合度に対する検定統計量もまた、ピアソンのカイ二乗統計量に基づく。表に適用されたSDC手法は、統計的推測の結果を変化させる可能性がある。したがって、SDC手法の適用前後における検定統計量への影響を検討する。</li>
+    <li>推測のためのもう1つの統計的手法はスピアマンの順位相関である。これは2つの変数間の関係の方向と強さを検定する手法である。この統計量は、両方のデータ群を最大から最小まで順位付けすることに基づく。したがって、統計データに対するSDC手法の影響を評価する上で重要な観点の1つは、セル度数の順位を歪めていないかどうかである。</li>
+  </ul>
+
+  <p>データ提供者が最適な開示制御手法について十分な情報に基づく判断を行えるようにするため、ONS(英国国家統計局)は、表内の小さい度数に基づく開示リスク指標と、開示制御済みの統計データに対する(上述のような)幅広い情報損失指標の両方を算出する、使いやすいソフトウェアアプリケーションを開発した(Shlomo and Young, 2006)。このソフトウェアアプリケーションは、R-U機密性マップ(R-U Confidentiality map)も出力する。</p>
+
+  <h2 id="sec-DiscRisk_measures">開示リスク指標</h2>
+
+  <p>度数表における開示リスクの2つの基本概念、すなわち一方では(表のセルにおける低い度数に現れる属性の組み合わせの希少性に起因する)識別リスクと、他方では属性開示リスク、特に集団属性開示のリスクについては、すでに前節で紹介した。5.2節では、「…集団属性開示から保護するためには、ゼロにあいまいさを導入し、すべての回答者が1つまたは少数のカテゴリのみに属することがないようにすることが不可欠である」と述べられている。</p>
+
+  <p>これらのリスクは測定可能であるため、ここでより詳しく見ていく。Lupp and Langsrud (2021) は、集団属性開示の形式的定義を提案している。攻撃者が表に対する $k$ 人($k$ は自然数)の寄与者についての知識を持っている(これを「$k$連合($k$-coalition)」と呼ぶ)と仮定する。例えば、攻撃者自身が表への寄与者の一人であり、かつ他の $k-1$ 人の寄与者の属性についても知識を持っている場合である。最も基本的な場合、攻撃者は背景知識をまったく持たない、すなわち攻撃者にとって $k=0$ である。もう1つの典型的な仮定は $k=1$ である。この場合、攻撃者は自分自身をデータから除外し、その結果得られる表を分析することで、自分の背景知識を用いて他の単位についての情報を開示することができる。この形式的定義において、Lupp and Langsrud (2021) は、度数表のセル $c$ が、機密変数内に次の条件を満たす公表された周辺セル $p_c$ が存在する場合に、$k$ を基準として「直接開示的(directly disclosive)」であるとみなす。</p>
+
+  <ul>
+    <li>$c$ が $p_c$ に寄与するセルであること</li>
+    <li>$|p_c|-k\le |c|$ であること</li>
+  </ul>
+
+  <p>ここで $|t|$ はセル $t$ に属する単位の数を表す。言い換えると、あるセルが $k$ を基準として直接開示的であるならば、$k$ 人の表寄与者についての知識を持つ攻撃者が存在し、その攻撃者は、$p_c$ に寄与する他のすべての単位がセル $c$ に属していなければならないことを導出できる。したがって、直接開示的なセルが全セル数に占める割合は、一次開示リスクの良い指標となり得る。</p>
+
+  <p>(低い度数に関連する)識別に関する開示リスクは、表の全セル数に対する小さい度数を持つセルの割合として測定できる。</p>
+
+  <p>Antal, Shlomo and Elliot (2014) は、エントロピーに基づく母集団表向けの以下のリスク指標を提案している。彼らのアプローチによれば、エントロピーが高いことはセル間の分布が一様であることを示し、エントロピーが低いことは、行・列の大部分がゼロであるか、非ゼロセルが少数の表であることを示す。非ゼロセルの数が少ないほど、属性開示が生じる可能性が高くなる。セル $C_l$($l=1,2,\ldots,k$、$k$ は全セル数)の母集団度数を $F_l$ とする。母集団の総数を $N$ とし、$N=\sum_{l=1}^k{F_k}$、$D=\{l\in\{1,2,\ldots,n\}:F_l=0\}$ とする。このとき、母集団に基づく度数表に対する開示リスクは次のように定義される。</p>
+
+  $$
+  r=w_1\frac{|D|}{k}+w_2\left(1-\frac{H}{\log k}\right)-w_3\frac{1}{\sqrt{N}}\log\frac{1}{e\cdot\sqrt{N}},
+  $$
+
+  <p>ここで $|A|$ は集合 $A$ の要素数を表し、$H$ は前章(4.6.1)で定義された値を現在の状況に合わせて調整したもので、次のようになる。</p>
+
+  $$
+  H=-\sum_{i=1}^{k}{\frac{F_i}{N}\cdot\log{\frac{F_i}{N}}},
+  $$
+
+  <p>また $\mathbf{w}=(w_1,w_2,w_3)$ は重みのベクトルである($e$ はもちろん自然対数の底である)。この指標は上述したすべての性質を備えている。</p>
+
+  <p>元の表が摂動されたと仮定する。このとき、セル $C_l$ の度数は $F_l^{\#}$($l=1,2,\ldots,k$)となる。修正後の表にはより大きな不確実性があるため、この場合に提案される開示リスク指標は次のようになる。</p>
+
+  $$
+  r^{\#}=w_1\left(\frac{|D|}{k}\right)^{\frac{|D\cup Q|}{|D\cap Q|}}+w_2\left(1-\frac{H}{\log k}\right)\left(1-\frac{H^{\#}}{H}\right)-w_3\frac{1}{\sqrt{N}}\log\frac{1}{e\cdot\sqrt{N}}
+  $$
+
+  <p>ここで、</p>
+  <ul>
+    <li>$Q$ は摂動後の度数表におけるゼロの集合である</li>
+    <li>$H^{\#}=-\sum_{i=1}^{k}{\frac{F_i^{\#}}{N}\cdot\sum_{j=1}^{k}{\frac{F_{ij}^{\#}}{N\cdot F_j^{\#}}\cdot\log{\frac{F_{ij}^{\#}}{N\cdot F_j^{\#}}}}}$</li>
+    <li>$F_{ij}^{\#}$ は、摂動前に $C_i$ に属し、摂動後に $C_j$ に属する単位の数である。</li>
+  </ul>
+
+  <p>摂動後の表の開示リスクは、元の表の開示リスクよりも低いことが期待される。$r^{\#}$ はこの要件を満たす。</p>
+
+  <h2 id="sec-References">参考文献</h2>
+
+  <div class="references">
+    <p>Antal, L., Shlomo, N., &amp; Elliot, M. (2014) <em>Measuring disclosure risk with entropy in population based frequency tables</em>, In <em>Privacy in Statistical Databases: UNESCO Chair in Data Privacy, International Conference, PSD 2014, Ibiza, Spain, September 17-19, 2014. Proceedings</em> (pp. 62-78). Springer International Publishing.</p>
+
+    <p>Antal, L., &amp; Shlomo, N., &amp; Elliot, M. (2015), <em>Disclosure Risk Measurement with Entropy in Sample Based Frequency Tables</em>, New Techniques and Technologies for Statistics (NTTS) Reliable Evidence for a Society in Transition, Brussels, Belgium, 9-13 March 2015, <a href="https://cros-legacy.ec.europa.eu/system/files/Antal-etal_NTTS%202015%20abstract%20unblinded%20disclosure%20risk%20measurement.pdf">https://cros-legacy.ec.europa.eu/system/files/Antal-etal_NTTS%202015%20abstract%20unblinded%20disclosure%20risk%20measurement.pdf</a>.</p>
+
+    <p>Brown, D., (2003) <em>Different approaches to disclosure control problems associated with geography, ONS</em>, United Nations Statistical Commission and Economic Commission for Europe Conference of European Statisticians, Working Paper No. 14.</p>
+
+    <p>Costemalle, V. (2019). <em>Detecting geographical differencing problems in the context of spatial data dissemination</em>. <em>Statistical Journal of the IAOS, vol. 35, No. 4, pp. 559-568</em>.</p>
+
+    <p>Doyle, P., Lane, J.I., Theeuwes, J.J.M. and Zayatz, (2001). <em>Confidentiality, Disclosure and Data Access: Theory and Practical Application for Statistical Agencies</em>. Elsevier Science BV.</p>
+
+    <p>Duke-Williams, O. and Rees, P., (1998) <em>Can Census Offices publish statistics for more than one small area geography? An analysis of the differencing problem in statistical disclosure</em>, International Journal of Geographical Information Science 12, 579-605</p>
+
+    <p>Enderle, T., Giessing, S., Tent, R., (2020) <em>Calculation of Risk Probabilities for the Cell Key Method. In: Domingo-Ferrer, J., Muralidhar, K. (eds) Privacy in Statistical Databases</em>, Lecture Notes in Computer Science, vol 12276. Springer, Cham. <a href="https://doi.org/10.1007/978-3-030-57521-2_11">https://doi.org/10.1007/978-3-030-57521-2_11</a></p>
+
+    <p>Gomatam, S. and A. Karr (2003), <em>Distortion Measures for Categorical Data Swapping,</em> Technical Report Number 131, National Institute of Statistical Sciences.</p>
+
+    <p>Lupp, D. P., &amp; Langsrud, Ø. (2021). <em>Suppression of directly-disclosive cells in frequency tables</em>, In Joint UNECE/Eurostat Expert Meeting on Statistical Data Confidentiality, Poznań, 1-3 December 2021 (pp. 1-3)</p>
+
+    <p>Möhler, M., Jamme, J., De Jonge, E., Młodak, A., Gussenbauer, J., De Wolf, P.-P. (2024), <em>Guidelines for Statistical Disclosure Control Methods Applied on Geo-Referenced Data</em>, EU Grant agreement 899218 – 2019-BG-Methodology 'STACE project' , Deliverable D2.9, <a href="https://github.com/sdcTools/GeoSpatialGuidelinesSources/releases">https://github.com/sdcTools/GeoSpatialGuidelinesSources/releases</a> .</p>
+
+    <p>Salazar, JJ, Staggermeier, A and Bycroft, C, (2005) <em>Controlled rounding implementation</em>, Proceeding of the Joint UNECE/Eurostat Work Session on Statistical Data Confidentiality, Geneva</p>
+
+    <p>Shlomo, N. (2007) Statistical Disclosure Control Methods for Census Frequency Tables. International Statistical Review, Volume 75, Number 2, August 2007 , pp. 199-217(19) Blackwell Publishing.</p>
+
+    <p>Shlomo, N. and Young, C. (2005) <em>Information Loss Measures for Frequency Tables</em>, Proceeding of the Joint UNECE/Eurostat Work Session on Statistical Data Confidentiality, Geneva.</p>
+
+    <p>Shlomo, N. and Young, C. (2006) <em>Statistical Disclosure Control Methods Through a Risk-Utility Framework</em>, PSD'2006 Privacy in Statistical Databases, Springer LNCS proceedings, to appear.</p>
+
+    <p>Willenborg, L., and Ton de Waal. (1996) <em>Statistical Disclosure Control in Practice.</em> Lecture Notes in Statistics no 111 Springer-Verlag. New York.</p>
+  </div>
+
+  <div class="pagenav">
+    <a class="prev" href="05-2-ckm-rounding-trs.html">← 第5章 セルキー法・丸め処理・TRS</a>
+    <a class="next" href="06-remote-access.html">第6章 リモートアクセスの課題 →</a>
+  </div>
+</div>
+</body>
+</html>
